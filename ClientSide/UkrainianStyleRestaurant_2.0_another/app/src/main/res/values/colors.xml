@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="mainBgColor">#F6F6F6</color>
+    <color name="asideBgColor">#FAFAFA</color>
+    <color name="swipeBgColor">#FFFFFFFF</color>
+    <color name="navigationBgColor">#FF000000</color>
+    <color name="name_of_app">#EC6D6D</color>
+    <color name="category">#EC6D6D</color>
+    <color name="cart">#B9B9B9</color>
+    <color name="style">#787878</color>
+    <color name="sum">#B9B9B9</color>
+</resources>

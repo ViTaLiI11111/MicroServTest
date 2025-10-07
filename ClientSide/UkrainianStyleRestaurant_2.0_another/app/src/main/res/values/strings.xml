@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">Ukrainian Style</string>
+    <string name="sales_icon">Sales</string>
+    <string name="contacts_text">Контакти</string>
+    <string name="about_text">Про нас</string>
+    <string name="main_scene_text">Головна</string>
+    <string name="logo_of_app_1">Ukrainian</string>
+    <string name="logo_of_app_2">Style</string>
+    <string name="filter">Filter</string>
+    <string name="course_price">Ціна:</string>
+    <string name="course_pepper">Гострота:</string>
+    <string name="about_us_text">Ukrainian Style Restaurant - це заклад, де подають страви, що представляють культурну спадщину України та її народів. У меню можна знайти багато традиційних страв, виготовлених зі свіжих і смачних інгредієнтів, таких як борщ, вареники та галушки. Ресторан української кухні також може пропонувати місцеві напої, такі як узвар та квас. Наш ресторан української кухні дуже затишний та має вишукане оформлення в стилі національного декору. Він чудово підходить для сімейних обідів, романтичних побачень та вечірок з друзями.</string>
+    <string name="order_contact">Номер телефона замовлення:</string>
+    <string name="phone_1">+380746384433</string>
+    <string name="owner_contact">Номери телефонів власника:</string>
+    <string name="phone_2">+380542845673</string>
+    <string name="phone_3">+380876542763</string>
+    <string name="to_by_it">Замовити</string>
+    <string name="clear_cart">Очистити кошик</string>
+    <string name="currency">грн</string>
+    <string name="summ">Сума:</string>
+    <string name="score">/5</string>
+</resources>
