@@ -9,6 +9,7 @@ Thumbs.db
 # -----------------------
 .vs/
 .vscode/
+**/packages/
 *.suo
 *.user
 *.userosscache
