@@ -1,16 +1,111 @@
-/packages
-*.iml
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
+# -----------------------
+# OS
+# -----------------------
 .DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
+Thumbs.db
+
+# -----------------------
+# Visual Studio / .NET
+# -----------------------
+.vs/
+.vscode/
+*.suo
+*.user
+*.userosscache
+*.csproj.user
+*.sln.docstates
+
+# Build outputs
+**/bin/
+**/obj/
+**/publish/
+
+# NuGet
+*.nupkg
+# VS cache
+*.vsix
+
+# Rider / IntelliJ
+.idea/
+
+# dotCover, NCrunch etc
+*.dotCover
+*.ncrunch*
+*.coverage
+*.coveragexml
+
+# -----------------------
+# ASP.NET / config / secrets
+# -----------------------
+# Local development secrets
+appsettings.Development.json
+appsettings.*.Local.json
+secrets.json
+.env
+.env.local
+*.local.env
+
+# If you want to avoid committing any environment-specific appsettings
+# (leave only appsettings.json.example in repo)
+**/appsettings.*.json
+
+# Do not ignore migrations folder (we want it tracked), so be careful with patterns:
+# Migrations/
+
+# -----------------------
+# Docker
+# -----------------------
+docker-compose.override.yml
+**/*.override.yml
+**/*.local.env
+
+# -----------------------
+# Logs / DB / misc
+# -----------------------
+*.log
+*.sqlite
+*.db
+*.sql
+*.bak
+
+# -----------------------
+# Android / Gradle / Google services
+# -----------------------
+# Local Gradle / build files
+**/.gradle/
+**/build/
+**/out/
+
+# Android Studio
 local.properties
+.gradle/
+captures/
+*.keystore
+
+# Firebase config: usually contains API keys -> keep out of repo
+**/google-services.json
+**/google-services.plist
+google-services.json
+
+# If you want to keep a template:
+# google-services.json.template
+
+# -----------------------
+# Node / frontend
+# -----------------------
+node_modules/
+dist/
+npm-debug.log
+yarn-error.log
+
+# -----------------------
+# Misc
+# -----------------------
+*.zip
+*.7z
+*.tar.gz
+*.psd
+
+# Editor temp files
+*~ 
+*.swp
