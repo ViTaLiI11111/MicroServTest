@@ -1,76 +1,62 @@
 package com.example.ukrainianstylerestaurant.model;
 
+import com.google.gson.annotations.SerializedName;
+
 public class Course {
 
-    int id, category;
-    String img, title, price, pepper, color;
+    @SerializedName("id")
+    private int id;
+
+    @SerializedName("categoryId")
+    private int categoryId;          // <-- було category
+
+    @SerializedName("imageBase64")
+    private String imageBase64;      // <-- було img
+
+    @SerializedName("title")
+    private String title;
+
+    // Якщо price у бекенді decimal — лиши String або зроби BigDecimal
+    @SerializedName("price")
+    private String price;
+
+    @SerializedName("pepper")
+    private String pepper;
+
+    @SerializedName("color")
+    private String color;
 
     public Course() {}
 
-    public Course(int id, String img, String title, String price, String pepper, String color, int category) {
+    public Course(int id, String imageBase64, String title, String price,
+                  String pepper, String color, int categoryId) {
         this.id = id;
-        this.img = img;
+        this.imageBase64 = imageBase64;
         this.title = title;
         this.price = price;
         this.pepper = pepper;
         this.color = color;
-        this.category = category;
+        this.categoryId = categoryId;
     }
 
+    public int getCategoryId() { return categoryId; }
+    public void setCategoryId(int categoryId) { this.categoryId = categoryId; }
 
-    public int getCategory() {
-        return category;
-    }
+    public String getImageBase64() { return imageBase64; }
+    public void setImageBase64(String imageBase64) { this.imageBase64 = imageBase64; }
 
-    public void setCategory(int category) {
-        this.category = category;
-    }
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
 
-    public int getId() {
-        return id;
-    }
+    public String getTitle() { return title; }
+    public void setTitle(String title) { this.title = title; }
 
-    public void setId(int id) {
-        this.id = id;
-    }
+    public String getPrice() { return price; }
+    public void setPrice(String price) { this.price = price; }
 
-    public String getImg() {
-        return img;
-    }
+    public String getPepper() { return pepper; }
+    public void setPepper(String pepper) { this.pepper = pepper; }
 
-    public void setImg(String img) {
-        this.img = img;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getPrice() {
-        return price;
-    }
-
-    public void setPrice(String price) {
-        this.price = price;
-    }
-
-    public String getPepper() {
-        return pepper;
-    }
-
-    public void setPepper(String pepper) {
-        this.pepper = pepper;
-    }
-
-    public String getColor() {
-        return color;
-    }
-
-    public void setColor(String color) {
-        this.color = color;
-    }
+    public String getColor() { return color; }
+    public void setColor(String color) { this.color = color; }
 }

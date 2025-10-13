@@ -55,7 +55,7 @@ public class CourseAdapter extends RecyclerView.Adapter<CourseAdapter.CourseView
                 Log.e("CourseAdapter", "Invalid color format: " + course.getColor());
             }
 
-            String imageBase64 = course.getImg();
+            String imageBase64 = course.getImageBase64();
             if (imageBase64 != null && !imageBase64.isEmpty()) {
                 try {
                     byte[] decodedString = Base64.decode(imageBase64, Base64.DEFAULT);

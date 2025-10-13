@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Collections.Generic;
 using System.Linq;
-using System.Collections.Generic;
 
 namespace USRest_Admin
 {
@@ -72,6 +71,7 @@ namespace USRest_Admin
 
                 // сформуємо запит
                 CreateDishRequest req = new CreateDishRequest();
+                req.Id = int.Parse(textBox_id.Text);
                 req.Title = textBox_title.Text.Trim();
                 req.Price = decimal.Parse(textBox_price.Text.Trim());
                 req.Pepper = textBox_spicy.Text.Trim();
@@ -316,57 +316,94 @@ namespace USRest_Admin
         //                             CATEGORIES
         // =====================================================================
 
-        private void ButtonResetCategory_Click(object sender, EventArgs e)
-        {
-            ClearCategoryFields();
-        }
-
-        private async void InsertCategory_Click(object sender, EventArgs e)
+        private async Task LoadCategoriesToGridAsync()
         {
             try
             {
-                if (!ValidateCategoryInputs()) return;
-
-                int id = int.Parse(textBox_id_category.Text);
-                var name = textBox_title_category.Text.Trim();
-
-                // чи існує вже така категорія?
-                CategoryDto existing = null;
-                try { existing = await _api.GetCategoryAsync(id); } catch { existing = null; }
-
-                if (existing == null)
-                {
-                    var created = await _api.CreateCategoryAsync(name);
-                    MessageBox.Show(created == null
-                        ? "Категорія створена (можливо без тіла відповіді)."
-                        : "Категорія створена Id = " + created.Id);
-                }
-                else
-                {
-                    // у MenuService немає PUT для категорій — за потреби додаси.
-                    MessageBox.Show("Категорія з таким Id вже існує.");
-                }
-
-                await ReloadCategoriesGridAsync();
-                ClearCategoryFields();
+                var list = await _api.GetCategoriesAsync();
+                if (list == null) list = new List<CategoryDto>();
+                dataGridView2.AutoGenerateColumns = true;
+                dataGridView2.DataSource = list;
             }
             catch (Exception ex)
             {
-                ShowTopMessage("Помилка з категорією: " + ex.Message);
+                MessageBox.Show("Помилка завантаження категорій: " + ex.Message);
             }
         }
 
-        private async void RetrieveCategory_Click(object sender, EventArgs e)
+        private bool ValidateInputsCategory(out int id, out string title)
         {
+            id = 0;
+            title = string.Empty;
+
+            if (!int.TryParse(textBox_id_category.Text, out id) || id <= 0)
+            {
+                MessageBox.Show("Id категорії має бути цілим числом ≥ 1.");
+                return false;
+            }
+
+            title = (textBox_title_category.Text ?? string.Empty).Trim();
+            if (title.Length == 0)
+            {
+                MessageBox.Show("Назва категорії обов’язкова.");
+                return false;
+            }
+
+            // Додаткова перевірка формату (можеш прибрати, якщо зайве)
+            if (!Regex.IsMatch(title, @"^[\p{L}\p{M}\s'\-]+$"))
+            {
+                MessageBox.Show("Назва містить недопустимі символи.");
+                return false;
+            }
+
+            return true;
+        }
+
+        // Кнопка: Ввести/Оновити
+        private async void InsertCategory_Click(object sender, EventArgs e)
+        {
+            int id;
+            string title;
+            if (!ValidateInputsCategory(out id, out title)) return;
+
             try
             {
-                int id;
-                if (!int.TryParse(textBox_id_category.Text, out id))
+                var req = new CreateCategoryRequest { Id = id, Title = title };
+
+                // Перевіримо, чи є вже така категорія
+                var existing = await _api.GetCategoryAsync(id);
+                if (existing == null)
                 {
-                    MessageBox.Show("Некоректний Id категорії.");
-                    return;
+                    var created = await _api.CreateCategoryAsync(req);
+                    MessageBox.Show("Створено категорію Id=" + created.Id);
+                }
+                else
+                {
+                    var updated = await _api.UpdateCategoryAsync(id, req);
+                    MessageBox.Show("Оновлено категорію Id=" + updated.Id);
                 }
 
+                await LoadCategoriesToGridAsync();
+                ClearCategoryFields_Click(sender, e);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Помилка з категорією: " + ex.Message);
+            }
+        }
+
+        // Кнопка: Повернути (отримати по Id в текстбоксі)
+        private async void RetrieveCategory_Click(object sender, EventArgs e)
+        {
+            int id;
+            if (!int.TryParse(textBox_id_category.Text, out id) || id <= 0)
+            {
+                MessageBox.Show("Вкажіть коректний Id.");
+                return;
+            }
+
+            try
+            {
                 var cat = await _api.GetCategoryAsync(id);
                 if (cat == null)
                 {
@@ -374,91 +411,56 @@ namespace USRest_Admin
                     return;
                 }
 
+                textBox_id_category.Text = cat.Id.ToString();
                 textBox_title_category.Text = cat.Title;
             }
             catch (Exception ex)
             {
-                ShowTopMessage("Помилка при отриманні категорії: " + ex.Message);
+                MessageBox.Show("Помилка: " + ex.Message);
             }
         }
 
+        // Кнопка: Видалити
         private async void DeleteCategory_Click(object sender, EventArgs e)
         {
+            int id;
+            if (!int.TryParse(textBox_id_category.Text, out id) || id <= 0)
+            {
+                MessageBox.Show("Вкажіть коректний Id.");
+                return;
+            }
+
+            var confirm = MessageBox.Show(
+                "Видалити категорію " + id + "?",
+                "Підтвердження",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question);
+
+            if (confirm != DialogResult.Yes) return;
+
             try
             {
-                int id;
-                if (!int.TryParse(textBox_id_category.Text, out id))
-                {
-                    MessageBox.Show("Некоректний Id категорії.");
-                    return;
-                }
-
-                if (MessageBox.Show("Видалити категорію?", "Підтвердження",
-                        MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
-                {
-                    return;
-                }
-
                 await _api.DeleteCategoryAsync(id);
-                await ReloadCategoriesGridAsync();
-                ClearCategoryFields();
-                MessageBox.Show("Категорію видалено.");
+                await LoadCategoriesToGridAsync();
+                ClearCategoryFields_Click(sender, e);
             }
             catch (Exception ex)
             {
-                ShowTopMessage("Помилка при видаленні категорії: " + ex.Message);
+                MessageBox.Show("Помилка видалення: " + ex.Message);
             }
         }
 
+        // Кнопка: Показати у DataGridView
         private async void ExportToDataGridViewCategory_Click(object sender, EventArgs e)
         {
-            try
-            {
-                await ReloadCategoriesGridAsync();
-            }
-            catch (Exception ex)
-            {
-                ShowTopMessage("Помилка завантаження категорій: " + ex.Message);
-            }
+            await LoadCategoriesToGridAsync();
         }
 
-        private async Task ReloadCategoriesGridAsync()
+        // Кнопка: Очистити поля
+        private void ClearCategoryFields_Click(object sender, EventArgs e)
         {
-            _dtCategories.Rows.Clear();
-
-            var list = await _api.GetCategoriesAsync();   // List<CategoryDto>
-            if (list == null || list.Count == 0) return;
-
-            foreach (var c in list)
-            {
-                var row = _dtCategories.NewRow();
-                row["Id категорії"] = c.Id;
-                row["Назва категорії"] = c.Title;
-                _dtCategories.Rows.Add(row);
-            }
-        }
-
-
-        private void ClearCategoryFields()
-        {
-            textBox_id_category.Text = "";
-            textBox_title_category.Text = "";
-        }
-
-        private bool ValidateCategoryInputs()
-        {
-            int id;
-            if (!int.TryParse(textBox_id_category.Text.Trim(), out id))
-            {
-                MessageBox.Show("Некоректний Id категорії.");
-                return false;
-            }
-            if (textBox_title_category.Text.Trim().Length == 0)
-            {
-                MessageBox.Show("Назва категорії обов'язкова.");
-                return false;
-            }
-            return true;
+            textBox_id_category.Text = string.Empty;
+            textBox_title_category.Text = string.Empty;
         }
 
         // =====================================================================
@@ -576,19 +578,13 @@ namespace USRest_Admin
                     }
                 }
 
-                await ReloadCategoriesGridAsync();
+                await LoadCategoriesToGridAsync();
                 timerVelocity.ShowTemporaryMessage("Категорії, що не використовуються, видалені.");
             }
             catch (Exception ex)
             {
                 timerVelocity.ShowTemporaryMessage("Помилка при видаленні категорій: " + ex.Message);
             }
-        }
-
-        private void ClearCategoryFields_Click(object sender, EventArgs e)
-        {
-            ResetControls(isCategory: true);
-            timerVelocity.ShowTemporaryMessage("Поля категорії очищено.");
         }
 
         private void UserDelete_Click(object sender, EventArgs e)

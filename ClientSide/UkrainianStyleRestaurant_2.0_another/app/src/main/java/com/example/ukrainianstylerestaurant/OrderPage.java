@@ -9,7 +9,6 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.ukrainianstylerestaurant.R;
 import com.example.ukrainianstylerestaurant.model.Course;
 import com.example.ukrainianstylerestaurant.model.Order;
 
@@ -28,7 +27,7 @@ public class OrderPage extends AppCompatActivity {
 
         List<String> coursesOrder = new ArrayList<>();
         List<String> coursesSum = new ArrayList<>();
-        int sum = 0;
+        float sum = 0;
 
 
         for (Course c : MainActivity.fullCoursesList) {
@@ -36,13 +35,13 @@ public class OrderPage extends AppCompatActivity {
                 coursesOrder.add(c.getTitle());
                 coursesOrder.add(c.getPrice());
 
-                int n = Integer.parseInt(c.getPrice());
+                float n = Float.parseFloat(c.getPrice());
                 sum += n;
             }
         }
 
 
-        String string_sum = Integer.toString(sum);
+        String string_sum = Float.toString(sum);
         coursesSum.add(string_sum);
 
         orders_list.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, coursesOrder));

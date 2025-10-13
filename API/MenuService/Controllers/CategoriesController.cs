@@ -1,54 +1,78 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using MenuService.Data;      // <- підстав свій namespace з AppDbContext
-using MenuService.Models;    // <- підстав namespace де Category
+using MenuService.Data;
+using MenuService.DTOs;
+using MenuService.Models;
 
-namespace MenuService.Controllers
+namespace MenuService.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+public sealed class CategoriesController : ControllerBase
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class CategoriesController : ControllerBase
+    private readonly AppDbContext _db;
+
+    public CategoriesController(AppDbContext db) => _db = db;
+
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<CategoryDto>>> GetAll()
     {
-        private readonly AppDbContext _db;
-        public CategoriesController(AppDbContext db) => _db = db;
+        var data = await _db.Categories
+            .OrderBy(x => x.Id)
+            .Select(x => new CategoryDto { Id = x.Id, Title = x.Title })
+            .ToListAsync();
 
-        // GET /api/Categories
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Category>>> GetAll()
-        {
-            var list = await _db.Categories.ToListAsync();
-            return Ok(list);
-        }
+        return Ok(data);
+    }
 
-        // GET /api/Categories/{id}
-        [HttpGet("{id:int}")]
-        public async Task<ActionResult<Category>> GetById(int id)
-        {
-            var item = await _db.Categories.FindAsync(id);
-            if (item == null) return NotFound();
-            return Ok(item);
-        }
+    [HttpGet("{id:int}")]
+    public async Task<ActionResult<CategoryDto>> GetById(int id)
+    {
+        var cat = await _db.Categories.FindAsync(id);
+        if (cat is null) return NotFound();
 
-        // POST /api/Categories
-        [HttpPost]
-        public async Task<ActionResult<Category>> Create([FromBody] Category category)
-        {
-            _db.Categories.Add(category);
-            await _db.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetById), new { id = category.Id }, category);
-        }
+        return Ok(new CategoryDto { Id = cat.Id, Title = cat.Title });
+    }
 
-        // DELETE /api/Categories/{id}
-        [HttpDelete("{id:int}")]
-        public async Task<IActionResult> Delete(int id)
-        {
-            var item = await _db.Categories.FindAsync(id);
-            if (item == null) return NotFound();
-            _db.Categories.Remove(item);
-            await _db.SaveChangesAsync();
-            return NoContent();
-        }
+    [HttpPost]
+    public async Task<ActionResult<CategoryDto>> Create([FromBody] CreateCategoryRequest req)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+
+        var exists = await _db.Categories.AnyAsync(c => c.Id == req.Id);
+        if (exists) return Conflict($"Category with id {req.Id} already exists.");
+
+        var entity = new Category { Id = req.Id, Title = req.Title };
+        _db.Categories.Add(entity);
+        await _db.SaveChangesAsync();
+
+        var dto = new CategoryDto { Id = entity.Id, Title = entity.Title };
+        return CreatedAtAction(nameof(GetById), new { id = dto.Id }, dto);
+    }
+
+    [HttpPut("{id:int}")]
+    public async Task<ActionResult<CategoryDto>> Update(int id, [FromBody] CreateCategoryRequest req)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+        if (id != req.Id) return BadRequest("Id in route must match Id in body.");
+
+        var entity = await _db.Categories.FindAsync(id);
+        if (entity is null) return NotFound();
+
+        entity.Title = req.Title;
+        await _db.SaveChangesAsync();
+
+        return Ok(new CategoryDto { Id = entity.Id, Title = entity.Title });
+    }
+
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var entity = await _db.Categories.FindAsync(id);
+        if (entity is null) return NotFound();
+
+        _db.Categories.Remove(entity);
+        await _db.SaveChangesAsync();
+        return NoContent();
     }
 }

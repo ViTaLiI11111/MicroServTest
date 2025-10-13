@@ -11,8 +11,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MenuService.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251010202020_initial")]
-    partial class initial
+    [Migration("20251012223110_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -27,10 +27,7 @@ namespace MenuService.Migrations
             modelBuilder.Entity("MenuService.Models.Category", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -44,21 +41,20 @@ namespace MenuService.Migrations
             modelBuilder.Entity("MenuService.Models.Dish", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("CategoryId")
                         .HasColumnType("integer");
 
                     b.Property<string>("Color")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("ImageBase64")
                         .HasColumnType("text");
 
                     b.Property<string>("Pepper")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<decimal>("Price")
@@ -78,12 +74,17 @@ namespace MenuService.Migrations
             modelBuilder.Entity("MenuService.Models.Dish", b =>
                 {
                     b.HasOne("MenuService.Models.Category", "Category")
-                        .WithMany()
+                        .WithMany("Dishes")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("MenuService.Models.Category", b =>
+                {
+                    b.Navigation("Dishes");
                 });
 #pragma warning restore 612, 618
         }

@@ -2,6 +2,7 @@ namespace MenuService.DTOs
 {
     public class UpdateDishRequest
     {
+        public int Id { get; set; }
         public string Title { get; set; } = default!;
         public decimal Price { get; set; }
         public string? Pepper { get; set; }

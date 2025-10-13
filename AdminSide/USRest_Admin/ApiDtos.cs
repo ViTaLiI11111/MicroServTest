@@ -1,35 +1,46 @@
-﻿namespace USRest_Admin
+﻿using System;
+
+namespace USRest_Admin
 {
-    public class CategoryDto
+    // -------------------- Categories --------------------
+    public sealed class CategoryDto
     {
         public int Id { get; set; }
-        public string Title { get; set; }
+        public string Title { get; set; } = string.Empty;
     }
 
-    public class DishDto
+    public sealed class CreateCategoryRequest
+    {
+        public int Id { get; set; }            // ручне введення Id
+        public string Title { get; set; } = string.Empty;
+    }
+
+    // ---------------------- Dishes ----------------------
+    public sealed class DishDto
     {
         public int Id { get; set; }
-        public int CategoryId { get; set; }
-        public string Title { get; set; }
-        public decimal Price { get; set; }          // EF: decimal
-        public string Pepper { get; set; }
-        public string ImageBase64 { get; set; }
-        public string Color { get; set; }
-    }
+        public string Title { get; set; } = string.Empty;
 
-    // для створення/оновлення (можеш і DishDto використовувати, але я відділив)
-    public class CreateDishRequest
-    {
-        public int CategoryId { get; set; }
-        public string Title { get; set; }
+        // у БД numeric(12,2) → тут decimal
         public decimal Price { get; set; }
-        public string Pepper { get; set; }
-        public string ImageBase64 { get; set; }
-        public string Color { get; set; }
+
+        public string Pepper { get; set; } = string.Empty;
+        public string Color { get; set; } = "#ffffff";
+
+        public int CategoryId { get; set; }
+
+        // base64 png/jpg
+        public string ImageBase64 { get; set; } = null;
     }
 
-    public class CreateCategoryRequest
+    public sealed class CreateDishRequest
     {
-        public string Title { get; set; }
+        public int Id { get; set; }                 // дозволяємо ручне Id
+        public string Title { get; set; } = string.Empty;
+        public decimal Price { get; set; }
+        public string Pepper { get; set; } = string.Empty;
+        public string Color { get; set; } = "#ffffff";
+        public int CategoryId { get; set; }
+        public string ImageBase64 { get; set; } = null;
     }
 }
