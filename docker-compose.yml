@@ -5,25 +5,25 @@ services:
       POSTGRES_USER: appuser
       POSTGRES_PASSWORD: app123
       POSTGRES_DB: restaurant_db
-    ports:
-      - "5432:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql/data
+    ports: ["5432:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U appuser -d restaurant_db || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
 
   redis:
     image: redis:7
-    ports:
-      - "6379:6379"
+    ports: ["6379:6379"]
 
   pgadmin:
     image: dpage/pgadmin4
     environment:
       PGADMIN_DEFAULT_EMAIL: "admin@example.com"
       PGADMIN_DEFAULT_PASSWORD: "admin"
-    ports:
-      - "8081:80"
-    depends_on:
-      - postgres
+    ports: ["8081:80"]
+    depends_on: [postgres]
     restart: unless-stopped
 
   menusvc:
@@ -31,14 +31,30 @@ services:
       context: ./API/MenuService
       dockerfile: Dockerfile
     environment:
+      # <- якщо у MenuService в коді GetConnectionString("DefaultConnection") – лишай як є
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=restaurant_db;Username=appuser;Password=app123
       - Redis__ConnectionString=redis:6379
       - ASPNETCORE_ENVIRONMENT=Development
     depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    ports: ["5045:80"]
+
+  order-dispatch-service:
+    build:
+      context: ./API/OrderDispatchService
+      dockerfile: Dockerfile
+    environment:
+      - ASPNETCORE_URLS=http://+:80
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=dispatch_db;Username=appuser;Password=app123
+      - MenuService__BaseUrl=http://menusvc
+    depends_on:
       - postgres
-      - redis
+      - menusvc
     ports:
-      - "5045:80"
+      - "5245:80"
 
 volumes:
   pgdata:

@@ -8,7 +8,7 @@ public class CashAdd extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        // Увімкнення кешування Firebase
+
         FirebaseDatabase.getInstance().setPersistenceEnabled(true);
     }
 }

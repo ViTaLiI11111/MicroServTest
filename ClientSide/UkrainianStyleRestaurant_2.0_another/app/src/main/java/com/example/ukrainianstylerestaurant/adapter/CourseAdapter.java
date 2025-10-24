@@ -62,7 +62,7 @@ public class CourseAdapter extends RecyclerView.Adapter<CourseAdapter.CourseView
                     Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
                     holder.courseImage.setImageBitmap(decodedByte);
 
-                    // Збереження зображення у файл
+
                     File imageFile = saveImageToFile(decodedByte, "course_" + course.getId() + ".png");
                     if (imageFile != null) {
                         holder.itemView.setOnClickListener(view -> {

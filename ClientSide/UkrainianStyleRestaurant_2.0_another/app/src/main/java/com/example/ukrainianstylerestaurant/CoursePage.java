@@ -1,19 +1,16 @@
 package com.example.ukrainianstylerestaurant;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
-
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.GestureDetector;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.example.ukrainianstylerestaurant.model.Order;
 
@@ -29,7 +26,7 @@ public class CoursePage extends AppCompatActivity {
         ConstraintLayout courseBg = findViewById(R.id.coursePageBg);
         ImageView courseImage = findViewById(R.id.coursePageImage);
 
-        // Отримання шляху до файлу зображення з інтенції
+
         String imageFilePath = getIntent().getStringExtra("courseImageFilePath");
         if (imageFilePath != null && !imageFilePath.isEmpty()) {
             File imageFile = new File(imageFilePath);

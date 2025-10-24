@@ -11,6 +11,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ukrainianstylerestaurant.model.Course;
 import com.example.ukrainianstylerestaurant.model.Order;
+import com.example.ukrainianstylerestaurant.data.OrdersRepository;
+import com.example.ukrainianstylerestaurant.model.CreateOrderRequest;
+import com.example.ukrainianstylerestaurant.model.OrderItemRequest;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,10 +68,38 @@ public class OrderPage extends AppCompatActivity {
     public void toBuy(View view){
         if(Order.items_id.isEmpty()){
             Toast.makeText(this,"Замовте страву, будь ласка.", Toast.LENGTH_LONG).show();
+            return;
         }
-        else{
-            Toast.makeText(this,"Замовлення виконано!", Toast.LENGTH_LONG).show();
+
+
+        List<OrderItemRequest> items = new ArrayList<>();
+        for (Integer dishId : Order.items_id) {
+            items.add(new OrderItemRequest(dishId, 1, null)); // qty=1, notes=null
         }
+
+        CreateOrderRequest req = new CreateOrderRequest(1, items);
+
+        new Thread(() -> {
+            try {
+                OrdersRepository repo = new OrdersRepository();
+                boolean ok = repo.createOrder(req);
+
+                runOnUiThread(() -> {
+                    if (ok) {
+                        Toast.makeText(this, "Замовлення відправлено офіціанту!", Toast.LENGTH_LONG).show();
+                        Order.items_id.clear();
+                        recreate();
+                    } else {
+                        Toast.makeText(this, "Помилка серверу при створенні замовлення", Toast.LENGTH_LONG).show();
+                    }
+                });
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                runOnUiThread(() ->
+                        Toast.makeText(this, "Мережева помилка: " + ex.getMessage(), Toast.LENGTH_LONG).show()
+                );
+            }
+        }).start();
     }
 
     public void toClearCart(View view){

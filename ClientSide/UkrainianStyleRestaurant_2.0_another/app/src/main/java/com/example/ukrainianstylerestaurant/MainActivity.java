@@ -103,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // ---------- helpers ----------
+
     private boolean isInternetAvailable() {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         if (cm == null) return false;
@@ -139,7 +139,7 @@ public class MainActivity extends AppCompatActivity {
 
         List<Course> filtered = new ArrayList<>();
         for (Course c : courseList) {
-            // якщо у твоїй моделі поле називається getCategory(), заміни на нього
+
             int cat = (c.getCategoryId() != 0) ? c.getCategoryId() : c.getCategoryId();
             if (cat == categoryId) filtered.add(c);
         }

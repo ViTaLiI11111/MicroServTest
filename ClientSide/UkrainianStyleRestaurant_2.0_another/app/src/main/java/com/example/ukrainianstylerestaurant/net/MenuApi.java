@@ -9,7 +9,7 @@ import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
 
-// На бекенді: Category { id, title }, Dish { id, title, price, pepper, color, categoryId, imageBase64 }
+
 public interface MenuApi {
     @GET("api/Categories")
     Call<List<Category>> getCategories();

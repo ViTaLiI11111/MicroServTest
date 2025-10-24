@@ -7,6 +7,6 @@ public class DishDto {
     public String pepper;
     public String color;
     public int categoryId;
-    public String imageBase64; // може бути null/порожнє
+    public String imageBase64;
 }
 
