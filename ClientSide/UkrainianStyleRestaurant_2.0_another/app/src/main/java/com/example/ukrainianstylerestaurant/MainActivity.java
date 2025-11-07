@@ -159,4 +159,21 @@ public class MainActivity extends AppCompatActivity {
     public void openShoppingCart(View view) {
         startActivity(new Intent(this, OrderPage.class));
     }
+
+    // --- НОВИЙ МЕТОД ДЛЯ КНОПКИ "ВИЙТИ" ---
+    /**
+     * Викликається кнопкою "Вийти" (btnLogoutMain) з activity_main.xml
+     */
+    public void logout(View view) {
+        // Очищуємо локальну сесію
+        LocalStorage.logout(this);
+
+        // Повертаємось на екран логіну
+        Intent intent = new Intent(this, LoginActivity.class);
+        // Встановлюємо прапори, щоб очистити історію
+        // і користувач не міг натиснути "Назад"
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+        finish(); // Закриваємо MainActivity
+    }
 }

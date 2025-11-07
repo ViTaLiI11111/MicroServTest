@@ -71,13 +71,20 @@ public class OrderPage extends AppCompatActivity {
             return;
         }
 
+        // --- ПОЧАТОК ЗМІН ---
+
+        // 1. Отримуємо номер столика з LocalStorage
+        int tableNo = LocalStorage.getTableNumber(this);
 
         List<OrderItemRequest> items = new ArrayList<>();
         for (Integer dishId : Order.items_id) {
             items.add(new OrderItemRequest(dishId, 1, null)); // qty=1, notes=null
         }
 
-        CreateOrderRequest req = new CreateOrderRequest(1, items);
+        // 2. Використовуємо 'tableNo' замість '1'
+        CreateOrderRequest req = new CreateOrderRequest(tableNo, items);
+
+        // --- КІНЕЦЬ ЗМІН ---
 
         new Thread(() -> {
             try {

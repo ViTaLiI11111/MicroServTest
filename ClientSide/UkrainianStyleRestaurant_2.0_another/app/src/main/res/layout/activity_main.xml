@@ -79,6 +79,7 @@
             app:layout_constraintTop_toTopOf="parent"
             tools:ignore="TextSizeCheck,VisualLintBounds"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
+
     <TextView
         android:id="@+id/textView4"
         android:layout_width="wrap_content"
@@ -132,20 +133,6 @@
         app:layout_constraintTop_toBottomOf="@+id/return_first_list" />
 
     <ImageButton
-        android:id="@+id/imageButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@android:color/transparent"
-        android:contentDescription="@string/app_name"
-        android:onClick="openShoppingCart"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/constraintLayout"
-        app:layout_constraintTop_toBottomOf="@+id/courseRecycler"
-        app:srcCompat="@drawable/shop_cart"
-        tools:ignore="DuplicateSpeakableTextCheck,UsingOnClickInXml" />
-
-    <ImageButton
         android:id="@+id/return_first_list"
         android:layout_width="70dp"
         android:layout_height="35dp"
@@ -158,5 +145,36 @@
         app:layout_constraintTop_toBottomOf="@+id/textView4"
         app:srcCompat="@drawable/filter"
         tools:ignore="ImageContrastCheck,TouchTargetSizeCheck,UsingOnClickInXml" />
+
+    <ImageButton
+        android:id="@+id/btnLogoutMain"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:contentDescription="Вийти"
+        android:onClick="logout"
+        android:padding="8dp"
+        android:src="@android:drawable/ic_lock_power_off"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/imageButton"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintStart_toEndOf="@+id/constraintLayout"
+        app:layout_constraintTop_toBottomOf="@+id/courseRecycler"
+        tools:ignore="UsingOnClickInXml" />
+
+    <ImageButton
+        android:id="@+id/imageButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:contentDescription="@string/app_name"
+        android:onClick="openShoppingCart"
+        android:padding="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/btnLogoutMain"
+        app:layout_constraintTop_toBottomOf="@+id/courseRecycler"
+        app:srcCompat="@drawable/shop_cart"
+        tools:ignore="DuplicateSpeakableTextCheck,UsingOnClickInXml" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

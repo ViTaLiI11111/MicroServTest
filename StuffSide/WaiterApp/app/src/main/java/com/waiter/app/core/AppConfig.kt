@@ -2,5 +2,7 @@ package com.waiter.app.core
 
 object AppConfig {
     const val ORDER_BASE_URL = "http://10.0.2.2:5245"
+    // Додайте URL нового сервісу
+    const val AUTH_BASE_URL = "http://10.0.2.2:5210"
     const val SSE_URL = "$ORDER_BASE_URL/orders/stream"
 }

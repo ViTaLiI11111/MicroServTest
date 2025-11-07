@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -21,7 +22,8 @@ import com.waiter.app.domain.model.UiOrder
 @Composable
 fun OrdersListScreen(
     vm: OrdersViewModel,
-    onOpenDetails: (String) -> Unit
+    onOpenDetails: (String) -> Unit,
+    onOpenSettings: () -> Unit // <-- Новий параметр
 ) {
     val state by vm.state.collectAsState()
 
@@ -30,10 +32,18 @@ fun OrdersListScreen(
             TopAppBar(
                 title = { Text("Замовлення") },
                 actions = {
+                    // Кнопка Оновити
                     IconButton(onClick = { vm.refresh() }) {
                         Icon(
                             imageVector = Icons.Default.Refresh,
                             contentDescription = "Оновити"
+                        )
+                    }
+                    // Нова кнопка Налаштування
+                    IconButton(onClick = onOpenSettings) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "Налаштування"
                         )
                     }
                 }

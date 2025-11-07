@@ -56,5 +56,21 @@ services:
     ports:
       - "5245:80"
 
+  authservice:
+    build:
+      context: ./API/AuthService  # Переконайтеся, що папка називається AuthService
+      dockerfile: Dockerfile
+    environment:
+      - ASPNETCORE_URLS=http://+:80
+      - ASPNETCORE_ENVIRONMENT=Development
+      # Рядок підключення для AuthDb, який ми вказали в Program.cs
+      - ConnectionStrings__AuthDb=Host=postgres;Port=5432;Database=authdb;Username=appuser;Password=app123
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "5210:80"
+    restart: unless-stopped
+
 volumes:
   pgdata:
