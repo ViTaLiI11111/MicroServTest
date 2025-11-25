@@ -1,10 +1,10 @@
 package com.example.ukrainianstylerestaurant.adapter;
 
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.os.Bundle;
 import android.os.Environment;
 import android.util.Base64;
 import android.util.Log;
@@ -16,9 +16,9 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.ukrainianstylerestaurant.CoursePage;
 import com.example.ukrainianstylerestaurant.R;
 import com.example.ukrainianstylerestaurant.model.Course;
 
@@ -66,14 +66,19 @@ public class CourseAdapter extends RecyclerView.Adapter<CourseAdapter.CourseView
                     File imageFile = saveImageToFile(decodedByte, "course_" + course.getId() + ".png");
                     if (imageFile != null) {
                         holder.itemView.setOnClickListener(view -> {
-                            Intent intent = new Intent(context, CoursePage.class);
-                            intent.putExtra("courseBg", Color.parseColor(course.getColor()));
-                            intent.putExtra("courseImageFilePath", imageFile.getAbsolutePath()); // передаємо шлях до файлу зображення
-                            intent.putExtra("courseTitle", course.getTitle());
-                            intent.putExtra("coursePrice", course.getPrice());
-                            intent.putExtra("coursePepper", course.getPepper());
-                            intent.putExtra("courseId", course.getId());
-                            context.startActivity(intent);
+
+                            // !!! КЛЮЧОВА ЗМІНА: ВИКОРИСТАННЯ BUNDLE І NAVIGATOR !!!
+                            Bundle bundle = new Bundle();
+                            bundle.putInt("courseId", course.getId());
+                            bundle.putInt("courseBg", Color.parseColor(course.getColor()));
+                            bundle.putString("courseImageFilePath", imageFile.getAbsolutePath());
+                            bundle.putString("courseTitle", course.getTitle());
+                            bundle.putString("coursePrice", course.getPrice());
+                            bundle.putString("coursePepper", course.getPepper());
+
+                            // Переходимо за допомогою NavController
+                            Navigation.findNavController(view).navigate(R.id.nav_course_detail, bundle);
+
                         });
                     }
                 } catch (IllegalArgumentException e) {

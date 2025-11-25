@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_home"
+            android:title="@string/main_scene_text" />
+        <item
+            android:id="@+id/nav_order_page"
+            android:title="Кошик" />
+        <item
+            android:id="@+id/nav_about_us"
+            android:title="@string/about_text" />
+        <item
+            android:id="@+id/nav_contacts"
+            android:title="@string/contacts_text" />
+    </group>
+
+    <item android:title="Налаштування">
+        <menu>
+            <item
+                android:id="@+id/nav_logout"
+                android:title="Вийти з акаунту" />
+        </menu>
+    </item>
+</menu>

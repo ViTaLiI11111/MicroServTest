@@ -9,9 +9,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.ukrainianstylerestaurant.MainActivity;
 import com.example.ukrainianstylerestaurant.R;
 import com.example.ukrainianstylerestaurant.model.Category;
+import com.example.ukrainianstylerestaurant.ui.home.HomeFragment;
 
 import java.util.List;
 
@@ -19,12 +19,12 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
 
     Context context;
     List<Category> categories;
-    MainActivity mainActivity;
+    HomeFragment homeFragment;
 
-    public CategoryAdapter(Context context, List<Category> categories, MainActivity mainActivity) {
+    public CategoryAdapter(Context context, List<Category> categories, HomeFragment homeFragment) {
         this.context = context;
         this.categories = categories;
-        this.mainActivity = mainActivity;
+        this.homeFragment = homeFragment;
     }
 
     @NonNull
@@ -38,7 +38,7 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
     public void onBindViewHolder(@NonNull CategoryViewHolder holder, int position) {
         holder.categoryTitle.setText(categories.get(holder.getAdapterPosition()).getTitle());
 
-        holder.itemView.setOnClickListener(view -> mainActivity
+        holder.itemView.setOnClickListener(view -> homeFragment
                 .showCoursesByCategory(categories
                         .get(holder.getAdapterPosition())
                         .getId()));

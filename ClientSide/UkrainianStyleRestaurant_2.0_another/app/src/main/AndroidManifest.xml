@@ -39,19 +39,10 @@
         <activity
             android:name=".TableSelectActivity"
             android:exported="false"/>
-
         <activity
-            android:name=".AboutUs"
-            android:exported="false" />
-        <activity
-            android:name=".Contacts"
-            android:exported="false" />
-        <activity
-            android:name=".CoursePage"
-            android:exported="false" />
-        <activity
-            android:name=".OrderPage"
-            android:exported="false" />
+            android:name=".ui.course.CourseDetailFragment"
+            android:exported="false"
+            tools:ignore="Instantiatable" />
 
     </application>
 

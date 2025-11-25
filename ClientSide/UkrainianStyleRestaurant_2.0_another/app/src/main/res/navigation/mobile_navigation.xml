@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/nav_home">
+
+    <action
+        android:id="@+id/action_nav_home_to_nav_course_detail"
+        app:destination="@id/nav_course_detail" />
+
+    <fragment
+        android:id="@+id/nav_home"
+        android:name="com.example.ukrainianstylerestaurant.ui.home.HomeFragment"
+        android:label="@string/main_scene_text"
+        tools:layout="@layout/fragment_home" />
+
+    <fragment
+        android:id="@+id/nav_about_us"
+        android:name="com.example.ukrainianstylerestaurant.ui.aboutus.AboutUsFragment"
+        android:label="@string/about_text"
+        tools:layout="@layout/fragment_about_us" />
+
+    <fragment
+        android:id="@+id/nav_order_page"
+        android:name="com.example.ukrainianstylerestaurant.ui.order.OrderFragment"
+        android:label="Кошик"
+        tools:layout="@layout/fragment_order" />
+
+    <fragment
+        android:id="@+id/nav_contacts"
+        android:name="com.example.ukrainianstylerestaurant.ui.contacts.ContactsFragment"
+        android:label="@string/contacts_text"
+        tools:layout="@layout/fragment_contacts" />
+
+    <fragment
+        android:id="@+id/nav_course_detail"
+        android:name="com.example.ukrainianstylerestaurant.ui.course.CourseDetailFragment"
+        android:label="Страва"
+        tools:layout="@layout/fragment_course_detail"/>
+
+    <argument
+        android:name="courseId"
+        app:argType="integer" />
+    <argument
+        android:name="courseTitle"
+        app:argType="string" />
+    <argument
+        android:name="coursePrice"
+        app:argType="string" />
+    <argument
+        android:name="coursePepper"
+        app:argType="string" />
+    <argument
+        android:name="courseBg"
+        app:argType="integer" />
+    <argument
+        android:name="courseImageFilePath"
+        app:argType="string"
+        app:nullable="true" />
+
+</navigation>
