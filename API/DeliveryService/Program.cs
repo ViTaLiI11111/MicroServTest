@@ -1,0 +1,41 @@
+using DeliveryService.Data;
+using Microsoft.EntityFrameworkCore;
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+var connectionString = builder.Configuration.GetConnectionString("DeliveryDb");
+builder.Services.AddDbContext<DeliveryDbContext>(options =>
+    options.UseNpgsql(connectionString));
+
+var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+// Авто-міграція бази даних при старті
+try
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        var db = scope.ServiceProvider.GetRequiredService<DeliveryDbContext>();
+        db.Database.Migrate();
+    }
+}
+catch (Exception ex)
+{
+    // Логування помилки
+    Console.WriteLine($"Migration Error: {ex.Message}");
+}
+
+app.UseHttpsRedirection();
+app.UseAuthorization();
+app.MapControllers();
+
+app.Run();

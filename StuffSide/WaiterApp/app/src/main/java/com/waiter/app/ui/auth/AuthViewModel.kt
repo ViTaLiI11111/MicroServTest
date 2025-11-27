@@ -3,16 +3,16 @@ package com.waiter.app.ui.auth
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.waiter.app.core.Result
+import com.waiter.app.core.UserRole // Імпорт Enum
 import com.waiter.app.data.repo.AuthRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-// Стан UI для екранів автентифікації
 sealed interface AuthUiState {
-    object Idle : AuthUiState // Початковий стан
+    object Idle : AuthUiState
     object Loading : AuthUiState
-    object Success : AuthUiState // Успішний вхід або реєстрація
+    object Success : AuthUiState
     data class Error(val message: String) : AuthUiState
 }
 
@@ -23,12 +23,14 @@ class AuthViewModel(
     private val _uiState = MutableStateFlow<AuthUiState>(AuthUiState.Idle)
     val uiState = _uiState.asStateFlow()
 
-    fun login(username: String, password: String, onLoginSuccess: (Int, String) -> Unit) {
+    // Додано аргумент role
+    fun login(role: UserRole, username: String, pass: String, onLoginSuccess: (Int, String) -> Unit) {
         viewModelScope.launch {
             _uiState.value = AuthUiState.Loading
-            when (val result = authRepository.login(username, password)) {
+
+            // Передаємо роль у репозиторій
+            when (val result = authRepository.login(role, username, pass)) {
                 is Result.Ok -> {
-                    // Викликаємо callback, щоб SettingsViewModel зберіг сесію
                     onLoginSuccess(result.value.userId, result.value.username)
                     _uiState.value = AuthUiState.Success
                 }
@@ -40,14 +42,24 @@ class AuthViewModel(
         }
     }
 
-    fun register(username: String, password: String, fullName: String) {
+    // Додано аргумент role
+    fun register(
+        role: UserRole,
+        username: String,
+        pass: String,
+        fullName: String,
+        phone: String = "",
+        email: String = "" // <-- ДОДАНО (дефолт пустий)
+    ) {
         viewModelScope.launch {
             _uiState.value = AuthUiState.Loading
-            when (val result = authRepository.register(username, password, fullName)) {
+
+            // Передаємо всі дані далі
+            val result = authRepository.register(role, username, pass, fullName, phone, email)
+
+            when (result) {
                 is Result.Ok -> {
-                    // Після реєстрації одразу переводимо на екран логіну
                     _uiState.value = AuthUiState.Idle
-                    // Тут можна показати Snackbar "Registration successful"
                 }
                 is Result.Err -> {
                     _uiState.value = AuthUiState.Error(result.error.message ?: "Unknown error")
@@ -57,7 +69,6 @@ class AuthViewModel(
         }
     }
 
-    // Скидання стану помилки
     fun clearError() {
         _uiState.value = AuthUiState.Idle
     }

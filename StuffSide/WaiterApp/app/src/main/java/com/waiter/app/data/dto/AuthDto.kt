@@ -16,5 +16,7 @@ data class LoginResponse(
 data class RegisterRequest(
     val username: String,
     val password: String,
-    val fullName: String?
+    val fullName: String?,
+    val phone: String? = null,
+    val email: String? = null // <-- ДОДАНО EMAIL
 )

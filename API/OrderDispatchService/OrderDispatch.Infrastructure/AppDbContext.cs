@@ -23,6 +23,10 @@ public class AppDbContext : DbContext
                 .WithOne(i => i.Order!)
                 .HasForeignKey(i => i.OrderId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            e.Property(x => x.Type).HasConversion<string>(); // Зберігаємо enum як текст
+            e.Property(x => x.DeliveryAddress).HasMaxLength(500).IsRequired(false);
+            e.Property(x => x.ClientPhone).HasMaxLength(50).IsRequired(false);
         });
 
         b.Entity<OrderItem>(e =>

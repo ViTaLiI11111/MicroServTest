@@ -1,8 +1,9 @@
 package com.waiter.app.data.repo
 
 import com.waiter.app.BuildConfig
-import com.waiter.app.core.AppConfig // Імпортуємо AppConfig
-import com.waiter.app.data.api.AuthApi // Імпортуємо AuthApi
+import com.waiter.app.core.AppConfig
+import com.waiter.app.data.api.AuthApi
+import com.waiter.app.data.api.DeliveryApi // Додано імпорт
 import com.waiter.app.data.repo.api.OrdersApi
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -25,7 +26,7 @@ object RetrofitModule {
         .add(KotlinJsonAdapterFactory())
         .build()
 
-    // --- Існуючий API для Замовлень ---
+    // --- Order Service ---
     fun createApi(): OrdersApi {
         val baseUrl = if (BuildConfig.API_BASE_URL.endsWith("/"))
             BuildConfig.API_BASE_URL
@@ -33,7 +34,7 @@ object RetrofitModule {
             BuildConfig.API_BASE_URL + "/"
 
         val retrofit = Retrofit.Builder()
-            .baseUrl(baseUrl) // Використовує URL з BuildConfig
+            .baseUrl(baseUrl)
             .client(client)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
@@ -41,14 +42,25 @@ object RetrofitModule {
         return retrofit.create(OrdersApi::class.java)
     }
 
-    // --- Новий API для Автентифікації ---
+    // --- Auth Service ---
     fun createAuthApi(): AuthApi {
         val retrofit = Retrofit.Builder()
-            .baseUrl(AppConfig.AUTH_BASE_URL) // Використовує новий URL з AppConfig
+            .baseUrl(AppConfig.AUTH_BASE_URL)
             .client(client)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
 
         return retrofit.create(AuthApi::class.java)
+    }
+
+    // --- Delivery Service (Новий метод) ---
+    fun createDeliveryApi(): DeliveryApi {
+        val retrofit = Retrofit.Builder()
+            .baseUrl(AppConfig.DELIVERY_BASE_URL)
+            .client(client)
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .build()
+
+        return retrofit.create(DeliveryApi::class.java)
     }
 }

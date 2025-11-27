@@ -2,6 +2,8 @@
 using OrderDispatch.Infrastructure;
 using OrderDispatch.Application.Menu;
 using OrderDispatch.Infrastructure.Menu;
+using OrderDispatch.Application.Delivery;
+using OrderDispatch.Infrastructure.Delivery;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +15,8 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
     opt.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddHttpClient<IMenuClient, MenuClient>();
+
+builder.Services.AddHttpClient<IDeliveryClient, DeliveryClient>();
 
 var app = builder.Build();
 

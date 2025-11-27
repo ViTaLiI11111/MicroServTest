@@ -8,9 +8,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.waiter.app.core.UserRole // Імпорт Enum
 
 @Composable
 fun LoginScreen(
+    role: UserRole, // <-- НОВИЙ ПАРАМЕТР
     authViewModel: AuthViewModel = viewModel(),
     onLoginSuccess: () -> Unit,
     onNavigateToRegister: () -> Unit,
@@ -20,28 +22,8 @@ fun LoginScreen(
     var password by remember { mutableStateOf("") }
     val uiState by authViewModel.uiState.collectAsState()
 
-    // Ми отримаємо SettingsViewModel з Activity/NavGraph,
-    // щоб зберегти сесію після успішного логіну
-    // !! ВАЖЛИВО: це буде передано з NavGraph
-    // val settingsViewModel: SettingsViewModel = ...
-
-    // Цей код буде в NavGraph:
-    // val settingsViewModel: SettingsViewModel = viewModel(viewModelStoreOwner = activity)
-    // val authViewModel: AuthViewModel = viewModel()
-    // ...
-    // LoginScreen(
-    //   authViewModel = authViewModel,
-    //   onLoginSuccess = {
-    //      navController.navigate(Routes.LIST) { popUpTo(Routes.AUTH_GRAPH) { inclusive = true } }
-    //   },
-    //   onLoginSuccessSaveSession = { id, name -> settingsViewModel.saveLoginSession(id, name) },
-    //   onNavigateToRegister = { navController.navigate(Routes.REGISTER) }
-    // )
-
-    // *** Поки що ми імплементуємо сам екран, а логіку onLoginSuccessSaveSession
-    // *** передамо в наступному кроці з NavGraph.
-
-
+    // Визначаємо текст заголовка залежно від ролі
+    val roleTitle = if (role == UserRole.WAITER) "Офіціант" else "Кур'єр"
 
     LaunchedEffect(uiState) {
         if (uiState is AuthUiState.Success) {
@@ -56,14 +38,17 @@ fun LoginScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Вхід для офіціанта", style = MaterialTheme.typography.headlineMedium)
+        // Динамічний заголовок
+        Text("Вхід: $roleTitle", style = MaterialTheme.typography.headlineMedium)
+
         Spacer(modifier = Modifier.height(32.dp))
 
         OutlinedTextField(
             value = username,
             onValueChange = { username = it },
             label = { Text("Логін") },
-            singleLine = true
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(16.dp))
         OutlinedTextField(
@@ -71,22 +56,30 @@ fun LoginScreen(
             onValueChange = { password = it },
             label = { Text("Пароль") },
             singleLine = true,
-            visualTransformation = PasswordVisualTransformation()
+            visualTransformation = PasswordVisualTransformation(),
+            modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(32.dp))
 
         if (uiState is AuthUiState.Error) {
-            Text((uiState as AuthUiState.Error).message, color = MaterialTheme.colorScheme.error)
+            Text(
+                text = (uiState as AuthUiState.Error).message,
+                color = MaterialTheme.colorScheme.error
+            )
             Spacer(modifier = Modifier.height(16.dp))
         }
 
         Button(
-            onClick = { authViewModel.login(username, password, onLoginSuccessSaveSession) },
+            onClick = {
+                // Передаємо роль у ViewModel
+                authViewModel.login(role, username, password, onLoginSuccessSaveSession)
+            },
             enabled = uiState !is AuthUiState.Loading,
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(if (uiState is AuthUiState.Loading) "Вхід..." else "Увійти")
         }
+
         TextButton(onClick = onNavigateToRegister) {
             Text("Реєстрація")
         }

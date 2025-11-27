@@ -1,6 +1,7 @@
 package com.waiter.app.data.repo
 
 import com.waiter.app.core.Result
+import com.waiter.app.core.UserRole // Імпорт enum
 import com.waiter.app.data.api.AuthApi
 import com.waiter.app.data.dto.LoginRequest
 import com.waiter.app.data.dto.LoginResponse
@@ -12,10 +13,18 @@ class AuthRepository(
     private val api: AuthApi = RetrofitModule.createAuthApi()
 ) {
 
-    // Оновлюємо: тепер повертає Result<LoginResponse>
-    suspend fun login(username: String, password: String): Result<LoginResponse> = withContext(Dispatchers.IO) {
+    // Додано параметр role: UserRole
+    suspend fun login(role: UserRole, username: String, pass: String): Result<LoginResponse> = withContext(Dispatchers.IO) {
         try {
-            val response = api.login(LoginRequest(username, password))
+            val req = LoginRequest(username, pass)
+
+            // Вибираємо ендпоінт
+            val response = if (role == UserRole.WAITER) {
+                api.loginWaiter(req)
+            } else {
+                api.loginCourier(req)
+            }
+
             if (response.isSuccessful && response.body() != null) {
                 Result.Ok(response.body()!!)
             } else {
@@ -26,9 +35,31 @@ class AuthRepository(
         }
     }
 
-    suspend fun register(username: String, password: String, fullName: String): Result<Unit> = withContext(Dispatchers.IO) {
+    // Додано параметр role: UserRole
+    suspend fun register(
+        role: UserRole,
+        username: String,
+        pass: String,
+        fullName: String,
+        phone: String,
+        email: String // <-- ДОДАНО АРГУМЕНТ
+    ): Result<Unit> = withContext(Dispatchers.IO) {
         try {
-            val response = api.register(RegisterRequest(username, password, fullName))
+            // Формуємо повний об'єкт, як на вашому скріншоті
+            val req = RegisterRequest(
+                username = username,
+                password = pass,
+                fullName = fullName,
+                phone = phone,
+                email = email // <-- Передаємо email
+            )
+
+            val response = if (role == UserRole.WAITER) {
+                api.registerWaiter(req)
+            } else {
+                api.registerCourier(req)
+            }
+
             if (response.isSuccessful) {
                 Result.Ok(Unit)
             } else {

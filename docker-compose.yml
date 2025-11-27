@@ -50,6 +50,7 @@ services:
       - ASPNETCORE_URLS=http://+:80
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=dispatch_db;Username=appuser;Password=app123
       - MenuService__BaseUrl=http://menusvc
+      - DeliveryService__BaseUrl=http://deliveryservice:80
     depends_on:
       - postgres
       - menusvc
@@ -70,6 +71,21 @@ services:
         condition: service_healthy
     ports:
       - "5210:80"
+    restart: unless-stopped
+
+  deliveryservice:
+    build:
+      context: ./API/DeliveryService
+      dockerfile: Dockerfile
+    environment:
+      - ASPNETCORE_URLS=http://+:80
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DeliveryDb=Host=postgres;Port=5432;Database=delivery_db;Username=appuser;Password=app123
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "5300:80" # Новий порт
     restart: unless-stopped
 
 volumes:

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OrderDispatch.Application.Menu;
+using OrderDispatch.Application.Delivery; // <-- 1. Додано для доставки
 using OrderDispatch.Domain.Entities;
 using OrderDispatch.Infrastructure;
 
@@ -12,8 +13,15 @@ public class OrdersController : ControllerBase
 {
     private readonly AppDbContext _db;
     private readonly IMenuClient _menu;
+    private readonly IDeliveryClient _delivery; // <-- 2. Нове поле
 
-    public OrdersController(AppDbContext db, IMenuClient menu) { _db = db; _menu = menu; }
+    // 3. Оновлений конструктор
+    public OrdersController(AppDbContext db, IMenuClient menu, IDeliveryClient delivery)
+    {
+        _db = db;
+        _menu = menu;
+        _delivery = delivery;
+    }
 
     [HttpPost]
     public async Task<ActionResult<OrderResponse>> Create([FromBody] CreateOrderRequest req, CancellationToken ct)
@@ -21,7 +29,24 @@ public class OrdersController : ControllerBase
         if (req.Items is null || req.Items.Count == 0)
             return BadRequest("Items are required.");
 
-        var order = new Order { TableNo = req.TableNo, Status = "new" };
+        // 4. Валідація для доставки
+        if (req.Type == OrderType.Delivery)
+        {
+            if (string.IsNullOrEmpty(req.Address) || string.IsNullOrEmpty(req.Phone))
+            {
+                return BadRequest("Delivery Address and Phone are required for delivery orders.");
+            }
+        }
+
+        // 5. Мапинг нових полів
+        var order = new Order
+        {
+            TableNo = req.TableNo,
+            Status = "new",
+            Type = req.Type,               // <-- Тип (DineIn/Delivery)
+            DeliveryAddress = req.Address, // <-- Адреса
+            ClientPhone = req.Phone        // <-- Телефон
+        };
 
         foreach (var i in req.Items)
         {
@@ -42,6 +67,24 @@ public class OrdersController : ControllerBase
 
         _db.Orders.Add(order);
         await _db.SaveChangesAsync(ct);
+
+        // 6. Інтеграція: Надсилаємо запит у DeliveryService, якщо це доставка
+        if (order.Type == OrderType.Delivery)
+        {
+            // Ми не блокуємо відповідь клієнту, якщо сервіс доставки лежить,
+            // але в реальному проді тут варто додати обробку помилок або черги (RabbitMQ)
+            var deliverySuccess = await _delivery.CreateDeliveryRequestAsync(
+                order.Id,
+                order.DeliveryAddress!,
+                order.ClientPhone!,
+                ct);
+
+            if (!deliverySuccess)
+            {
+                // Тут можна залогувати помилку: "Не вдалося створити доставку автоматично"
+                // Для MVP просто продовжуємо
+            }
+        }
 
         return Ok(ToDto(order));
     }
@@ -77,9 +120,18 @@ public class OrdersController : ControllerBase
         return NoContent();
     }
 
+    // 7. Оновлений маппер ToDto (додані Type, Address, Phone)
     static OrderResponse ToDto(Order o) => new(
-        o.Id, o.TableNo, o.Status, o.Total, o.CreatedAt,
-        o.Items.Select(i => new OrderItemResponse(i.Id, i.DishId, i.DishTitle, i.Qty, i.Price)).ToList());
+        o.Id,
+        o.TableNo,
+        o.Status,
+        o.Type.ToString(),      // <-- Передаємо тип як рядок
+        o.Total,
+        o.CreatedAt,
+        o.DeliveryAddress,      // <-- Адреса (може бути null)
+        o.ClientPhone,          // <-- Телефон (може бути null)
+        o.Items.Select(i => new OrderItemResponse(i.Id, i.DishId, i.DishTitle, i.Qty, i.Price)).ToList()
+    );
 
     public record StatusRequest(string Status);
 }
