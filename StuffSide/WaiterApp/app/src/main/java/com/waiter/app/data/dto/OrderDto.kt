@@ -12,6 +12,7 @@ data class OrderDto(
     val tableNo: Int,
     val status: String,
     val total: Double,
+    val clientName: String?,
     val items: List<OrderItemDto>
 )
 

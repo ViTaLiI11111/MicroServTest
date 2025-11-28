@@ -1,7 +1,8 @@
 package com.example.ukrainianstylerestaurant.net;
 
 import com.example.ukrainianstylerestaurant.model.CreateOrderRequest;
-import okhttp3.ResponseBody;
+import com.example.ukrainianstylerestaurant.model.OrderResponse;
+
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.POST;
@@ -9,5 +10,5 @@ import retrofit2.http.POST;
 public interface OrdersApi {
 
     @POST("orders")
-    Call<ResponseBody> createOrder(@Body CreateOrderRequest request);
+    Call<OrderResponse> createOrder(@Body CreateOrderRequest request);
 }

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/mainBgColor"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:clickable="true"
+        android:focusable="true">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Мій Профіль"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:textColor="@color/black"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="32dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Особисті дані"
+            android:textStyle="bold"
+            android:textColor="@color/name_of_app"
+            android:layout_marginBottom="8dp"/>
+
+        <EditText
+            android:id="@+id/et_profile_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:drawable/edit_text"
+            android:padding="12dp"
+            android:hint="Ім'я (як до вас звертатись)"
+            android:inputType="textPersonName"
+            android:layout_marginBottom="12dp"/>
+
+        <EditText
+            android:id="@+id/et_profile_email"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:drawable/edit_text"
+            android:padding="12dp"
+            android:hint="Email"
+            android:inputType="textEmailAddress"
+            android:layout_marginBottom="12dp"/>
+
+        <EditText
+            android:id="@+id/et_profile_phone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:drawable/edit_text"
+            android:padding="12dp"
+            android:hint="Телефон"
+            android:inputType="phone"
+            android:layout_marginBottom="24dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Адреса доставки (за замовчуванням)"
+            android:textStyle="bold"
+            android:textColor="@color/name_of_app"
+            android:layout_marginBottom="8dp"/>
+
+        <EditText
+            android:id="@+id/et_profile_address"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:drawable/edit_text"
+            android:padding="12dp"
+            android:hint="Вул, Будинок, Квартира"
+            android:inputType="textPostalAddress"
+            android:layout_marginBottom="32dp"/>
+
+        <Button
+            android:id="@+id/btn_save_profile"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:text="Зберегти зміни"/>
+
+    </LinearLayout>
+</ScrollView>

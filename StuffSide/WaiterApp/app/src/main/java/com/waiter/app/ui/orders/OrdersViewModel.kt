@@ -1,5 +1,6 @@
 package com.waiter.app.ui.orders
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -45,9 +46,19 @@ class OrdersViewModel(
     fun select(id: String) {
         viewModelScope.launch {
             try {
+                // Додамо лог, щоб бачити, який ID ми запитуємо
+                Log.d("OrdersViewModel", "Requesting details for ID: $id")
+
                 val o = repo.getOrder(id)
                 _selected.value = o
+
+                Log.d("OrdersViewModel", "Details loaded successfully")
             } catch (t: Throwable) {
+                // --- ОСЬ ТУТ ВАЖЛИВА ЗМІНА ---
+                Log.e("OrdersViewModel", "Error loading details", t)
+                t.printStackTrace() // Друкуємо помилку в консоль
+                // -----------------------------
+
                 _selected.value = null
             }
         }

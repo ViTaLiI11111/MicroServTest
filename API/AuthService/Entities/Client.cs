@@ -13,6 +13,10 @@ namespace AuthService.Entities
         [Required]
         public string PasswordHash { get; set; }
 
+        // --- ОСЬ ЦЬОГО РЯДКА НЕ ВИСТАЧАЄ ---
+        public string? FullName { get; set; }
+        // -----------------------------------
+
         [EmailAddress]
         public string? Email { get; set; }
 

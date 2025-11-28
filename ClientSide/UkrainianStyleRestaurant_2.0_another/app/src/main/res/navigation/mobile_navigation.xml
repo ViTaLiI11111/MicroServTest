@@ -39,6 +39,18 @@
         android:label="Страва"
         tools:layout="@layout/fragment_course_detail"/>
 
+    <fragment
+        android:id="@+id/nav_delivery_status"
+        android:name="com.example.ukrainianstylerestaurant.ui.delivery.DeliveryStatusFragment"
+        android:label="Delivery Status"
+        tools:layout="@layout/fragment_delivery_status" />
+
+    <fragment
+        android:id="@+id/nav_profile"
+        android:name="com.example.ukrainianstylerestaurant.ui.profile.ProfileFragment"
+        android:label="Мій Кабінет"
+        tools:layout="@layout/fragment_profile" />
+
     <argument
         android:name="courseId"
         app:argType="integer" />

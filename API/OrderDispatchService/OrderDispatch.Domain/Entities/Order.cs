@@ -1,22 +1,26 @@
-﻿namespace OrderDispatch.Domain.Entities;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace OrderDispatch.Domain.Entities;
 
 public enum OrderType
 {
-    DineIn,   // В закладі
-    Delivery  // Доставка
+    DineIn,
+    Delivery
 }
 
 public class Order
 {
     public Guid Id { get; set; } = Guid.NewGuid();
 
-    public OrderType Type { get; set; } = OrderType.DineIn; // <--- Нове поле
+    public OrderType Type { get; set; } = OrderType.DineIn;
 
     public int TableNo { get; set; }
 
-    // Інформація для доставки (може бути null, якщо це DineIn)
-    public string? DeliveryAddress { get; set; } // <--- Нове поле
-    public string? ClientPhone { get; set; }     // <--- Нове поле
+    // --- НОВЕ ПОЛЕ ---
+    public string? ClientName { get; set; }
+
+    public string? DeliveryAddress { get; set; }
+    public string? ClientPhone { get; set; }
 
     public string Status { get; set; } = "new";
     public decimal Total { get; set; }

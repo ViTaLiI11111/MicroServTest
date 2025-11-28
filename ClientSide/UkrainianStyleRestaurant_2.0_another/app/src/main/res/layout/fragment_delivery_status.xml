@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:gravity="center"
+    android:background="@color/mainBgColor"
+    android:clickable="true"
+    android:focusable="true">
+
+    <TextView
+        android:id="@+id/tv_status_header"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Інформація про доставку"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="@color/black"
+        android:layout_marginTop="24dp"/>
+
+    <TextView
+        android:id="@+id/tv_status_body"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Активних замовлень немає"
+        android:textSize="18sp"
+        android:textColor="@color/style"
+        android:gravity="center"
+        android:layout_marginTop="16dp"/>
+
+    <LinearLayout
+        android:id="@+id/layout_courier_info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:visibility="gone"
+        android:layout_marginTop="32dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ваш кур'єр:"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:id="@+id/tv_courier_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Олександр"
+            android:textSize="20sp"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Орієнтовний час:"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:id="@+id/tv_eta"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="~30 хв"
+            android:textSize="28sp"
+            android:textColor="@android:color/holo_green_dark"
+            android:textStyle="bold"/>
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btn_refresh_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="48dp"
+        android:text="Оновити статус"/>
+
+</LinearLayout>

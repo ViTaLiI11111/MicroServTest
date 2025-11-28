@@ -7,11 +7,12 @@ public record OrderResponse(
     Guid Id,
     int TableNo,
     string Status,
-    string Type,            // <--- Нове
+    string Type,
     decimal Total,
     DateTimeOffset CreatedAt,
-    string? DeliveryAddress, // <--- Нове
-    string? ClientPhone,     // <--- Нове
+    string? DeliveryAddress,
+    string? ClientPhone,
+    string? ClientName, // <--- Важливе нове поле
     List<OrderItemResponse> Items
 );
 

@@ -63,5 +63,21 @@ namespace AuthService.Controllers
 
             return Ok(response);
         }
+
+        [HttpPut("profile")]
+        public async Task<IActionResult> UpdateProfile([FromBody] UpdateClientRequest request)
+        {
+            var client = await _context.Clients.FindAsync(request.Id);
+            if (client == null) return NotFound("Client not found");
+
+            // Оновлюємо ім'я в базі
+            client.FullName = request.FullName; // <--- Ось тут відбувається магія
+
+            client.Email = request.Email;
+            client.Phone = request.Phone;
+
+            await _context.SaveChangesAsync();
+            return Ok(new { Message = "Profile updated successfully" });
+        }
     }
 }

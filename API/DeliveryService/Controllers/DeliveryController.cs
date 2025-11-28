@@ -21,7 +21,6 @@ namespace DeliveryService.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateDelivery(CreateDeliveryRequest request)
         {
-            // Перевірка, чи не існує вже доставки для цього замовлення
             if (await _context.Deliveries.AnyAsync(d => d.OrderId == request.OrderId))
             {
                 return BadRequest("Delivery for this order already exists");
@@ -32,6 +31,7 @@ namespace DeliveryService.Controllers
                 OrderId = request.OrderId,
                 ClientAddress = request.Address,
                 ClientPhone = request.Phone,
+                ClientName = request.ClientName, // <--- ЗБЕРІГАЄМО ТУТ
                 Status = DeliveryStatus.Created
             };
 
@@ -99,6 +99,31 @@ namespace DeliveryService.Controllers
                 .Where(d => d.CourierId == courierId && d.Status != DeliveryStatus.Delivered)
                 .ToListAsync();
             return Ok(list);
+        }
+
+        [HttpGet("track/{orderId}")]
+        public async Task<IActionResult> GetDeliveryStatus(Guid orderId)
+        {
+            // Шукаємо доставку, яка прив'язана до цього замовлення
+            var delivery = await _context.Deliveries
+                .FirstOrDefaultAsync(d => d.OrderId == orderId);
+
+            if (delivery == null)
+            {
+                // Якщо доставки немає, повертаємо 404.
+                // Клієнт зрозуміє це як "Замовлення ще готується, кур'єра не викликали"
+                return NotFound(new { Message = "Delivery not found for this order" });
+            }
+
+            var response = new DeliveryStatusResponse
+            {
+                Id = delivery.Id,
+                Status = delivery.Status,
+                CourierId = delivery.CourierId,
+                DeliveredAt = delivery.DeliveredAt
+            };
+
+            return Ok(response);
         }
     }
 }

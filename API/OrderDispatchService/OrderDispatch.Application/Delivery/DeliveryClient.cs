@@ -18,7 +18,7 @@ public class DeliveryClient : IDeliveryClient
         _baseUrl = url?.TrimEnd('/') ?? "http://deliveryservice";
     }
 
-    public async Task<bool> CreateDeliveryRequestAsync(Guid orderId, string address, string phone, CancellationToken ct = default)
+    public async Task<bool> CreateDeliveryRequestAsync(Guid orderId, string address, string phone, string clientName, CancellationToken ct = default)
     {
         try
         {
@@ -26,7 +26,8 @@ public class DeliveryClient : IDeliveryClient
             {
                 OrderId = orderId, // Важливо: DeliveryService має очікувати Guid або string, а не int!
                 Address = address,
-                Phone = phone
+                Phone = phone,
+                ClientName = clientName
             };
 
             var response = await _http.PostAsJsonAsync($"{_baseUrl}/api/deliveries", request, ct);

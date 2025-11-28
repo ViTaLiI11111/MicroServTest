@@ -11,5 +11,6 @@ data class UiOrder(
     val tableNo: Int,
     val status: String,
     val total: Double,
+    val clientName: String,
     val items: List<UiOrderItem>
 )

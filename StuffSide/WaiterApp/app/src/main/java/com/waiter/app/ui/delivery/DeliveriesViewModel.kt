@@ -49,4 +49,16 @@ class DeliveriesViewModel(
     }
 
     fun clearError() { _error.value = null }
+
+    fun updateStatus(deliveryId: Int, courierId: Int, newStatus: Int) {
+        viewModelScope.launch {
+            try {
+                repo.updateStatus(deliveryId, courierId, newStatus)
+                // Одразу оновлюємо список, щоб кнопка змінилася або замовлення зникло (якщо Delivered)
+                loadData(courierId)
+            } catch (e: Exception) {
+                _error.value = "Error updating status: ${e.message}"
+            }
+        }
+    }
 }

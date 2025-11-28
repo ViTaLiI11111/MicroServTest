@@ -18,5 +18,6 @@ fun OrderDto.toUi(): UiOrder =
         tableNo = tableNo,
         status = status,
         total = total,
+        clientName = clientName ?: "Гість", // <--- Якщо null, пишемо "Гість"
         items = items.map { it.toUi() }
     )

@@ -2,30 +2,26 @@ package com.waiter.app.ui.orders
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Card
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.waiter.app.domain.model.UiOrder
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OrdersListScreen(
     vm: OrdersViewModel,
     onOpenDetails: (String) -> Unit,
-    onOpenSettings: () -> Unit // <-- Новий параметр
+    onOpenSettings: () -> Unit
 ) {
-    val state by vm.state.collectAsState()
+    // Використовуємо collectAsStateWithLifecycle для кращої роботи з життєвим циклом
+    val state by vm.state.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {
@@ -39,7 +35,7 @@ fun OrdersListScreen(
                             contentDescription = "Оновити"
                         )
                     }
-                    // Нова кнопка Налаштування
+                    // Кнопка Налаштування
                     IconButton(onClick = onOpenSettings) {
                         Icon(
                             imageVector = Icons.Default.Settings,
@@ -50,23 +46,36 @@ fun OrdersListScreen(
             )
         }
     ) { padding ->
-        Column(Modifier.padding(padding).fillMaxSize().padding(16.dp)) {
+        Box(modifier = Modifier.padding(padding).fillMaxSize()) {
             when (val s = state) {
-                is OrdersUiState.Loading -> Text("Завантаження…")
-                is OrdersUiState.Error   -> Text(s.message)
-                is OrdersUiState.ListState    -> {
-                    s.orders.forEach { o ->
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 8.dp)
-                                .clickable { onOpenDetails(o.id) }
+                is OrdersUiState.Loading -> {
+                    // Показуємо спіннер по центру
+                    CircularProgressIndicator(modifier = Modifier.align(androidx.compose.ui.Alignment.Center))
+                }
+                is OrdersUiState.Error -> {
+                    Text(
+                        text = "Помилка: ${s.message}",
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
+                is OrdersUiState.ListState -> {
+                    if (s.orders.isEmpty()) {
+                        Text(
+                            text = "Немає активних замовлень",
+                            modifier = Modifier.align(androidx.compose.ui.Alignment.Center)
+                        )
+                    } else {
+                        // Використовуємо LazyColumn для прокручування списку
+                        LazyColumn(
+                            contentPadding = PaddingValues(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Column(Modifier.padding(12.dp)) {
-                                Text("Order #${o.id}")
-                                Text("Table: ${o.tableNo}")
-                                Text("Status: ${o.status}")
-                                Text("Total: ${o.total}")
+                            items(s.orders) { o ->
+                                OrderCard(
+                                    order = o,
+                                    onClick = { onOpenDetails(o.id) }
+                                )
                             }
                         }
                     }
@@ -76,3 +85,72 @@ fun OrdersListScreen(
     }
 }
 
+@Composable
+fun OrderCard(
+    order: com.waiter.app.domain.model.UiOrder,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            // ID та Сума
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Order #${order.id.take(4)}...",
+                    style = MaterialTheme.typography.labelMedium
+                )
+                Text(
+                    text = "${order.total} грн",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Ім'я клієнта
+            Text(
+                text = "👤 ${order.clientName}",
+                style = MaterialTheme.typography.titleMedium
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+            Divider()
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Локація (Стіл або Доставка) та Статус
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                // --- ОСЬ ТУТ ЛОГІКА ---
+                if (order.tableNo > 0) {
+                    Text(text = "🍽️ Стіл: ${order.tableNo}")
+                } else {
+                    Text(
+                        text = "🏠 Доставка", // Показуємо це, якщо стіл 0
+                        color = MaterialTheme.colorScheme.tertiary,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+                // ---------------------
+
+                Text(
+                    text = order.status.uppercase(),
+                    color = MaterialTheme.colorScheme.secondary,
+                    style = MaterialTheme.typography.labelLarge
+                )
+            }
+        }
+    }
+}

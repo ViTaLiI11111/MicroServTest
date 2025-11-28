@@ -7,7 +7,8 @@ public record CreateOrderRequest(
     List<CreateOrderItem> Items, // <--- Використовує клас нижче
     OrderType Type = OrderType.DineIn,
     string? Address = null,
-    string? Phone = null
+    string? Phone = null,
+    string? ClientName = null
 );
 
 public record CreateOrderItem(int DishId, int Qty);
