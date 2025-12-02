@@ -29,6 +29,7 @@ import com.example.ukrainianstylerestaurant.ui.home.HomeFragment;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map; // Додано імпорт
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -68,19 +69,31 @@ public class OrderFragment extends Fragment {
     private void loadOrderData() {
         List<String> coursesOrder = new ArrayList<>();
         List<String> coursesSum = new ArrayList<>();
-        float sum = 0;
+        float totalSum = 0;
 
+        // Проходимось по всіх доступних стравах
         for (Course c : HomeFragment.fullCoursesList) {
-            if (Order.items_id.contains(c.getId())) {
-                coursesOrder.add(c.getTitle());
+            // Перевіряємо, чи є ID цієї страви в нашій Map
+            if (Order.itemsMap.containsKey(c.getId())) {
+
+                int qty = Order.itemsMap.get(c.getId()); // Отримуємо кількість
+
+                // Формуємо рядок: "Борщ x2"
+                coursesOrder.add(c.getTitle() + " x" + qty);
+
+                // Ціна за одну порцію
                 coursesOrder.add(c.getPrice());
+
                 try {
-                    sum += Float.parseFloat(c.getPrice());
-                } catch (NumberFormatException e) { /* ігноруємо */ }
+                    float price = Float.parseFloat(c.getPrice());
+                    totalSum += price * qty; // Додаємо до суми (ціна * кількість)
+                } catch (NumberFormatException e) {
+                    /* ігноруємо */
+                }
             }
         }
 
-        coursesSum.add(String.valueOf(sum));
+        coursesSum.add(String.valueOf(totalSum));
 
         if (getContext() != null) {
             ordersList.setAdapter(new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, coursesOrder));
@@ -88,11 +101,8 @@ public class OrderFragment extends Fragment {
         }
     }
 
-    // --- ЛОГІКА ОФОРМЛЕННЯ ЗАМОВЛЕННЯ (CHECKOUT) ---
-
-    // Крок 1: Перевірка кошика та імені
     private void startCheckoutProcess() {
-        if (Order.items_id.isEmpty()) {
+        if (Order.itemsMap.isEmpty()) {
             Toast.makeText(requireContext(), "Кошик пустий", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -107,7 +117,6 @@ public class OrderFragment extends Fragment {
         showDeliveryDialog();
     }
 
-    // Крок 2: Вибір типу доставки
     private void showDeliveryDialog() {
         String[] options = {"🍽️ У закладі (на столик)", "🛵 Доставка додому"};
 
@@ -115,10 +124,8 @@ public class OrderFragment extends Fragment {
                 .setTitle("Оберіть спосіб отримання")
                 .setItems(options, (dialog, which) -> {
                     if (which == 0) {
-                        // Обрано: У закладі (0) -> Йдемо до оплати
                         showPaymentDialog(0);
                     } else {
-                        // Обрано: Доставка (1) -> Перевіряємо адресу
                         String address = LocalStorage.getClientAddress(requireContext());
                         String phone = LocalStorage.getClientPhone(requireContext());
 
@@ -126,7 +133,6 @@ public class OrderFragment extends Fragment {
                             Toast.makeText(requireContext(), "Для доставки вкажіть адресу та телефон!", Toast.LENGTH_LONG).show();
                             Navigation.findNavController(requireView()).navigate(R.id.nav_profile);
                         } else {
-                            // Адреса є -> Йдемо до оплати
                             showPaymentDialog(1);
                         }
                     }
@@ -134,32 +140,33 @@ public class OrderFragment extends Fragment {
                 .show();
     }
 
-    // Крок 3: Вибір способу оплати
     private void showPaymentDialog(int orderType) {
         String[] options = {"💳 Оплатити зараз (Картка)", "💵 Оплата при отриманні"};
 
         new AlertDialog.Builder(requireContext())
                 .setTitle("Спосіб оплати")
                 .setItems(options, (dialog, which) -> {
-                    boolean payImmediately = (which == 0); // 0 = Платимо зараз
-
-                    // Запускаємо процес створення замовлення
+                    boolean payImmediately = (which == 0);
                     processOrder(orderType, payImmediately);
                 })
                 .show();
     }
 
-    // Крок 4: Виконання запитів на сервер
     private void processOrder(int type, boolean payImmediately) {
-        // Показуємо користувачеві, що процес пішов (можна додати ProgressBar, але поки Toast)
         Toast.makeText(requireContext(), "Обробка замовлення...", Toast.LENGTH_SHORT).show();
 
         executorService.execute(() -> {
             try {
-                // 1. Збираємо дані
+                // 1. Збираємо дані з Map
                 List<OrderItemRequest> items = new ArrayList<>();
-                for (Integer dishId : Order.items_id) {
-                    items.add(new OrderItemRequest(dishId, 1, null));
+
+                // Проходимо по кожному запису в Map (ID -> Quantity)
+                for (Map.Entry<Integer, Integer> entry : Order.itemsMap.entrySet()) {
+                    int dishId = entry.getKey();
+                    int qty = entry.getValue();
+
+                    // Додаємо в список для відправки на сервер
+                    items.add(new OrderItemRequest(dishId, qty, null));
                 }
 
                 String clientName = LocalStorage.getClientName(requireContext());
@@ -168,31 +175,25 @@ public class OrderFragment extends Fragment {
                 CreateOrderRequest req;
 
                 if (type == 0) {
-                    // DINE IN
                     int tableNo = LocalStorage.getTableNumber(requireContext());
                     req = new CreateOrderRequest(tableNo, items, clientName);
                 } else {
-                    // DELIVERY
                     String address = LocalStorage.getClientAddress(requireContext());
                     String phone = LocalStorage.getClientPhone(requireContext());
                     req = new CreateOrderRequest(items, address, phone, clientName);
                 }
 
-                // 2. Створюємо замовлення
                 OrdersRepository repo = new OrdersRepository();
                 OrderResponse response = repo.createOrder(req);
 
                 if (response != null && response.id != null) {
-                    // Зберігаємо ID для відстеження
                     LocalStorage.saveActiveOrderId(requireContext(), response.id);
 
-                    // 3. Якщо вибрана миттєва оплата -> викликаємо Pay
                     boolean paymentSuccess = false;
                     if (payImmediately) {
                         paymentSuccess = repo.payOrder(response.id);
                     }
 
-                    // Фінальний результат для UI
                     boolean finalPaymentSuccess = paymentSuccess;
 
                     mainThreadHandler.post(() -> {
@@ -202,7 +203,7 @@ public class OrderFragment extends Fragment {
                             if (finalPaymentSuccess) {
                                 msg += "\n✅ Оплачено успішно!";
                             } else {
-                                msg += "\n⚠️ Помилка оплати. Спробуйте пізніше в меню відстеження.";
+                                msg += "\n⚠️ Помилка оплати. Спробуйте пізніше.";
                             }
                         } else {
                             msg += "\nОплата при отриманні.";
@@ -211,7 +212,7 @@ public class OrderFragment extends Fragment {
                         Toast.makeText(requireContext(), msg, Toast.LENGTH_LONG).show();
 
                         // Очищаємо кошик
-                        Order.items_id.clear();
+                        Order.itemsMap.clear();
                         loadOrderData();
                     });
 
@@ -231,8 +232,8 @@ public class OrderFragment extends Fragment {
     }
 
     public void toClearCart() {
-        if (!Order.items_id.isEmpty()) {
-            Order.items_id.clear();
+        if (!Order.itemsMap.isEmpty()) {
+            Order.itemsMap.clear();
             Toast.makeText(requireContext(), "Кошик очищено!", Toast.LENGTH_LONG).show();
             loadOrderData();
         } else {

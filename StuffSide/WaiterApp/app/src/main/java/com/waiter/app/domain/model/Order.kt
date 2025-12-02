@@ -7,6 +7,10 @@ data class UiOrder(
     val total: Double,
     val clientName: String,
     val isPaid: Boolean,
+
+    // --- ДОДАЛИ ---
+    val waiterId: Int?,
+
     val items: List<UiOrderItem>
 )
 
@@ -14,6 +18,5 @@ data class UiOrderItem(
     val dishTitle: String,
     val qty: Int,
     val price: Double,
-    // --- НОВЕ ПОЛЕ ---
     val itemStatus: String // "Pending", "Cooking", "Ready"
 )

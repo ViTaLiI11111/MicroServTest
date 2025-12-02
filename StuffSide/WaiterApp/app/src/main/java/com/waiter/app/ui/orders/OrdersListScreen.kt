@@ -13,75 +13,102 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.waiter.app.domain.model.UiOrder
+import com.waiter.app.ui.settings.SettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OrdersListScreen(
     vm: OrdersViewModel,
+    settingsVm: SettingsViewModel = viewModel(), // Отримуємо ID офіціанта з налаштувань
     onOpenDetails: (String) -> Unit,
     onOpenSettings: () -> Unit
 ) {
-    // Використовуємо collectAsStateWithLifecycle для кращої роботи з життєвим циклом
-    val state by vm.state.collectAsStateWithLifecycle()
+    // Отримуємо поточний ID офіціанта
+    val waiterId by settingsVm.userIdFlow.collectAsState(initial = 0)
+
+    val available by vm.availableOrders.collectAsState()
+    val myOrders by vm.myOrders.collectAsState()
+    val isLoading by vm.isLoading.collectAsState()
+    val error by vm.error.collectAsState()
+
+    // Стан вкладок: 0 = Вільні, 1 = Мої
+    var selectedTab by remember { mutableIntStateOf(0) }
+
+    // Завантажуємо дані при вході
+    LaunchedEffect(waiterId) {
+        if (waiterId != 0) vm.loadData(waiterId)
+    }
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Замовлення") },
-                actions = {
-                    // Кнопка Оновити
-                    IconButton(onClick = { vm.refresh() }) {
-                        Icon(
-                            imageVector = Icons.Default.Refresh,
-                            contentDescription = "Оновити"
-                        )
+            Column {
+                TopAppBar(
+                    title = { Text("Зал (Офіціант)") },
+                    actions = {
+                        IconButton(onClick = { vm.loadData(waiterId) }) {
+                            Icon(Icons.Default.Refresh, "Refresh")
+                        }
+                        IconButton(onClick = onOpenSettings) {
+                            Icon(Icons.Default.Settings, "Settings")
+                        }
                     }
-                    // Кнопка Налаштування
-                    IconButton(onClick = onOpenSettings) {
-                        Icon(
-                            imageVector = Icons.Default.Settings,
-                            contentDescription = "Налаштування"
-                        )
-                    }
+                )
+
+                // --- ВКЛАДКИ ---
+                TabRow(selectedTabIndex = selectedTab) {
+                    Tab(
+                        selected = selectedTab == 0,
+                        onClick = { selectedTab = 0 },
+                        text = { Text("Вільні столики") }
+                    )
+                    Tab(
+                        selected = selectedTab == 1,
+                        onClick = { selectedTab = 1 },
+                        text = { Text("Мої столики") }
+                    )
                 }
-            )
+            }
         }
     ) { padding ->
         Box(modifier = Modifier.padding(padding).fillMaxSize()) {
-            when (val s = state) {
-                is OrdersUiState.Loading -> {
-                    // Показуємо спіннер по центру
-                    CircularProgressIndicator(modifier = Modifier.align(androidx.compose.ui.Alignment.Center))
-                }
-                is OrdersUiState.Error -> {
-                    Text(
-                        text = "Помилка: ${s.message}",
-                        color = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.padding(16.dp)
-                    )
-                }
-                is OrdersUiState.ListState -> {
-                    if (s.orders.isEmpty()) {
-                        Text(
-                            text = "Немає активних замовлень",
-                            modifier = Modifier.align(androidx.compose.ui.Alignment.Center)
-                        )
-                    } else {
-                        // Використовуємо LazyColumn для прокручування списку
-                        LazyColumn(
-                            contentPadding = PaddingValues(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            items(s.orders) { o ->
-                                OrderCard(
-                                    order = o,
-                                    onClick = { onOpenDetails(o.id) }
-                                )
-                            }
+            if (isLoading) {
+                CircularProgressIndicator(modifier = Modifier.align(androidx.compose.ui.Alignment.Center))
+            } else {
+                LazyColumn(
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    // Вибираємо список залежно від вкладки
+                    val listToShow = if (selectedTab == 0) available else myOrders
+
+                    if (listToShow.isEmpty()) {
+                        item {
+                            Text(
+                                text = if (selectedTab == 0) "Немає вільних столиків" else "У вас немає активних замовлень",
+                                modifier = Modifier.padding(16.dp),
+                                color = Color.Gray
+                            )
                         }
                     }
+
+                    items(listToShow) { o ->
+                        OrderCard(
+                            order = o,
+                            isMyOrder = (selectedTab == 1),
+                            onTake = { vm.assignOrder(o.id, waiterId) }, // Кнопка "Взяти"
+                            onClick = { onOpenDetails(o.id) }            // Відкрити деталі
+                        )
+                    }
                 }
+            }
+
+            if (error != null) {
+                Snackbar(
+                    modifier = Modifier.align(androidx.compose.ui.Alignment.BottomCenter).padding(16.dp),
+                    action = { TextButton(onClick = { vm.clearError() }) { Text("OK") } }
+                ) { Text(error!!) }
             }
         }
     }
@@ -89,74 +116,51 @@ fun OrdersListScreen(
 
 @Composable
 fun OrderCard(
-    order: com.waiter.app.domain.model.UiOrder,
+    order: UiOrder,
+    isMyOrder: Boolean,
+    onTake: () -> Unit,
     onClick: () -> Unit
 ) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
-        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
+        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
+        elevation = CardDefaults.cardElevation(3.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            // Верхній рядок: ID та Сума
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
+            // Верхній рядок
+            Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
+                Text("Стіл №${order.tableNo}", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                Text("${order.total} грн", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+            }
+
+            Spacer(Modifier.height(8.dp))
+            Text("Статус: ${order.status}")
+
+            if (order.isPaid) {
+                Text("✅ Оплачено", color = Color(0xFF2E7D32), fontWeight = FontWeight.Bold)
+            } else {
+                Text("💵 Не оплачено", color = Color.Red)
+            }
+
+            Spacer(Modifier.height(12.dp))
+
+            // Якщо це "Вільний столик", показуємо кнопку "Взяти"
+            if (!isMyOrder) {
+                Button(
+                    onClick = onTake,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                ) {
+                    Text("🙋‍♂️ Обслуговувати цей стіл")
+                }
+            } else {
+                // Якщо "Мій столик"
                 Text(
-                    text = "Order #${order.id.take(4)}...",
-                    style = MaterialTheme.typography.labelMedium,
+                    "Натисніть, щоб керувати",
+                    style = MaterialTheme.typography.bodySmall,
                     color = Color.Gray
                 )
-                Text(
-                    text = "${order.total} грн",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Bold
-                )
             }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Ім'я клієнта
-            Text(
-                text = "👤 ${order.clientName}",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-
-            Text(
-                text = if (order.tableNo > 0) "🍽️ Стіл: ${order.tableNo}" else "🏠 Доставка",
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color.Gray
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // --- ДИНАМІЧНА ПЛАШКА СТАТУСУ ---
-            val (statusText, bgColor, contentColor) = when (order.status) {
-                "new" -> Triple("🆕 Нове (Чекає)", Color(0xFFFFEBEE), Color(0xFFD32F2F)) // Червоний
-                "inprogress" -> Triple("👨‍🍳 Готується", Color(0xFFFFF3E0), Color(0xFFE65100)) // Помаранчевий
-                "ready" -> Triple("✅ ГОТОВО ДО ВИДАЧІ", Color(0xFFE8F5E9), Color(0xFF2E7D32)) // Зелений
-                "completed" -> Triple("🏁 Завершено", Color(0xFFF5F5F5), Color(0xFF757575)) // Сірий
-                else -> Triple(order.status, Color.LightGray, Color.Black)
-            }
-
-            Surface(
-                color = bgColor,
-                shape = MaterialTheme.shapes.small
-            ) {
-                Text(
-                    text = statusText,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = contentColor,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-            // --------------------------------
         }
     }
 }

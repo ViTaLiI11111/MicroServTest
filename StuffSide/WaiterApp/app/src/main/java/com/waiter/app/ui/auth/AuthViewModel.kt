@@ -52,24 +52,38 @@ class AuthViewModel(
         fullName: String,
         phone: String = "",
         email: String = "",
-        stationId: Int? = null // Додаємо stationId
+        stationId: Int? = null
     ) {
         viewModelScope.launch {
+            // 1. Показуємо індикатор завантаження
             _uiState.value = AuthUiState.Loading
 
-            // Передаємо ВСІ параметри у репозиторій
+            // 2. Викликаємо репозиторій з усіма параметрами
             val result = authRepository.register(
-                role, username, pass, fullName, phone, email, stationId
+                role,
+                username,
+                pass,
+                fullName,
+                phone,
+                email,
+                stationId
             )
 
+            // 3. Обробляємо результат
             when (result) {
                 is Result.Ok -> {
-                    _uiState.value = AuthUiState.Idle
+                    // ВАЖЛИВО: Ставимо статус Success.
+                    // Саме це змусить LaunchedEffect на екрані RegisterScreen спрацювати,
+                    // показати Toast "Успішно" і викликати onRegisterSuccess() (навігацію назад).
+                    _uiState.value = AuthUiState.Success
                 }
                 is Result.Err -> {
+                    // Показуємо помилку (наприклад, "Username taken")
                     _uiState.value = AuthUiState.Error(result.error.message ?: "Unknown error")
                 }
-                is Result.Loading -> {}
+                is Result.Loading -> {
+                    // Цей стан ми вже встановили на початку, тут можна нічого не робити
+                }
             }
         }
     }

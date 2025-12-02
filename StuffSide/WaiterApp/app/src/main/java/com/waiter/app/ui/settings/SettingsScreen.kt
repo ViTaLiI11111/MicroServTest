@@ -1,6 +1,8 @@
 package com.waiter.app.ui.settings
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -10,17 +12,24 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun SettingsScreen(
     vm: SettingsViewModel,
-    onLogout: () -> Unit // <-- Новий параметр для виходу
+    onLogout: () -> Unit,
+    onBack: () -> Unit // <--- НОВИЙ ПАРАМЕТР
 ) {
-    // Ми можемо отримувати ім'я юзера з vm
     val username by vm.usernameFlow.collectAsState(initial = "Waiter")
 
-    // Старий код для waiterId (можна видалити, якщо більше не потрібен)
-    // val current by vm.waiterIdFlow.collectAsState(initial = "waiter-001")
-    // var waiterId by remember(current) { mutableStateOf(current) }
-
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Налаштування") }) }
+        topBar = {
+            TopAppBar(
+                title = { Text("Налаштування") },
+                // --- ДОДАНО КНОПКУ НАЗАД ---
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Назад")
+                    }
+                }
+                // ---------------------------
+            )
+        }
     ) { pad ->
         Column(Modifier.padding(pad).padding(16.dp)) {
 
@@ -28,28 +37,12 @@ fun SettingsScreen(
 
             Spacer(Modifier.height(32.dp))
 
-            // Старий функціонал (можна видалити)
-            /*
-            OutlinedTextField(
-                value = waiterId,
-                onValueChange = { waiterId = it },
-                label = { Text("Waiter ID") },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(Modifier.height(12.dp))
-            Button(onClick = { vm.saveWaiterId(waiterId) }) {
-                Text("Зберегти ID")
-            }
-            */
-            // Кінець старого функціоналу
-
-            // Нова кнопка "Вийти"
             Button(
-                onClick = onLogout, // Викликаємо callback
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                onClick = onLogout,
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Вийти")
+                Text("Вийти з акаунту")
             }
         }
     }

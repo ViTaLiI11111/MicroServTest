@@ -1,6 +1,4 @@
-﻿using OrderDispatch.Domain.Entities;
-
-namespace OrderDispatch.Api.Orders;
+﻿namespace OrderDispatch.Api.Orders;
 
 public record OrderResponse(
     Guid Id,
@@ -12,11 +10,11 @@ public record OrderResponse(
     string? DeliveryAddress,
     string? ClientPhone,
     string? ClientName,
-
-    // --- НОВІ ПОЛЯ ---
     bool IsPaid,
     DateTimeOffset? PaidAt,
-    // -----------------
+
+    // --- НОВЕ ПОЛЕ ---
+    int? WaiterId,
 
     List<OrderItemResponse> Items
 );
@@ -27,8 +25,8 @@ public record OrderItemResponse(
     string DishTitle,
     int Qty,
     decimal Price,
-    int StationId,          // <--- Нове
-    string Status           // <--- Нове (Enum як рядок)
+    int StationId,
+    string Status
 );
 
-public record UpdateItemStatusRequest(OrderItemStatus Status); // DTO для зміни статусу
+public record UpdateItemStatusRequest(Domain.Entities.OrderItemStatus Status);

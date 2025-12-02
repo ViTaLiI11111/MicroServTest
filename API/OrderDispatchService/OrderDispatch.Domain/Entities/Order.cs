@@ -16,7 +16,6 @@ public class Order
 
     public int TableNo { get; set; }
 
-    // --- НОВЕ ПОЛЕ ---
     public string? ClientName { get; set; }
 
     public string? DeliveryAddress { get; set; }
@@ -28,6 +27,11 @@ public class Order
     public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
     public bool IsPaid { get; set; } = false;
     public DateTimeOffset? PaidAt { get; set; }
+
+    // --- НОВЕ ПОЛЕ ---
+    // ID офіціанта, який обслуговує цей столик (може бути null, якщо ще ніхто не взяв)
+    public int? WaiterId { get; set; }
+    // -----------------
 
     public List<OrderItem> Items { get; set; } = new();
 }

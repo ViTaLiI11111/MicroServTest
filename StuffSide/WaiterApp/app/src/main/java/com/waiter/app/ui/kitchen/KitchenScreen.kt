@@ -4,8 +4,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -18,41 +18,71 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun KitchenScreen(
-    stationId: Int, // Отримуємо з Settings
+    stationId: Int,
     vm: KitchenViewModel = viewModel(),
-    onLogout: () -> Unit
+    onOpenSettings: () -> Unit // <--- Перехід на екран налаштувань
 ) {
-    val items by vm.items.collectAsState()
+    val pendingItems by vm.pendingItems.collectAsState()
+    val cookingItems by vm.cookingItems.collectAsState()
 
-    // Авто-завантаження при старті
+    // Стан вкладок: 0 = Черга (Pending), 1 = Готується (Cooking)
+    var selectedTab by remember { mutableIntStateOf(0) }
+
     LaunchedEffect(stationId) {
         vm.loadOrdersForStation(stationId)
     }
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Цех #$stationId") },
-                actions = {
-                    IconButton(onClick = { vm.loadOrdersForStation(stationId) }) {
-                        Icon(Icons.Default.Refresh, "Refresh")
+            Column {
+                TopAppBar(
+                    title = { Text("Цех #$stationId") },
+                    actions = {
+                        // Оновити
+                        IconButton(onClick = { vm.loadOrdersForStation(stationId) }) {
+                            Icon(Icons.Default.Refresh, "Refresh")
+                        }
+                        // Налаштування (замість Exit)
+                        IconButton(onClick = onOpenSettings) {
+                            Icon(Icons.Default.Settings, "Settings")
+                        }
                     }
-                    IconButton(onClick = onLogout) {
-                        Icon(Icons.Default.ExitToApp, "Exit")
-                    }
+                )
+                // Вкладки з лічильниками
+                TabRow(selectedTabIndex = selectedTab) {
+                    Tab(
+                        selected = selectedTab == 0,
+                        onClick = { selectedTab = 0 },
+                        text = { Text("Черга (${pendingItems.size})") }
+                    )
+                    Tab(
+                        selected = selectedTab == 1,
+                        onClick = { selectedTab = 1 },
+                        text = { Text("Готується (${cookingItems.size})") }
+                    )
                 }
-            )
+            }
         }
     ) { pad ->
         LazyColumn(
             modifier = Modifier.padding(pad).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            if (items.isEmpty()) {
-                item { Text("Замовлень немає", modifier = Modifier.padding(16.dp)) }
+            // Вибір списку залежно від вкладки
+            val listToShow = if (selectedTab == 0) pendingItems else cookingItems
+
+            if (listToShow.isEmpty()) {
+                item {
+                    Text(
+                        text = if(selectedTab == 0) "Немає нових замовлень" else "Нічого не готується",
+                        modifier = Modifier.padding(16.dp),
+                        color = Color.Gray
+                    )
+                }
             }
 
-            items(items) { item ->
+            // ВАЖЛИВО: key = { it.itemId } запобігає глюкам скролінгу і дублюванню
+            items(items = listToShow, key = { it.itemId }) { item ->
                 KitchenItemCard(
                     item = item,
                     onAdvance = { vm.advanceStatus(item.itemId, item.status, stationId) }
@@ -64,19 +94,14 @@ fun KitchenScreen(
 
 @Composable
 fun KitchenItemCard(item: KitchenUiItem, onAdvance: () -> Unit) {
-    // Вибираємо колір залежно від статусу
-    val (cardColor, textColor) = when (item.status) {
-        "Cooking" -> Color(0xFFFFF3E0) to Color(0xFFE65100) // Помаранчевий (Готується)
-        "Ready" -> Color(0xFFE8F5E9) to Color(0xFF2E7D32)   // Зелений (Готово)
-        else -> MaterialTheme.colorScheme.surfaceVariant to MaterialTheme.colorScheme.onSurface // Сірий (Чекає)
-    }
+    // Колір залежить від статусу: Черга -> Звичайний, В роботі -> Помаранчевий
+    val cardColor = if (item.status == "Cooking") Color(0xFFFFF3E0) else MaterialTheme.colorScheme.surface
 
     Card(
         colors = CardDefaults.cardColors(containerColor = cardColor),
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
         Column(Modifier.padding(16.dp)) {
-            // Шапка: Назва та кількість
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -97,25 +122,16 @@ fun KitchenItemCard(item: KitchenUiItem, onAdvance: () -> Unit) {
             Text("Замовлення #${item.orderId}", style = MaterialTheme.typography.bodyMedium)
             Spacer(Modifier.height(8.dp))
 
-            // Кнопка зміни статусу
-            if (item.status != "Ready") {
-                Button(
-                    onClick = onAdvance,
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (item.status == "Pending") MaterialTheme.colorScheme.primary else Color(0xFF4CAF50)
-                    )
-                ) {
-                    val btnText = if (item.status == "Pending") "Почати готувати" else "ГОТОВО!"
-                    Text(btnText)
-                }
-            } else {
-                Text(
-                    "✅ Видано",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = textColor,
-                    modifier = Modifier.align(Alignment.End)
+            Button(
+                onClick = onAdvance,
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    // Синій для "Почати", Зелений для "Готово"
+                    containerColor = if (item.status == "Pending") MaterialTheme.colorScheme.primary else Color(0xFF4CAF50)
                 )
+            ) {
+                val btnText = if (item.status == "Pending") "🔥 Почати готувати" else "✅ ГОТОВО!"
+                Text(btnText)
             }
         }
     }

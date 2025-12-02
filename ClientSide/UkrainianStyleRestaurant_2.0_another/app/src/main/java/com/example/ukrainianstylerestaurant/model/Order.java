@@ -1,8 +1,9 @@
 package com.example.ukrainianstylerestaurant.model;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Order {
-    public static Set<Integer> items_id = new HashSet<>();
+    // Змінюємо Set на Map: Key = DishID, Value = Quantity
+    public static Map<Integer, Integer> itemsMap = new HashMap<>();
 }

@@ -10,7 +10,6 @@ fun OrderItemDto.toUi(): UiOrderItem =
         dishTitle = dishTitle ?: "Dish #$dishId",
         qty = qty,
         price = price,
-        // --- МАПИНГ ---
         itemStatus = status ?: "Pending"
     )
 
@@ -22,5 +21,9 @@ fun OrderDto.toUi(): UiOrder =
         total = total,
         clientName = clientName ?: "Гість",
         isPaid = isPaid,
+
+        // --- МАПИНГ ---
+        waiterId = waiterId,
+
         items = items.map { it.toUi() }
     )

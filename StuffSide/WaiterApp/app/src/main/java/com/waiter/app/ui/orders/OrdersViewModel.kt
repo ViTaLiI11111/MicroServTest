@@ -3,45 +3,91 @@ package com.waiter.app.ui.orders
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.waiter.app.data.repo.OrdersRepository
+import com.waiter.app.domain.model.UiOrder
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import com.waiter.app.domain.model.UiOrder
-import com.waiter.app.data.repo.OrdersRepository
-
-sealed interface OrdersUiState {
-    data object Loading : OrdersUiState
-    data class ListState(val orders: List<UiOrder>) : OrdersUiState
-    data class Error(val message: String) : OrdersUiState
-}
 
 class OrdersViewModel(
     private val repo: OrdersRepository = OrdersRepository()
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow<OrdersUiState>(OrdersUiState.Loading)
-    val state: StateFlow<OrdersUiState> = _state
+    private val _availableOrders = MutableStateFlow<List<UiOrder>>(emptyList())
+    val availableOrders: StateFlow<List<UiOrder>> = _availableOrders
+
+    private val _myOrders = MutableStateFlow<List<UiOrder>>(emptyList())
+    val myOrders: StateFlow<List<UiOrder>> = _myOrders
+
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading
+
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = _error
 
     private val _selected = MutableStateFlow<UiOrder?>(null)
     val selected: StateFlow<UiOrder?> = _selected
 
-    init {
-        refresh()
+    // --- ОНОВЛЕНИЙ МЕТОД ЗАВАНТАЖЕННЯ ---
+    fun loadData(waiterId: Int) {
+        viewModelScope.launch {
+            // ХИТРІСТЬ: Вмикаємо спінер, ТІЛЬКИ якщо у нас взагалі немає даних.
+            // Якщо це просто оновлення після натискання кнопки - екран не буде блимати.
+            val hasData = _availableOrders.value.isNotEmpty() || _myOrders.value.isNotEmpty()
+            if (!hasData) {
+                _isLoading.value = true
+            }
+
+            try {
+                // 1. Завантажуємо вільні
+                val free = repo.getOrders(type = "DineIn", onlyFree = true)
+                _availableOrders.value = free
+
+                // 2. Завантажуємо мої
+                val mine = repo.getOrders(type = "DineIn", waiterId = waiterId)
+                _myOrders.value = mine
+
+            } catch (e: Exception) {
+                _error.value = "Помилка завантаження: ${e.message}"
+            } finally {
+                // Вимикаємо спінер в будь-якому випадку
+                _isLoading.value = false
+            }
+        }
     }
 
-    fun refresh() {
+    fun assignOrder(orderId: String, waiterId: Int) {
         viewModelScope.launch {
             try {
-                _state.value = OrdersUiState.Loading
+                repo.assignOrder(orderId, waiterId)
+                loadData(waiterId)
+            } catch (e: Exception) {
+                _error.value = "Не вдалося взяти замовлення: ${e.message}"
+            }
+        }
+    }
 
-                // --- ВАЖЛИВА ЗМІНА ---
-                // Запитуємо тільки "DineIn" (в закладі).
-                // Доставки більше не будуть показуватись офіціанту.
-                val items = repo.getOrders(type = "DineIn")
+    fun completeOrder(orderId: String, waiterId: Int, onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            try {
+                repo.completeOrder(orderId)
+                // Оновлюємо дані БЕЗ блимання (завдяки зміні в loadData)
+                loadData(waiterId)
+                onSuccess()
+            } catch (e: Exception) {
+                _error.value = "Помилка завершення: ${e.message}"
+            }
+        }
+    }
 
-                _state.value = OrdersUiState.ListState(items)
+    fun payOrder(id: String, waiterId: Int) {
+        viewModelScope.launch {
+            try {
+                repo.payOrder(id)
+                select(id)
+                loadData(waiterId)
             } catch (t: Throwable) {
-                _state.value = OrdersUiState.Error(t.message ?: "Unknown error")
+                _error.value = "Помилка оплати: ${t.message}"
             }
         }
     }
@@ -49,29 +95,13 @@ class OrdersViewModel(
     fun select(id: String) {
         viewModelScope.launch {
             try {
-                Log.d("OrdersViewModel", "Requesting details for ID: $id")
                 val o = repo.getOrder(id)
                 _selected.value = o
             } catch (t: Throwable) {
-                Log.e("OrdersViewModel", "Error loading details", t)
-                t.printStackTrace()
-                _selected.value = null
+                _error.value = "Не вдалося відкрити деталі"
             }
         }
     }
 
-    fun payOrder(id: String) {
-        viewModelScope.launch {
-            try {
-                repo.payOrder(id)
-                select(id)
-                refresh()
-            } catch (t: Throwable) {
-                t.printStackTrace()
-            }
-        }
-    }
-
-    fun accept(id: String) {}
-    fun complete(id: String) {}
+    fun clearError() { _error.value = null }
 }

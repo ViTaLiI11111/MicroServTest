@@ -36,11 +36,9 @@ public class CourseDetailFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // 1. ОТРИМАННЯ ДАНИХ З АРГУМЕНТІВ (замість Intent)
         if (getArguments() != null) {
             Bundle args = getArguments();
 
-            // Всі дані тепер отримуємо з Bundle
             courseId = args.getInt("courseId", 0);
             int courseBgColor = args.getInt("courseBg", 0);
             String courseTitleText = args.getString("courseTitle");
@@ -48,20 +46,17 @@ public class CourseDetailFragment extends Fragment {
             String coursePepperText = args.getString("coursePepper");
             String imageFilePath = args.getString("courseImageFilePath");
 
-            // 2. ПОШУК VIEW
             ImageView courseImage = view.findViewById(R.id.coursePageImage);
             TextView courseTitle = view.findViewById(R.id.coursePageTitle);
             TextView coursePrice = view.findViewById(R.id.coursePagePrice);
             TextView coursePepper = view.findViewById(R.id.coursePagePepper);
             ImageButton addToCartBtn = view.findViewById(R.id.addToCart);
 
-            // 3. ВСТАНОВЛЕННЯ ДАНИХ
             view.findViewById(R.id.coursePageBg).setBackgroundColor(courseBgColor);
             courseTitle.setText(courseTitleText);
             coursePrice.setText(coursePriceText);
             coursePepper.setText(coursePepperText);
 
-            // Завантаження зображення
             if (imageFilePath != null && !imageFilePath.isEmpty()) {
                 File imageFile = new File(imageFilePath);
                 if (imageFile.exists()) {
@@ -74,17 +69,20 @@ public class CourseDetailFragment extends Fragment {
                 courseImage.setImageResource(R.drawable.default_image);
             }
 
-            // 4. Обробник кнопки "Додати до кошика"
             addToCartBtn.setOnClickListener(this::addToCart);
         }
-
-        // ВАЖЛИВО: Навігаційні методи mainPage(), goToContacts(), aboutUs() - ВИДАЛЕНО!
     }
 
     public void addToCart(View view) {
         if (courseId != 0) {
-            Order.items_id.add(courseId);
-            Toast.makeText(requireContext(), "Додано до кошика!", Toast.LENGTH_LONG).show();
+            // --- НОВА ЛОГІКА ---
+            // Перевіряємо, чи є вже ця страва в кошику
+            // Якщо є - беремо поточну кількість і додаємо 1
+            // Якщо немає - ставимо 1
+            int currentQty = Order.itemsMap.getOrDefault(courseId, 0);
+            Order.itemsMap.put(courseId, currentQty + 1);
+
+            Toast.makeText(requireContext(), "Додано! (Всього: " + (currentQty + 1) + ")", Toast.LENGTH_SHORT).show();
         }
     }
 }

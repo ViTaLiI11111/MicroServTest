@@ -1,14 +1,13 @@
 package com.waiter.app.data.dto
 
 data class OrderItemDto(
-    val id: Int,       // ID самої позиції (важливо для зміни статусу)
+    val id: Int,
     val dishId: Int,
     val dishTitle: String?,
     val qty: Int,
     val price: Double,
-    // --- НОВІ ПОЛЯ ---
-    val stationId: Int,  // ID цеху (1=Гарячий, 2=Холодний...)
-    val status: String   // "Pending", "Cooking", "Ready"
+    val stationId: Int,
+    val status: String // "Pending", "Cooking", "Ready"
 )
 
 data class OrderDto(
@@ -21,11 +20,11 @@ data class OrderDto(
     val deliveryAddress: String?,
     val clientPhone: String?,
     val clientName: String?,
-
-    // --- НОВІ ПОЛЯ ---
     val isPaid: Boolean,
     val paidAt: String?,
 
+    // --- НОВЕ ПОЛЕ ---
+    val waiterId: Int?, // Може бути null, якщо замовлення ще ніхто не взяв
+
     val items: List<OrderItemDto>
 )
-
