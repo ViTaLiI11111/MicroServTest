@@ -7,5 +7,10 @@ data class DeliveryDto(
     val status: Int, // 0=Created, 1=Assigned, 2=PickedUp, 3=Delivered
     val clientAddress: String,
     val clientPhone: String?,
-    val clientName: String? // <--- НОВЕ ПОЛЕ
+    val clientName: String?,
+    val isReadyForPickup: Boolean,
+
+    // --- НОВІ ПОЛЯ ---
+    val isPaid: Boolean,
+    val total: Double
 )

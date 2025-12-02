@@ -1,7 +1,7 @@
 package com.waiter.app.data.repo
 
 import com.waiter.app.core.Result
-import com.waiter.app.core.UserRole // Імпорт enum
+import com.waiter.app.core.UserRole
 import com.waiter.app.data.api.AuthApi
 import com.waiter.app.data.dto.LoginRequest
 import com.waiter.app.data.dto.LoginResponse
@@ -13,16 +13,15 @@ class AuthRepository(
     private val api: AuthApi = RetrofitModule.createAuthApi()
 ) {
 
-    // Додано параметр role: UserRole
     suspend fun login(role: UserRole, username: String, pass: String): Result<LoginResponse> = withContext(Dispatchers.IO) {
         try {
             val req = LoginRequest(username, pass)
 
-            // Вибираємо ендпоінт
-            val response = if (role == UserRole.WAITER) {
-                api.loginWaiter(req)
-            } else {
-                api.loginCourier(req)
+            // ВИПРАВЛЕНО: Використовуємо when для 3-х ролей
+            val response = when (role) {
+                UserRole.WAITER -> api.loginWaiter(req)
+                UserRole.COURIER -> api.loginCourier(req)
+                UserRole.COOK -> api.loginCook(req)
             }
 
             if (response.isSuccessful && response.body() != null) {
@@ -35,29 +34,31 @@ class AuthRepository(
         }
     }
 
-    // Додано параметр role: UserRole
     suspend fun register(
         role: UserRole,
         username: String,
         pass: String,
         fullName: String,
         phone: String,
-        email: String // <-- ДОДАНО АРГУМЕНТ
+        email: String,
+        stationId: Int? // Додайте stationId сюди, якщо він передається
     ): Result<Unit> = withContext(Dispatchers.IO) {
         try {
-            // Формуємо повний об'єкт, як на вашому скріншоті
+            // Формуємо запит
             val req = RegisterRequest(
                 username = username,
                 password = pass,
                 fullName = fullName,
                 phone = phone,
-                email = email // <-- Передаємо email
+                email = email,
+                stationId = stationId // Передаємо stationId
             )
 
-            val response = if (role == UserRole.WAITER) {
-                api.registerWaiter(req)
-            } else {
-                api.registerCourier(req)
+            // ВИПРАВЛЕНО: Використовуємо when для 3-х ролей
+            val response = when (role) {
+                UserRole.WAITER -> api.registerWaiter(req)
+                UserRole.COURIER -> api.registerCourier(req)
+                UserRole.COOK -> api.registerCook(req)
             }
 
             if (response.isSuccessful) {

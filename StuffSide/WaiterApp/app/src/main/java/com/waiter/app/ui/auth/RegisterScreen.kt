@@ -19,24 +19,34 @@ fun RegisterScreen(
     onRegisterSuccess: () -> Unit,
     onBack: () -> Unit
 ) {
+    // Змінні стану
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var fullName by remember { mutableStateOf("") }
-    var phone by remember { mutableStateOf("") }
 
-    // Нова змінна для Email
+    // Поля для Кур'єра
+    var phone by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
 
+    // Поле для Кухаря
+    var stationIdText by remember { mutableStateOf("") }
+
     val uiState by authViewModel.uiState.collectAsState()
-    val roleTitle = if (role == UserRole.WAITER) "Офіціант" else "Кур'єр"
+
+    val roleTitle = when(role) {
+        UserRole.WAITER -> "Офіціант"
+        UserRole.COURIER -> "Кур'єр"
+        UserRole.COOK -> "Кухар"
+    }
 
     LaunchedEffect(uiState) {
         if (uiState is AuthUiState.Success) {
-            onRegisterSuccess()
+            onRegisterSuccess() // Повернення на екран логіну
         }
     }
 
-    LaunchedEffect(username, password, fullName, phone, email) {
+    // Скидаємо помилку, коли користувач починає вводити дані
+    LaunchedEffect(username, password, fullName, phone, stationIdText) {
         if (uiState is AuthUiState.Error) {
             authViewModel.clearError()
         }
@@ -50,9 +60,9 @@ fun RegisterScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text("Реєстрація: $roleTitle", style = MaterialTheme.typography.headlineMedium)
-
         Spacer(modifier = Modifier.height(32.dp))
 
+        // --- СПІЛЬНІ ПОЛЯ ---
         OutlinedTextField(
             value = fullName,
             onValueChange = { fullName = it },
@@ -60,32 +70,44 @@ fun RegisterScreen(
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
         )
+        Spacer(modifier = Modifier.height(16.dp))
 
-        // Показуємо додаткові поля для Кур'єра
+        // --- СПЕЦИФІЧНІ ПОЛЯ ---
+
         if (role == UserRole.COURIER) {
-            Spacer(modifier = Modifier.height(16.dp))
             OutlinedTextField(
                 value = phone,
                 onValueChange = { phone = it },
-                label = { Text("Номер телефону") },
+                label = { Text("Телефон") },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                 modifier = Modifier.fillMaxWidth()
             )
-
-            // --- ДОДАНО ПОЛЕ EMAIL ---
             Spacer(modifier = Modifier.height(16.dp))
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
-                label = { Text("Email") },
+                label = { Text("Email (необов'язково)") },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                 modifier = Modifier.fillMaxWidth()
             )
+            Spacer(modifier = Modifier.height(16.dp))
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        if (role == UserRole.COOK) {
+            OutlinedTextField(
+                value = stationIdText,
+                onValueChange = { stationIdText = it },
+                label = { Text("Номер Цеху (1, 2...)") },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        // --- ПРОДОВЖЕННЯ СПІЛЬНИХ ПОЛІВ ---
         OutlinedTextField(
             value = username,
             onValueChange = { username = it },
@@ -93,7 +115,6 @@ fun RegisterScreen(
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
         )
-
         Spacer(modifier = Modifier.height(16.dp))
         OutlinedTextField(
             value = password,
@@ -103,7 +124,6 @@ fun RegisterScreen(
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth()
         )
-
         Spacer(modifier = Modifier.height(32.dp))
 
         if (uiState is AuthUiState.Error) {
@@ -116,8 +136,19 @@ fun RegisterScreen(
 
         Button(
             onClick = {
-                // Передаємо всі поля, включаючи email
-                authViewModel.register(role, username, password, fullName, phone, email)
+                // Парсимо ID цеху, якщо це кухар
+                val sId = if (role == UserRole.COOK) stationIdText.toIntOrNull() else null
+
+                // Викликаємо оновлений метод ViewModel
+                authViewModel.register(
+                    role,
+                    username,
+                    password,
+                    fullName,
+                    phone,
+                    email,
+                    sId // stationId
+                )
             },
             enabled = uiState !is AuthUiState.Loading,
             modifier = Modifier.fillMaxWidth()

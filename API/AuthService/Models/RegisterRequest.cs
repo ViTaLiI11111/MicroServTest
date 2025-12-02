@@ -15,5 +15,6 @@ namespace AuthService.Models
         public string? Email { get; set; } // Використовується тільки для клієнта
         public string? Phone { get; set; } // Використовується тільки для клієнта
         public string? FullName { get; set; } // Використовується тільки для офіціанта
+        public int? StationId { get; set; }
     }
 }

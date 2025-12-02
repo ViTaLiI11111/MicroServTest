@@ -4,7 +4,7 @@ import com.waiter.app.BuildConfig
 import com.waiter.app.core.AppConfig
 import com.waiter.app.data.api.AuthApi
 import com.waiter.app.data.api.DeliveryApi // Додано імпорт
-import com.waiter.app.data.repo.api.OrdersApi
+import com.waiter.app.data.api.OrdersApi
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit

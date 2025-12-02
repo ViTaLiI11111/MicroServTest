@@ -64,6 +64,8 @@
             this.exportToDataGridViewCategories = new System.Windows.Forms.Button();
             this.clearCategoryFields = new System.Windows.Forms.Button();
             this.UserDelete = new System.Windows.Forms.Button();
+            this.label10 = new System.Windows.Forms.Label();
+            this.txtStationId = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.imageBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView2)).BeginInit();
@@ -148,7 +150,7 @@
             // insert
             // 
             this.insert.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.insert.Location = new System.Drawing.Point(26, 611);
+            this.insert.Location = new System.Drawing.Point(11, 701);
             this.insert.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.insert.Name = "insert";
             this.insert.Size = new System.Drawing.Size(259, 80);
@@ -160,7 +162,7 @@
             // retrieve
             // 
             this.retrieve.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.retrieve.Location = new System.Drawing.Point(26, 697);
+            this.retrieve.Location = new System.Drawing.Point(12, 787);
             this.retrieve.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.retrieve.Name = "retrieve";
             this.retrieve.Size = new System.Drawing.Size(259, 80);
@@ -172,7 +174,7 @@
             // delete
             // 
             this.delete.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.delete.Location = new System.Drawing.Point(27, 787);
+            this.delete.Location = new System.Drawing.Point(12, 877);
             this.delete.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.delete.Name = "delete";
             this.delete.Size = new System.Drawing.Size(259, 80);
@@ -184,7 +186,7 @@
             // deleteAll
             // 
             this.deleteAll.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.deleteAll.Location = new System.Drawing.Point(26, 873);
+            this.deleteAll.Location = new System.Drawing.Point(288, 877);
             this.deleteAll.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.deleteAll.Name = "deleteAll";
             this.deleteAll.Size = new System.Drawing.Size(259, 80);
@@ -206,10 +208,10 @@
             // exportToGridView
             // 
             this.exportToGridView.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.exportToGridView.Location = new System.Drawing.Point(293, 697);
+            this.exportToGridView.Location = new System.Drawing.Point(288, 701);
             this.exportToGridView.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.exportToGridView.Name = "exportToGridView";
-            this.exportToGridView.Size = new System.Drawing.Size(259, 82);
+            this.exportToGridView.Size = new System.Drawing.Size(259, 80);
             this.exportToGridView.TabIndex = 14;
             this.exportToGridView.Text = "Показати у DataGridView";
             this.exportToGridView.UseVisualStyleBackColor = true;
@@ -218,7 +220,7 @@
             // imageBox
             // 
             this.imageBox.BackColor = System.Drawing.SystemColors.AppWorkspace;
-            this.imageBox.Location = new System.Drawing.Point(570, 613);
+            this.imageBox.Location = new System.Drawing.Point(569, 617);
             this.imageBox.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.imageBox.Name = "imageBox";
             this.imageBox.Size = new System.Drawing.Size(493, 340);
@@ -228,7 +230,7 @@
             // browse
             // 
             this.browse.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.browse.Location = new System.Drawing.Point(294, 787);
+            this.browse.Location = new System.Drawing.Point(288, 787);
             this.browse.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.browse.Name = "browse";
             this.browse.Size = new System.Drawing.Size(259, 80);
@@ -266,7 +268,7 @@
             // clear
             // 
             this.clear.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.clear.Location = new System.Drawing.Point(1086, 613);
+            this.clear.Location = new System.Drawing.Point(1086, 617);
             this.clear.Name = "clear";
             this.clear.Size = new System.Drawing.Size(290, 72);
             this.clear.TabIndex = 21;
@@ -423,11 +425,30 @@
             this.UserDelete.UseVisualStyleBackColor = true;
             this.UserDelete.Click += new System.EventHandler(this.UserDelete_Click);
             // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label10.Location = new System.Drawing.Point(21, 600);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(76, 25);
+            this.label10.TabIndex = 37;
+            this.label10.Text = "Кухар:";
+            // 
+            // txtStationId
+            // 
+            this.txtStationId.Location = new System.Drawing.Point(176, 601);
+            this.txtStationId.Name = "txtStationId";
+            this.txtStationId.Size = new System.Drawing.Size(148, 26);
+            this.txtStationId.TabIndex = 38;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1485, 962);
+            this.Controls.Add(this.txtStationId);
+            this.Controls.Add(this.label10);
             this.Controls.Add(this.UserDelete);
             this.Controls.Add(this.dataGridView2);
             this.Controls.Add(this.clearCategoryFields);
@@ -513,6 +534,8 @@
         private System.Windows.Forms.Button exportToDataGridViewCategories;
         private System.Windows.Forms.Button clearCategoryFields;
         private System.Windows.Forms.Button UserDelete;
+        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.TextBox txtStationId;
     }
 }
 

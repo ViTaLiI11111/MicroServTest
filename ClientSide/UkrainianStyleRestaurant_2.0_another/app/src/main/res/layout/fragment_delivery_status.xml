@@ -1,78 +1,100 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="24dp"
-    android:gravity="center"
     android:background="@color/mainBgColor"
-    android:clickable="true"
-    android:focusable="true">
-
-    <TextView
-        android:id="@+id/tv_status_header"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Інформація про доставку"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:textColor="@color/black"
-        android:layout_marginTop="24dp"/>
-
-    <TextView
-        android:id="@+id/tv_status_body"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Активних замовлень немає"
-        android:textSize="18sp"
-        android:textColor="@color/style"
-        android:gravity="center"
-        android:layout_marginTop="16dp"/>
+    android:fillViewport="true">
 
     <LinearLayout
-        android:id="@+id/layout_courier_info"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:gravity="center"
-        android:visibility="gone"
-        android:layout_marginTop="32dp">
+        android:padding="24dp"
+        android:gravity="center_horizontal"
+        android:clickable="true"
+        android:focusable="true">
 
         <TextView
+            android:id="@+id/tv_status_header"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Ваш кур'єр:"
-            android:textStyle="bold"/>
+            android:text="Завантаження..."
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="@color/black"
+            android:gravity="center"
+            android:layout_marginTop="24dp"/>
 
         <TextView
-            android:id="@+id/tv_courier_name"
+            android:id="@+id/tv_status_body"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Олександр"
-            android:textSize="20sp"
-            android:layout_marginBottom="8dp"/>
+            android:text="Перевірка даних..."
+            android:textSize="16sp"
+            android:textColor="@color/style"
+            android:gravity="center"
+            android:layout_marginTop="8dp"/>
 
-        <TextView
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/layout_courier_info"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Орієнтовний час:"
-            android:textStyle="bold"/>
+            android:orientation="vertical"
+            android:gravity="center"
+            android:visibility="gone"
+            android:padding="16dp"
+            android:layout_marginTop="32dp">
 
-        <TextView
-            android:id="@+id/tv_eta"
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/layout_payment_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_marginTop="24dp"
+            android:visibility="gone"> <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="~30 хв"
-            android:textSize="28sp"
-            android:textColor="@android:color/holo_green_dark"
-            android:textStyle="bold"/>
+            android:text="Статус оплати:"
+            android:textColor="@color/style"
+            android:layout_marginBottom="4dp"/>
+
+            <TextView
+                android:id="@+id/tv_payment_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="НЕ ОПЛАЧЕНО"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/holo_red_dark"
+                android:layout_marginBottom="16dp"/>
+
+            <Button
+                android:id="@+id/btn_pay"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:text="Оплатити зараз"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:backgroundTint="#4CAF50"
+                android:textColor="@android:color/white"/>
+
+        </LinearLayout>
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <Button
+            android:id="@+id/btn_refresh_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:layout_marginBottom="16dp"
+            android:text="Оновити вручну"
+            style="?android:attr/borderlessButtonStyle"/>
+
     </LinearLayout>
-
-    <Button
-        android:id="@+id/btn_refresh_status"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="48dp"
-        android:text="Оновити статус"/>
-
-</LinearLayout>
+</ScrollView>

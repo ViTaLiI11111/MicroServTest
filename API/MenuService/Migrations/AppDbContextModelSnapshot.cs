@@ -57,6 +57,9 @@ namespace MenuService.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("numeric(12,2)");
 
+                    b.Property<int>("StationId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("text");

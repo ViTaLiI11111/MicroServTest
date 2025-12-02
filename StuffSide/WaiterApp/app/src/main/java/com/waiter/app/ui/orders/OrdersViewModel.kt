@@ -9,10 +9,9 @@ import kotlinx.coroutines.launch
 import com.waiter.app.domain.model.UiOrder
 import com.waiter.app.data.repo.OrdersRepository
 
-
 sealed interface OrdersUiState {
     data object Loading : OrdersUiState
-    data class ListState(val orders: kotlin.collections.List<UiOrder>) : OrdersUiState
+    data class ListState(val orders: List<UiOrder>) : OrdersUiState
     data class Error(val message: String) : OrdersUiState
 }
 
@@ -30,12 +29,16 @@ class OrdersViewModel(
         refresh()
     }
 
-
     fun refresh() {
         viewModelScope.launch {
             try {
                 _state.value = OrdersUiState.Loading
-                val items = repo.getOrders()
+
+                // --- ВАЖЛИВА ЗМІНА ---
+                // Запитуємо тільки "DineIn" (в закладі).
+                // Доставки більше не будуть показуватись офіціанту.
+                val items = repo.getOrders(type = "DineIn")
+
                 _state.value = OrdersUiState.ListState(items)
             } catch (t: Throwable) {
                 _state.value = OrdersUiState.Error(t.message ?: "Unknown error")
@@ -46,29 +49,29 @@ class OrdersViewModel(
     fun select(id: String) {
         viewModelScope.launch {
             try {
-                // Додамо лог, щоб бачити, який ID ми запитуємо
                 Log.d("OrdersViewModel", "Requesting details for ID: $id")
-
                 val o = repo.getOrder(id)
                 _selected.value = o
-
-                Log.d("OrdersViewModel", "Details loaded successfully")
             } catch (t: Throwable) {
-                // --- ОСЬ ТУТ ВАЖЛИВА ЗМІНА ---
                 Log.e("OrdersViewModel", "Error loading details", t)
-                t.printStackTrace() // Друкуємо помилку в консоль
-                // -----------------------------
-
+                t.printStackTrace()
                 _selected.value = null
             }
         }
     }
 
-    fun accept(id: String) {
-        // TODO: виклик repo для Accept і оновлення стану
+    fun payOrder(id: String) {
+        viewModelScope.launch {
+            try {
+                repo.payOrder(id)
+                select(id)
+                refresh()
+            } catch (t: Throwable) {
+                t.printStackTrace()
+            }
+        }
     }
 
-    fun complete(id: String) {
-        // TODO: виклик repo для Complete і оновлення стану
-    }
+    fun accept(id: String) {}
+    fun complete(id: String) {}
 }

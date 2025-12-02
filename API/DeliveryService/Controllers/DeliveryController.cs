@@ -31,8 +31,12 @@ namespace DeliveryService.Controllers
                 OrderId = request.OrderId,
                 ClientAddress = request.Address,
                 ClientPhone = request.Phone,
-                ClientName = request.ClientName, // <--- ЗБЕРІГАЄМО ТУТ
-                Status = DeliveryStatus.Created
+                ClientName = request.ClientName,
+                Status = DeliveryStatus.Created,
+
+                // --- Зберігаємо нові поля ---
+                IsPaid = request.IsPaid,
+                Total = request.Total
             };
 
             _context.Deliveries.Add(delivery);
@@ -42,7 +46,6 @@ namespace DeliveryService.Controllers
         }
 
         // 2. Отримання доступних замовлень (Для Кур'єра)
-        // Повертає ті, де ще немає кур'єра
         [HttpGet("available")]
         public async Task<IActionResult> GetAvailableDeliveries()
         {
@@ -96,22 +99,24 @@ namespace DeliveryService.Controllers
         public async Task<IActionResult> GetMyDeliveries(int courierId)
         {
             var list = await _context.Deliveries
-                .Where(d => d.CourierId == courierId && d.Status != DeliveryStatus.Delivered)
+                .Where(d => d.CourierId == courierId)
+                // ПРИБРАЛИ: && d.Status != DeliveryStatus.Delivered
+                // ДОДАЛИ: Сортування, щоб недоставлені були зверху, а потім за датою
+                .OrderBy(d => d.Status == DeliveryStatus.Delivered) // false < true, тому активні будуть вище
+                .ThenByDescending(d => d.CreatedAt)
                 .ToListAsync();
+
             return Ok(list);
         }
 
         [HttpGet("track/{orderId}")]
         public async Task<IActionResult> GetDeliveryStatus(Guid orderId)
         {
-            // Шукаємо доставку, яка прив'язана до цього замовлення
             var delivery = await _context.Deliveries
                 .FirstOrDefaultAsync(d => d.OrderId == orderId);
 
             if (delivery == null)
             {
-                // Якщо доставки немає, повертаємо 404.
-                // Клієнт зрозуміє це як "Замовлення ще готується, кур'єра не викликали"
                 return NotFound(new { Message = "Delivery not found for this order" });
             }
 
@@ -124,6 +129,33 @@ namespace DeliveryService.Controllers
             };
 
             return Ok(response);
+        }
+
+        [HttpPatch("order/{orderId:guid}/ready")]
+        public async Task<IActionResult> MarkAsReady(Guid orderId)
+        {
+            var delivery = await _context.Deliveries.FirstOrDefaultAsync(d => d.OrderId == orderId);
+
+            if (delivery == null) return NotFound();
+
+            delivery.IsReadyForPickup = true;
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        // --- 6. НОВИЙ МЕТОД: Позначити як оплачене ---
+        [HttpPatch("order/{orderId:guid}/pay")]
+        public async Task<IActionResult> MarkAsPaid(Guid orderId)
+        {
+            var delivery = await _context.Deliveries.FirstOrDefaultAsync(d => d.OrderId == orderId);
+
+            if (delivery == null) return NotFound();
+
+            delivery.IsPaid = true;
+            await _context.SaveChangesAsync();
+
+            return NoContent();
         }
     }
 }

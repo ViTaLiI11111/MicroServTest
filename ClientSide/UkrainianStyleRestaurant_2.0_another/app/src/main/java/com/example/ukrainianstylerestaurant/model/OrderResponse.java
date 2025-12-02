@@ -1,9 +1,21 @@
 package com.example.ukrainianstylerestaurant.model;
 
+import java.util.List;
+
 public class OrderResponse {
-    public String id;        // Це наш GUID (ID замовлення)
+    public String id;
     public int tableNo;
     public String status;
+    public String type;
     public double total;
     public String createdAt;
+    public String deliveryAddress;
+    public String clientPhone;
+    public String clientName;
+
+    // --- ВАЖЛИВІ ПОЛЯ ---
+    public boolean isPaid; // Має бути точно як в JSON (isPaid)
+    public String paidAt;
+
+    public List<OrderItemResponse> items;
 }

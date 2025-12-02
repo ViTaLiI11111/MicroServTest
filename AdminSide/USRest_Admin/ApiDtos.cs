@@ -31,6 +31,7 @@ namespace USRest_Admin
 
         // base64 png/jpg
         public string ImageBase64 { get; set; } = null;
+        public int StationId { get; set; }
     }
 
     public sealed class CreateDishRequest
@@ -42,5 +43,6 @@ namespace USRest_Admin
         public string Color { get; set; } = "#ffffff";
         public int CategoryId { get; set; }
         public string ImageBase64 { get; set; } = null;
+        public int StationId { get; set; }
     }
 }

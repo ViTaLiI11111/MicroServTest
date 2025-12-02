@@ -14,9 +14,14 @@ namespace DeliveryService.Entities
 
         public string? ClientPhone { get; set; }
 
-        public string? ClientName { get; set; } // <--- НОВЕ ПОЛЕ
+        public string? ClientName { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? DeliveredAt { get; set; }
+        public bool IsReadyForPickup { get; set; } = false;
+
+        // --- НОВІ ПОЛЯ ---
+        public bool IsPaid { get; set; }
+        public decimal Total { get; set; }
     }
 }

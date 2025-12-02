@@ -1,12 +1,15 @@
 namespace MenuService.DTOs;
 
-public sealed class CreateDishRequest
+public class CreateDishRequest
 {
     public int Id { get; set; }
-    public string Title { get; set; } = "";
+    public string Title { get; set; }
     public decimal Price { get; set; }
-    public string Pepper { get; set; } = "";
-    public string Color { get; set; } = "#ffffff";
+    public string Pepper { get; set; }
+    public string Color { get; set; }
     public int CategoryId { get; set; }
     public string? ImageBase64 { get; set; }
+
+    // --- ÍÎÂÅ ÏÎËÅ ---
+    public int StationId { get; set; } // 1=Ãàğÿ÷èé, 2=Õîëîäíèé, 3=Ãğèëü, 4=Ï³öà
 }

@@ -26,6 +26,8 @@ public class Order
     public decimal Total { get; set; }
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
     public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
+    public bool IsPaid { get; set; } = false;
+    public DateTimeOffset? PaidAt { get; set; }
 
     public List<OrderItem> Items { get; set; } = new();
 }

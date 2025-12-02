@@ -40,5 +40,16 @@ fun RoleSelectionScreen(
         ) {
             Text("🛵 Кур'єр", style = MaterialTheme.typography.titleMedium)
         }
+
+        Spacer(Modifier.height(16.dp))
+
+        // Кнопка Кухаря
+        Button(
+            onClick = { onRoleSelected(UserRole.COOK) },
+            modifier = Modifier.fillMaxWidth().height(60.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)
+        ) {
+            Text("👨‍🍳 Кухар (Кухня)", style = MaterialTheme.typography.titleMedium)
+        }
     }
 }

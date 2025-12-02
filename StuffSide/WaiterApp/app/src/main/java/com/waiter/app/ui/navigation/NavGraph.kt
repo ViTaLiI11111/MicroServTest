@@ -12,22 +12,27 @@ import androidx.navigation.navigation
 import com.waiter.app.core.UserRole
 import com.waiter.app.ui.auth.*
 import com.waiter.app.ui.delivery.DeliveriesScreen
+import com.waiter.app.ui.kitchen.KitchenScreen
 import com.waiter.app.ui.orders.*
 import com.waiter.app.ui.settings.SettingsScreen
 import com.waiter.app.ui.settings.SettingsViewModel
 
 object Routes {
+    // Екран вибору ролі
     const val ROLE_SELECTION = "role_selection"
 
-    // Нові графи
+    // Графи навігації
+    const val AUTH_GRAPH = "auth_graph"
     const val WAITER_GRAPH = "waiter_graph"
     const val COURIER_GRAPH = "courier_graph"
+    const val COOK_GRAPH = "cook_graph"
 
+    // Екрани
     const val SPLASH_SCREEN = "splash"
     const val LOGIN = "login"
     const val REGISTER = "register"
-    const val AUTH_GRAPH = "auth_graph"
 
+    // Екрани Офіціанта
     const val LIST = "orders_list"
     const val DETAILS = "order/{id}"
     const val SETTINGS = "settings"
@@ -37,12 +42,14 @@ object Routes {
 fun RootNavGraph(modifier: Modifier = Modifier) {
     val navController = rememberNavController()
 
+    // Отримуємо SettingsViewModel на рівні Activity
     val context = LocalContext.current
     val viewModelStoreOwner = checkNotNull(context as? ViewModelStoreOwner) {
         "Current context is not a ViewModelStoreOwner."
     }
     val settingsViewModel: SettingsViewModel = viewModel(viewModelStoreOwner = viewModelStoreOwner)
 
+    // Слідкуємо за станом авторизації
     val isLoggedIn by settingsViewModel.isLoggedInFlow.collectAsState(initial = null)
     val userRoleString by settingsViewModel.userRoleFlow.collectAsState(initial = null)
 
@@ -53,36 +60,44 @@ fun RootNavGraph(modifier: Modifier = Modifier) {
         modifier = modifier
     ) {
 
-        // 1. Splash / Routing Logic
+        // --- 1. SPLASH / РОУТИНГ ---
         composable(Routes.SPLASH_SCREEN) {
             LaunchedEffect(isLoggedIn, userRoleString) {
                 if (isLoggedIn == true && userRoleString != null) {
-                    if (userRoleString == "WAITER") {
-                        navController.navigate(Routes.WAITER_GRAPH) { popUpTo(Routes.SPLASH_SCREEN) { inclusive = true } }
-                    } else {
-                        navController.navigate(Routes.COURIER_GRAPH) { popUpTo(Routes.SPLASH_SCREEN) { inclusive = true } }
+                    when (userRoleString) {
+                        "WAITER" -> navController.navigate(Routes.WAITER_GRAPH) {
+                            popUpTo(Routes.SPLASH_SCREEN) { inclusive = true }
+                        }
+                        "COURIER" -> navController.navigate(Routes.COURIER_GRAPH) {
+                            popUpTo(Routes.SPLASH_SCREEN) { inclusive = true }
+                        }
+                        "COOK" -> navController.navigate(Routes.COOK_GRAPH) {
+                            popUpTo(Routes.SPLASH_SCREEN) { inclusive = true }
+                        }
                     }
                 } else if (isLoggedIn == false) {
-                    navController.navigate(Routes.ROLE_SELECTION) { popUpTo(Routes.SPLASH_SCREEN) { inclusive = true } }
+                    navController.navigate(Routes.ROLE_SELECTION) {
+                        popUpTo(Routes.SPLASH_SCREEN) { inclusive = true }
+                    }
                 }
             }
         }
 
-        // 2. Вибір ролі
+        // --- 2. ВИБІР РОЛІ ---
         composable(Routes.ROLE_SELECTION) {
             RoleSelectionScreen(
                 onRoleSelected = { role ->
-                    // Переходимо на логін з параметром ролі
                     navController.navigate("${Routes.LOGIN}/${role.name}")
                 }
             )
         }
 
-        // 3. Auth Graph (з параметром role)
+        // --- 3. АВТОРИЗАЦІЯ ---
         navigation(
             startDestination = "${Routes.LOGIN}/{role}",
             route = Routes.AUTH_GRAPH
         ) {
+            // Екран Логіну
             composable(
                 route = "${Routes.LOGIN}/{role}",
                 arguments = listOf(navArgument("role") { type = NavType.StringType })
@@ -93,19 +108,26 @@ fun RootNavGraph(modifier: Modifier = Modifier) {
                 val authViewModel: AuthViewModel = viewModel()
 
                 LoginScreen(
-                    authViewModel = authViewModel,
-                    // Передаємо роль в UI, якщо потрібно відобразити "Вхід для кур'єра"
-                    // Але тут головне передати її у VM при натисканні кнопки:
                     role = role,
-
-                    onLoginSuccessSaveSession = { id, name ->
-                        settingsViewModel.saveLoginSession(id, name, role.name)
+                    authViewModel = authViewModel,
+                    // Тут ми приймаємо 3 аргументи: ID, Ім'я, ID Цеху (може бути null)
+                    onLoginSuccessSaveSession = { id, name, stationId ->
+                        // Якщо це кухар, зберігаємо його цех, інакше 0
+                        val sId = if (role == UserRole.COOK) stationId ?: 0 else 0
+                        settingsViewModel.saveLoginSession(id, name, role.name, sId)
                     },
                     onLoginSuccess = {
-                        if (role == UserRole.WAITER) {
-                            navController.navigate(Routes.WAITER_GRAPH) { popUpTo(Routes.ROLE_SELECTION) { inclusive = true } }
-                        } else {
-                            navController.navigate(Routes.COURIER_GRAPH) { popUpTo(Routes.ROLE_SELECTION) { inclusive = true } }
+                        // Навігація
+                        when (role) {
+                            UserRole.WAITER -> navController.navigate(Routes.WAITER_GRAPH) {
+                                popUpTo(Routes.ROLE_SELECTION) { inclusive = true }
+                            }
+                            UserRole.COURIER -> navController.navigate(Routes.COURIER_GRAPH) {
+                                popUpTo(Routes.ROLE_SELECTION) { inclusive = true }
+                            }
+                            UserRole.COOK -> navController.navigate(Routes.COOK_GRAPH) {
+                                popUpTo(Routes.ROLE_SELECTION) { inclusive = true }
+                            }
                         }
                     },
                     onNavigateToRegister = {
@@ -114,6 +136,7 @@ fun RootNavGraph(modifier: Modifier = Modifier) {
                 )
             }
 
+            // Екран Реєстрації
             composable(
                 route = "${Routes.REGISTER}/{role}",
                 arguments = listOf(navArgument("role") { type = NavType.StringType })
@@ -123,15 +146,15 @@ fun RootNavGraph(modifier: Modifier = Modifier) {
                 val authViewModel: AuthViewModel = viewModel()
 
                 RegisterScreen(
+                    role = role,
                     authViewModel = authViewModel,
-                    role = role, // Передаємо роль
                     onRegisterSuccess = { navController.popBackStack() },
                     onBack = { navController.popBackStack() }
                 )
             }
         }
 
-        // 4. Граф Офіціанта (Старий MAIN_GRAPH)
+        // --- 4. ГРАФ ОФІЦІАНТА ---
         navigation(route = Routes.WAITER_GRAPH, startDestination = Routes.LIST) {
             composable(Routes.LIST) {
                 val graphEntry = remember(it) { navController.getBackStackEntry(Routes.WAITER_GRAPH) }
@@ -150,8 +173,8 @@ fun RootNavGraph(modifier: Modifier = Modifier) {
             ) { backStackEntry ->
                 val graphEntry = remember(backStackEntry) { navController.getBackStackEntry(Routes.WAITER_GRAPH) }
                 val vm: OrdersViewModel = viewModel(viewModelStoreOwner = graphEntry)
-                backStackEntry.arguments?.getString("id")?.let { vm.select(it) }
 
+                backStackEntry.arguments?.getString("id")?.let { vm.select(it) }
                 OrderDetailsScreen(vm = vm, onBack = { navController.popBackStack() })
             }
 
@@ -161,20 +184,35 @@ fun RootNavGraph(modifier: Modifier = Modifier) {
                     onLogout = {
                         settingsViewModel.logout()
                         navController.navigate(Routes.ROLE_SELECTION) {
-                            popUpTo(0) { inclusive = true } // Очистити все
+                            popUpTo(0) { inclusive = true }
                         }
                     }
                 )
             }
         }
 
-        // 5. Граф Кур'єра (Новий)
+        // --- 5. ГРАФ КУР'ЄРА ---
         navigation(route = Routes.COURIER_GRAPH, startDestination = "courier_home") {
             composable("courier_home") {
                 val userId by settingsViewModel.userIdFlow.collectAsState(0)
-
                 DeliveriesScreen(
                     courierId = userId,
+                    onLogout = {
+                        settingsViewModel.logout()
+                        navController.navigate(Routes.ROLE_SELECTION) {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    }
+                )
+            }
+        }
+
+        // --- 6. ГРАФ КУХАРЯ ---
+        navigation(route = Routes.COOK_GRAPH, startDestination = "kitchen") {
+            composable("kitchen") {
+                val stationId by settingsViewModel.stationIdFlow.collectAsState(initial = 0)
+                KitchenScreen(
+                    stationId = stationId,
                     onLogout = {
                         settingsViewModel.logout()
                         navController.navigate(Routes.ROLE_SELECTION) {

@@ -18,5 +18,6 @@ namespace MenuService.Models
         public Category Category { get; set; } = default!;
 
         public string? ImageBase64 { get; set; }
+        public int StationId { get; set; }
     }
 }

@@ -16,6 +16,7 @@ public class DishesController : ControllerBase
     [HttpGet] // GET /api/Dishes
     public async Task<ActionResult<IEnumerable<DishDto>>> GetAll()
         => await _db.Dishes
+            .OrderBy(d => d.Id)
             .Select(d => new DishDto
             {
                 Id = d.Id,
@@ -24,7 +25,8 @@ public class DishesController : ControllerBase
                 Pepper = d.Pepper,
                 Color = d.Color,
                 CategoryId = d.CategoryId,
-                ImageBase64 = d.ImageBase64
+                ImageBase64 = d.ImageBase64,
+                StationId = d.StationId
             })
             .ToListAsync();
 
@@ -41,7 +43,8 @@ public class DishesController : ControllerBase
             Pepper = d.Pepper,
             Color = d.Color,
             CategoryId = d.CategoryId,
-            ImageBase64 = d.ImageBase64
+            ImageBase64 = d.ImageBase64,
+            StationId = d.StationId
         };
     }
 
@@ -63,7 +66,8 @@ public class DishesController : ControllerBase
             Pepper = req.Pepper,
             Color = req.Color,
             CategoryId = req.CategoryId,
-            ImageBase64 = req.ImageBase64
+            ImageBase64 = req.ImageBase64,
+            StationId = req.StationId
         };
 
         _db.Dishes.Add(entity);
@@ -77,7 +81,8 @@ public class DishesController : ControllerBase
             Pepper = entity.Pepper,
             Color = entity.Color,
             CategoryId = entity.CategoryId,
-            ImageBase64 = entity.ImageBase64
+            ImageBase64 = entity.ImageBase64,
+            StationId = entity.StationId
         };
 
         return CreatedAtAction(nameof(GetById), new { id = entity.Id }, dto);
@@ -98,6 +103,7 @@ public class DishesController : ControllerBase
         d.Color = req.Color;
         d.CategoryId = req.CategoryId;
         d.ImageBase64 = req.ImageBase64;
+        d.StationId = req.StationId;
 
         await _db.SaveChangesAsync();
 
@@ -109,7 +115,8 @@ public class DishesController : ControllerBase
             Pepper = d.Pepper,
             Color = d.Color,
             CategoryId = d.CategoryId,
-            ImageBase64 = d.ImageBase64
+            ImageBase64 = d.ImageBase64,
+            StationId = d.StationId,
         };
     }
 

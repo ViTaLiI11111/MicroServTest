@@ -10,6 +10,8 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
@@ -95,24 +97,24 @@ fun OrderCard(
             .fillMaxWidth()
             .clickable(onClick = onClick),
         elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        )
+        colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            // ID та Сума
+            // Верхній рядок: ID та Сума
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
                     text = "Order #${order.id.take(4)}...",
-                    style = MaterialTheme.typography.labelMedium
+                    style = MaterialTheme.typography.labelMedium,
+                    color = Color.Gray
                 )
                 Text(
                     text = "${order.total} грн",
                     style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Bold
                 )
             }
 
@@ -121,36 +123,40 @@ fun OrderCard(
             // Ім'я клієнта
             Text(
                 text = "👤 ${order.clientName}",
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
-            Divider()
-            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = if (order.tableNo > 0) "🍽️ Стіл: ${order.tableNo}" else "🏠 Доставка",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.Gray
+            )
 
-            // Локація (Стіл або Доставка) та Статус
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // --- ДИНАМІЧНА ПЛАШКА СТАТУСУ ---
+            val (statusText, bgColor, contentColor) = when (order.status) {
+                "new" -> Triple("🆕 Нове (Чекає)", Color(0xFFFFEBEE), Color(0xFFD32F2F)) // Червоний
+                "inprogress" -> Triple("👨‍🍳 Готується", Color(0xFFFFF3E0), Color(0xFFE65100)) // Помаранчевий
+                "ready" -> Triple("✅ ГОТОВО ДО ВИДАЧІ", Color(0xFFE8F5E9), Color(0xFF2E7D32)) // Зелений
+                "completed" -> Triple("🏁 Завершено", Color(0xFFF5F5F5), Color(0xFF757575)) // Сірий
+                else -> Triple(order.status, Color.LightGray, Color.Black)
+            }
+
+            Surface(
+                color = bgColor,
+                shape = MaterialTheme.shapes.small
             ) {
-                // --- ОСЬ ТУТ ЛОГІКА ---
-                if (order.tableNo > 0) {
-                    Text(text = "🍽️ Стіл: ${order.tableNo}")
-                } else {
-                    Text(
-                        text = "🏠 Доставка", // Показуємо це, якщо стіл 0
-                        color = MaterialTheme.colorScheme.tertiary,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-                // ---------------------
-
                 Text(
-                    text = order.status.uppercase(),
-                    color = MaterialTheme.colorScheme.secondary,
-                    style = MaterialTheme.typography.labelLarge
+                    text = statusText,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = contentColor,
+                    fontWeight = FontWeight.Bold
                 )
             }
+            // --------------------------------
         }
     }
 }

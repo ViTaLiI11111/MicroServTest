@@ -62,24 +62,42 @@ namespace USRest_Admin
         {
             try
             {
+                // 1. Стандартна валідація (Id, Title, Price...)
                 if (!ValidateDishInputs())
                 {
                     return;
                 }
 
+                // 2. --- НОВА ВАЛІДАЦІЯ: Station ID ---
+                // Перевіряємо, чи ввів адмін число в поле StationId
+                int stationId;
+                // Переконайтеся, що TextBox на формі називається txtStationId
+                if (string.IsNullOrWhiteSpace(txtStationId.Text) || !int.TryParse(txtStationId.Text.Trim(), out stationId))
+                {
+                    MessageBox.Show("Id цеху (StationId) має бути цілим числом (наприклад: 1, 2, 3).",
+                                    "Помилка вводу", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+                // -------------------------------------
+
                 int id = int.Parse(textBox_id.Text);
 
-                // сформуємо запит
+                // 3. Формуємо запит (DTO)
                 CreateDishRequest req = new CreateDishRequest();
-                req.Id = int.Parse(textBox_id.Text);
+                req.Id = id;
                 req.Title = textBox_title.Text.Trim();
                 req.Price = decimal.Parse(textBox_price.Text.Trim());
                 req.Pepper = textBox_spicy.Text.Trim();
                 req.Color = textBox_color.Text.Trim();
                 req.CategoryId = int.Parse(textBox_category.Text.Trim());
-                req.ImageBase64 = EncodeImageToBase64(imageBox.Image); // може бути null => ок
 
-                // визначимо, створюємо чи оновлюємо
+                // --- ЗАПИСУЄМО STATION ID ---
+                req.StationId = stationId;
+                // ----------------------------
+
+                req.ImageBase64 = EncodeImageToBase64(imageBox.Image);
+
+                // 4. Перевіряємо, чи існує страва (щоб зрозуміти: Create чи Update)
                 DishDto existing = null;
                 try
                 {
@@ -87,6 +105,7 @@ namespace USRest_Admin
                 }
                 catch
                 {
+                    // Якщо помилка (наприклад 404), вважаємо, що страви немає
                     existing = null;
                 }
 
@@ -94,38 +113,40 @@ namespace USRest_Admin
 
                 if (existing == null)
                 {
-                    // створення (Id дає БД)
+                    // --- СТВОРЕННЯ (POST) ---
                     resp = await _api.CreateDishAsync(req);
+
                     if (resp == null)
                     {
-                        // деякі бек-конфи віддають 201 без тіла — перечитаємо по назві+категорії або просто оновимо грід
-                        MessageBox.Show("Створено страву (можливо без тіла відповіді). Оновлю грід.", "OK",
+                        MessageBox.Show("Створено страву (відповідь сервера пуста). Оновлюю таблицю.", "OK",
                             MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                     else
                     {
-                        MessageBox.Show("Створено страву Id = " + resp.Id, "OK",
+                        MessageBox.Show("Успішно створено страву Id = " + resp.Id, "OK",
                             MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        LoadDishToForm(resp);
+                        LoadDishToForm(resp); // Показуємо створені дані у полях
                     }
                 }
                 else
                 {
-                    // оновлення за Id
+                    // --- ОНОВЛЕННЯ (PUT) ---
                     resp = await _api.UpdateDishAsync(id, req);
+
                     if (resp == null)
                     {
-                        MessageBox.Show("Оновлено страву (можливо без тіла відповіді).", "OK",
+                        MessageBox.Show("Оновлено страву (відповідь сервера пуста).", "OK",
                             MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                     else
                     {
-                        MessageBox.Show("Оновлено страву Id = " + resp.Id, "OK",
+                        MessageBox.Show("Успішно оновлено страву Id = " + resp.Id, "OK",
                             MessageBoxButtons.OK, MessageBoxIcon.Information);
                         LoadDishToForm(resp);
                     }
                 }
 
+                // 5. Оновлюємо таблицю (Grid)
                 await ReloadDishesGridAsync();
             }
             catch (Exception ex)
@@ -260,6 +281,10 @@ namespace USRest_Admin
             textBox_spicy.Text = "";
             textBox_color.Text = "";
             textBox_category.Text = "";
+
+            // --- ДОДАТИ ЦЕЙ РЯДОК ---
+            txtStationId.Text = "";
+            // ------------------------
         }
 
         private bool ValidateDishInputs()
@@ -306,6 +331,10 @@ namespace USRest_Admin
             textBox_spicy.Text = d.Pepper;
             textBox_color.Text = d.Color;
             textBox_category.Text = d.CategoryId.ToString();
+
+            // --- ДОДАТИ ЦЕЙ РЯДОК ---
+            txtStationId.Text = d.StationId.ToString();
+            // ------------------------
 
             imageBox.Image = string.IsNullOrEmpty(d.ImageBase64)
                 ? null

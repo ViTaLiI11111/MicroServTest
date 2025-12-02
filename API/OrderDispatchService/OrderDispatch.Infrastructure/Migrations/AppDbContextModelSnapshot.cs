@@ -42,6 +42,12 @@ namespace OrderDispatch.Infrastructure.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
+                    b.Property<bool>("IsPaid")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset?>("PaidAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(32)
@@ -88,6 +94,12 @@ namespace OrderDispatch.Infrastructure.Migrations
                         .HasColumnType("numeric(12,2)");
 
                     b.Property<int>("Qty")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("StationId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Status")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");

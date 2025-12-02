@@ -8,4 +8,4 @@ public interface IMenuClient
     Task<DishDto?> GetDishAsync(int dishId, CancellationToken ct = default);
 }
 
-public record DishDto(int Id, string Title, decimal Price);
+public record DishDto(int Id, string Title, decimal Price, int StationId);

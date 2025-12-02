@@ -49,11 +49,20 @@ namespace DeliveryService.Migrations
                     b.Property<DateTime?>("DeliveredAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<bool>("IsPaid")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsReadyForPickup")
+                        .HasColumnType("boolean");
+
                     b.Property<Guid>("OrderId")
                         .HasColumnType("uuid");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");
+
+                    b.Property<decimal>("Total")
+                        .HasColumnType("numeric");
 
                     b.HasKey("Id");
 
