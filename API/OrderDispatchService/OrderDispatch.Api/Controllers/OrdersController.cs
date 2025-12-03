@@ -2,10 +2,12 @@
 using Microsoft.EntityFrameworkCore;
 using OrderDispatch.Application.Menu;
 using OrderDispatch.Application.Delivery;
+using OrderDispatch.Application.Interfaces; // <--- Інтерфейси тут
 using OrderDispatch.Domain.Entities;
 using OrderDispatch.Infrastructure;
+using OrderDispatch.Api.Orders; // Для DTO (CreateOrderRequest і т.д.)
 
-namespace OrderDispatch.Api.Orders;
+namespace OrderDispatch.Api.Controllers;
 
 [ApiController]
 [Route("orders")]
@@ -15,20 +17,32 @@ public class OrdersController : ControllerBase
     private readonly IMenuClient _menu;
     private readonly IDeliveryClient _delivery;
 
-    public OrdersController(AppDbContext db, IMenuClient menu, IDeliveryClient delivery)
+    // --- НОВІ ЗАЛЕЖНОСТІ ДЛЯ ПУШІВ ---
+    private readonly IAuthClient _auth;
+    private readonly INotificationService _notifier;
+
+    public OrdersController(
+        AppDbContext db,
+        IMenuClient menu,
+        IDeliveryClient delivery,
+        IAuthClient auth,
+        INotificationService notifier)
     {
         _db = db;
         _menu = menu;
         _delivery = delivery;
+        _auth = auth;
+        _notifier = notifier;
     }
 
-    // --- 1. СПИСОК ЗАМОВЛЕНЬ (ОНОВЛЕНО) ---
+    // --- 1. СПИСОК ЗАМОВЛЕНЬ ---
     [HttpGet]
     public async Task<ActionResult<IEnumerable<OrderResponse>>> List(
         [FromQuery] string? type,
         [FromQuery] int? waiterId,
         [FromQuery] bool? onlyFree,
-        [FromQuery] bool? activeOnly, // <--- НОВИЙ ПАРАМЕТР
+        [FromQuery] bool? activeOnly,
+        [FromQuery] string? clientName,
         CancellationToken ct)
     {
         var query = _db.Orders
@@ -49,28 +63,26 @@ public class OrdersController : ControllerBase
             }
         }
 
-        // 2. --- ФІЛЬТР АКТУАЛЬНОСТІ (ДЛЯ КУХАРЯ І ВСІХ ІНШИХ) ---
-        // Якщо activeOnly=true, або якщо параметри взагалі не передані (випадок Кухаря),
-        // то ми не хочемо бачити замовлення за минулий місяць.
-        // Давай показувати тільки ті, що створені за останні 24 години, АБО ще не мають статусу "completed".
-
-        // Логіка: (Створено недавно) АБО (Ще не завершено)
-        // Це гарантує, що старі "висяки" не прийдуть, якщо вони закриті.
-        // А якщо вони "висять" відкритими з минулого року - ну, тоді треба їх закрити адміном або скриптом.
-
-        // Для простоти, давай фільтрувати за датою для всіх запитів без фільтрів.
-        if (activeOnly == true || (string.IsNullOrEmpty(type) && waiterId == null))
+        // 2. Фільтр по клієнту (Історія)
+        if (!string.IsNullOrEmpty(clientName))
         {
-            // Беремо замовлення тільки за останні 24 години
-            var yesterday = DateTimeOffset.UtcNow.AddHours(-24);
-            query = query.Where(x => x.CreatedAt >= yesterday);
+            query = query.Where(x => x.ClientName == clientName);
+        }
+        else
+        {
+            // 3. Фільтр актуальності (якщо не історія)
+            if (activeOnly == true || (string.IsNullOrEmpty(type) && waiterId == null))
+            {
+                var yesterday = DateTimeOffset.UtcNow.AddHours(-24);
+                query = query.Where(x => x.CreatedAt >= yesterday);
+            }
         }
 
         var orders = await query.ToListAsync(ct);
         return Ok(orders.Select(ToDto));
     }
 
-    // --- 2. GET ONE ---
+    // --- 2. ОТРИМАННЯ ОДНОГО ---
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<OrderResponse>> Get(Guid id, CancellationToken ct)
     {
@@ -82,7 +94,7 @@ public class OrdersController : ControllerBase
         return Ok(ToDto(o));
     }
 
-    // --- 3. PAY ---
+    // --- 3. ОПЛАТА ---
     [HttpPost("{id:guid}/pay")]
     public async Task<IActionResult> Pay(Guid id, CancellationToken ct)
     {
@@ -102,7 +114,7 @@ public class OrdersController : ControllerBase
         return NoContent();
     }
 
-    // --- 4. CREATE ---
+    // --- 4. СТВОРЕННЯ (ТУТ Є ПУШІ) ---
     [HttpPost]
     public async Task<ActionResult<OrderResponse>> Create([FromBody] CreateOrderRequest req, CancellationToken ct)
     {
@@ -158,31 +170,122 @@ public class OrdersController : ControllerBase
                 ct);
         }
 
+        // --- ЛОГІКА ПОВІДОМЛЕНЬ ---
+        try
+        {
+            // 1. Сповіщаємо Кухарів
+            var cookTokens = await _auth.GetTokensByRoleAsync("Cook");
+            await _notifier.SendToMultipleTokensAsync(cookTokens, "Нове замовлення!",
+                $"Тип: {(order.Type == OrderType.DineIn ? "Зал" : "Доставка")}. Стіл/Інфо: {order.TableNo}");
+
+            // 2. Сповіщаємо персонал або клієнта
+            if (order.Type == OrderType.DineIn)
+            {
+                var waiterTokens = await _auth.GetTokensByRoleAsync("Waiter");
+                await _notifier.SendToMultipleTokensAsync(waiterTokens, "Новий столик", $"Стіл №{order.TableNo} чекає.");
+            }
+            else
+            {
+                // Сповіщення клієнту (якщо є ім'я)
+                if (!string.IsNullOrEmpty(order.ClientName))
+                {
+                    // Важливо: ми припускаємо, що ClientName == Username клієнта
+                    var token = await _auth.GetTokenAsync(order.ClientName, "Client");
+                    if (token != null)
+                    {
+                        await _notifier.SendToTokenAsync(token, "Замовлення прийнято!", "Ваше замовлення відправлено на кухню.");
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Notification Error: {ex.Message}");
+            // Не зупиняємо роботу, якщо пуш не пішов
+        }
+
         return Ok(ToDto(order));
     }
 
-    // --- 5. UPDATE ITEM STATUS ---
+    // --- 5. ЗМІНА СТАТУСУ СТРАВИ (ТУТ Є ПУШІ) ---
+    // --- 5. ЗМІНА СТАТУСУ СТРАВИ (Виправлено для Клієнта) ---
     [HttpPatch("items/{itemId:int}/status")]
     public async Task<IActionResult> UpdateItemStatus(int itemId, [FromBody] UpdateItemStatusRequest req, CancellationToken ct)
     {
         var item = await _db.OrderItems.Include(i => i.Order).FirstOrDefaultAsync(i => i.Id == itemId, ct);
         if (item is null) return NotFound();
 
+        // Оновлюємо статус
         item.Status = req.Status;
 
         var parentOrder = item.Order!;
         var allItemsCount = await _db.OrderItems.CountAsync(i => i.OrderId == parentOrder.Id, ct);
         var readyItemsCount = await _db.OrderItems.CountAsync(i => i.OrderId == parentOrder.Id && i.Status == OrderItemStatus.Ready, ct);
 
-        // Враховуємо поточну зміну (вона ще не в базі як Ready, якщо ми її тільки ставимо)
-        bool isNowFullyReady = (req.Status == OrderItemStatus.Ready) && (readyItemsCount + 1 == allItemsCount);
+        // Перевіряємо, чи ВСЕ замовлення готове (враховуємо поточний item, який ми щойно змінили в пам'яті, але в базі він ще може бути старим до SaveChanges, тому логіка readyItemsCount + 1 вірна лише якщо поточний статус Ready)
+        // Але надійніше перевірити після req.Status:
+
+        bool isCurrentItemBecomingReady = req.Status == OrderItemStatus.Ready;
+        // Якщо в базі 4 items, 3 ready, і ми зараз робимо 4-й ready -> то readyItemsCount (з бази) = 3. 3+1 = 4. 
+        bool isNowFullyReady = isCurrentItemBecomingReady && (readyItemsCount + 1 == allItemsCount);
 
         if (isNowFullyReady)
         {
             parentOrder.Status = "ready";
+
+            // ==========================================
+            // 1. ЛОГІКА ДЛЯ ДОСТАВКИ (Deliveries API + Couriers)
+            // ==========================================
             if (parentOrder.Type == OrderType.Delivery)
             {
                 await _delivery.MarkOrderAsReadyAsync(parentOrder.Id, ct);
+
+                // PUSH: Кур'єрам (щоб забрали)
+                try
+                {
+                    var courierTokens = await _auth.GetTokensByRoleAsync("Courier");
+                    await _notifier.SendToMultipleTokensAsync(courierTokens, "Доставка готова!", "Заберіть замовлення з кухні.");
+                }
+                catch { }
+            }
+            // ==========================================
+            // 2. ЛОГІКА ДЛЯ ЗАЛУ (Waiters)
+            // ==========================================
+            else
+            {
+                // PUSH: Офіціантам (щоб віднесли)
+                try
+                {
+                    var waiterTokens = await _auth.GetTokensByRoleAsync("Waiter");
+                    await _notifier.SendToMultipleTokensAsync(waiterTokens, "Готово до видачі!", $"Стіл №{parentOrder.TableNo} готовий.");
+                }
+                catch { }
+            }
+
+            // ==========================================
+            // 3. НОВА ЛОГІКА: СПОВІЩЕННЯ КЛІЄНТА
+            // ==========================================
+            if (!string.IsNullOrEmpty(parentOrder.ClientName))
+            {
+                try
+                {
+                    // Отримуємо токен саме цього клієнта
+                    var clientToken = await _auth.GetTokenAsync(parentOrder.ClientName, "Client");
+
+                    if (clientToken != null)
+                    {
+                        string title = "Замовлення готове! 😋";
+                        string body = parentOrder.Type == OrderType.DineIn
+                            ? "Ваші страви готові! Офіціант вже несе їх вам."
+                            : "Кухня приготувала ваше замовлення! Шукаємо кур'єра.";
+
+                        await _notifier.SendToTokenAsync(clientToken, title, body);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error sending push to client: {ex.Message}");
+                }
             }
         }
 
@@ -190,42 +293,30 @@ public class OrdersController : ControllerBase
         return NoContent();
     }
 
-    // --- 6. НОВИЙ МЕТОД: ASSIGN (Взяти замовлення) ---
+    // --- 6. ASSIGN ---
     [HttpPost("{id:guid}/assign")]
     public async Task<IActionResult> Assign(Guid id, [FromQuery] int waiterId, CancellationToken ct)
     {
         var order = await _db.Orders.FirstOrDefaultAsync(x => x.Id == id, ct);
         if (order is null) return NotFound();
 
-        // Перевіряємо, чи столик ще вільний
         if (order.WaiterId != null && order.WaiterId != waiterId)
-        {
             return BadRequest("This order is already taken.");
-        }
 
         order.WaiterId = waiterId;
-
-        // Якщо статус був "new", міняємо на "inprogress", щоб показати що над ним працюють
-        if (order.Status == "new")
-        {
-            order.Status = "inprogress";
-        }
+        if (order.Status == "new") order.Status = "inprogress";
 
         await _db.SaveChangesAsync(ct);
         return Ok(ToDto(order));
     }
 
-    // --- 7. НОВИЙ МЕТОД: COMPLETE (Завершити) ---
+    // --- 7. COMPLETE ---
     [HttpPost("{id:guid}/complete")]
     public async Task<IActionResult> Complete(Guid id, CancellationToken ct)
     {
         var order = await _db.Orders.FirstOrDefaultAsync(x => x.Id == id, ct);
         if (order is null) return NotFound();
-
-        if (!order.IsPaid)
-        {
-            return BadRequest("Cannot complete unpaid order.");
-        }
+        if (!order.IsPaid) return BadRequest("Cannot complete unpaid order.");
 
         order.Status = "completed";
         await _db.SaveChangesAsync(ct);
@@ -244,7 +335,7 @@ public class OrdersController : ControllerBase
         o.ClientName,
         o.IsPaid,
         o.PaidAt,
-        o.WaiterId, // <--- Мапимо нове поле
+        o.WaiterId,
         o.Items.Select(i => new OrderItemResponse(
             i.Id,
             i.DishId,

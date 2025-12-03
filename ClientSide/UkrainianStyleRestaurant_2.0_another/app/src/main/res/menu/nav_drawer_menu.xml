@@ -24,6 +24,10 @@
             android:id="@+id/nav_delivery_status"
             android:icon="@android:drawable/ic_menu_compass"
             android:title="Відстежити замовлення" />
+        <item
+            android:id="@+id/nav_history"
+            android:icon="@android:drawable/ic_menu_recent_history"
+            android:title="Історія замовлень" />
     </group>
 
     <item android:title="Налаштування">

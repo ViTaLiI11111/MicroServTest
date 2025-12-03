@@ -6,6 +6,7 @@ import com.waiter.app.data.api.AuthApi
 import com.waiter.app.data.dto.LoginRequest
 import com.waiter.app.data.dto.LoginResponse
 import com.waiter.app.data.dto.RegisterRequest
+import com.waiter.app.data.dto.SaveTokenRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -16,8 +17,6 @@ class AuthRepository(
     suspend fun login(role: UserRole, username: String, pass: String): Result<LoginResponse> = withContext(Dispatchers.IO) {
         try {
             val req = LoginRequest(username, pass)
-
-            // ВИПРАВЛЕНО: Використовуємо when для 3-х ролей
             val response = when (role) {
                 UserRole.WAITER -> api.loginWaiter(req)
                 UserRole.COURIER -> api.loginCourier(req)
@@ -41,33 +40,29 @@ class AuthRepository(
         fullName: String,
         phone: String,
         email: String,
-        stationId: Int? // Додайте stationId сюди, якщо він передається
+        stationId: Int?
     ): Result<Unit> = withContext(Dispatchers.IO) {
         try {
-            // Формуємо запит
-            val req = RegisterRequest(
-                username = username,
-                password = pass,
-                fullName = fullName,
-                phone = phone,
-                email = email,
-                stationId = stationId // Передаємо stationId
-            )
-
-            // ВИПРАВЛЕНО: Використовуємо when для 3-х ролей
+            val req = RegisterRequest(username, pass, fullName, phone, email, stationId)
             val response = when (role) {
                 UserRole.WAITER -> api.registerWaiter(req)
                 UserRole.COURIER -> api.registerCourier(req)
                 UserRole.COOK -> api.registerCook(req)
             }
 
-            if (response.isSuccessful) {
-                Result.Ok(Unit)
-            } else {
-                Result.Err(Exception("Registration failed: ${response.message()}"))
-            }
+            if (response.isSuccessful) Result.Ok(Unit)
+            else Result.Err(Exception("Registration failed"))
         } catch (e: Exception) {
             Result.Err(e)
+        }
+    }
+
+    // --- НОВИЙ МЕТОД ---
+    suspend fun saveToken(username: String, role: String, token: String) = withContext(Dispatchers.IO) {
+        try {
+            api.saveToken(SaveTokenRequest(username, role, token))
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 }

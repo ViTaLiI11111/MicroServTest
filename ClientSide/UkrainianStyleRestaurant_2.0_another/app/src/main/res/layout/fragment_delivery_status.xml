@@ -35,6 +35,22 @@
             android:gravity="center"
             android:layout_marginTop="8dp"/>
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Деталі замовлення:"
+            android:textStyle="bold"
+            android:layout_marginTop="32dp"
+            android:layout_gravity="start"/>
+
+        <LinearLayout
+            android:id="@+id/layout_order_items"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="8dp"
+            android:background="#10000000"
+            android:padding="12dp"/>
         <LinearLayout
             android:id="@+id/layout_courier_info"
             android:layout_width="match_parent"
@@ -43,8 +59,7 @@
             android:gravity="center"
             android:visibility="gone"
             android:padding="16dp"
-            android:layout_marginTop="32dp">
-
+            android:layout_marginTop="24dp">
         </LinearLayout>
 
         <LinearLayout
@@ -54,12 +69,14 @@
             android:orientation="vertical"
             android:gravity="center"
             android:layout_marginTop="24dp"
-            android:visibility="gone"> <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Статус оплати:"
-            android:textColor="@color/style"
-            android:layout_marginBottom="4dp"/>
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Статус оплати:"
+                android:textColor="@color/style"
+                android:layout_marginBottom="4dp"/>
 
             <TextView
                 android:id="@+id/tv_payment_status"
@@ -80,8 +97,8 @@
                 android:textStyle="bold"
                 android:backgroundTint="#4CAF50"
                 android:textColor="@android:color/white"/>
-
         </LinearLayout>
+
         <Space
             android:layout_width="match_parent"
             android:layout_height="0dp"

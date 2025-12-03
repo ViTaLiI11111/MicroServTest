@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -76,4 +77,5 @@ dependencies {
 
     implementation("androidx.navigation:navigation-compose:2.8.3")
 
+    implementation("com.google.firebase:firebase-messaging-ktx:23.4.0")
 }

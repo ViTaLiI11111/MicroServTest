@@ -27,7 +27,7 @@ class AuthViewModel(
         role: UserRole,
         username: String,
         pass: String,
-        onLoginSuccess: (Int, String, Int?) -> Unit // (id, username, stationId?)
+        onLoginSuccess: (Int, String, Int?) -> Unit
     ) {
         viewModelScope.launch {
             _uiState.value = AuthUiState.Loading
@@ -44,7 +44,6 @@ class AuthViewModel(
         }
     }
 
-    // ВИПРАВЛЕНИЙ МЕТОД REGISTER
     fun register(
         role: UserRole,
         username: String,
@@ -55,36 +54,27 @@ class AuthViewModel(
         stationId: Int? = null
     ) {
         viewModelScope.launch {
-            // 1. Показуємо індикатор завантаження
             _uiState.value = AuthUiState.Loading
-
-            // 2. Викликаємо репозиторій з усіма параметрами
-            val result = authRepository.register(
-                role,
-                username,
-                pass,
-                fullName,
-                phone,
-                email,
-                stationId
-            )
-
-            // 3. Обробляємо результат
+            val result = authRepository.register(role, username, pass, fullName, phone, email, stationId)
             when (result) {
-                is Result.Ok -> {
-                    // ВАЖЛИВО: Ставимо статус Success.
-                    // Саме це змусить LaunchedEffect на екрані RegisterScreen спрацювати,
-                    // показати Toast "Успішно" і викликати onRegisterSuccess() (навігацію назад).
-                    _uiState.value = AuthUiState.Success
-                }
-                is Result.Err -> {
-                    // Показуємо помилку (наприклад, "Username taken")
-                    _uiState.value = AuthUiState.Error(result.error.message ?: "Unknown error")
-                }
-                is Result.Loading -> {
-                    // Цей стан ми вже встановили на початку, тут можна нічого не робити
-                }
+                is Result.Ok -> _uiState.value = AuthUiState.Success
+                is Result.Err -> _uiState.value = AuthUiState.Error(result.error.message ?: "Unknown error")
+                is Result.Loading -> {}
             }
+        }
+    }
+
+    // --- НОВИЙ МЕТОД: ЗБЕРЕЖЕННЯ ТОКЕНА ---
+    fun saveToken(username: String, role: UserRole, token: String) {
+        viewModelScope.launch {
+            // Конвертуємо enum у рядок, який очікує бекенд (з великої літери)
+            val roleString = when(role) {
+                UserRole.WAITER -> "Waiter"
+                UserRole.COURIER -> "Courier"
+                UserRole.COOK -> "Cook"
+            }
+            // Викликаємо репозиторій (воно піде на сервер асинхронно)
+            authRepository.saveToken(username, roleString, token)
         }
     }
 

@@ -21,13 +21,14 @@ import com.waiter.app.data.dto.DeliveryDto
 fun DeliveriesScreen(
     courierId: Int,
     vm: DeliveriesViewModel = viewModel(),
-    onOpenSettings: () -> Unit // <--- Перехід на екран налаштувань
+    onOpenSettings: () -> Unit
 ) {
     val available by vm.available.collectAsState()
-    val myDeliveries by vm.myDeliveries.collectAsState()
+    val active by vm.activeDeliveries.collectAsState()
+    val history by vm.historyDeliveries.collectAsState()
     val error by vm.error.collectAsState()
 
-    // 0 = Вільні, 1 = Мої
+    // 0 = Вільні, 1 = Активні, 2 = Історія
     var selectedTab by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(courierId) {
@@ -40,17 +41,15 @@ fun DeliveriesScreen(
                 TopAppBar(
                     title = { Text("Кабінет Кур'єра") },
                     actions = {
-                        // Оновити список
                         IconButton(onClick = { vm.loadData(courierId) }) {
                             Icon(Icons.Default.Refresh, "Refresh")
                         }
-                        // Відкрити налаштування (там буде вихід)
                         IconButton(onClick = onOpenSettings) {
                             Icon(Icons.Default.Settings, "Settings")
                         }
                     }
                 )
-                // Вкладки
+                // --- 3 ВКЛАДКИ ---
                 TabRow(selectedTabIndex = selectedTab) {
                     Tab(
                         selected = selectedTab == 0,
@@ -60,7 +59,12 @@ fun DeliveriesScreen(
                     Tab(
                         selected = selectedTab == 1,
                         onClick = { selectedTab = 1 },
-                        text = { Text("Мої") }
+                        text = { Text("Активні") }
+                    )
+                    Tab(
+                        selected = selectedTab == 2,
+                        onClick = { selectedTab = 2 },
+                        text = { Text("Історія") }
                     )
                 }
             }
@@ -68,33 +72,27 @@ fun DeliveriesScreen(
     ) { pad ->
         LazyColumn(Modifier.padding(pad).padding(16.dp)) {
 
-            if (selectedTab == 0) {
-                // --- ВКЛАДКА 1: ВІЛЬНІ ЗАМОВЛЕННЯ ---
-                if (available.isEmpty()) {
-                    item {
-                        Text(
-                            "Немає вільних замовлень",
-                            color = Color.Gray,
-                            modifier = Modifier.padding(8.dp)
-                        )
-                    }
-                } else {
-                    items(available) { item ->
-                        AvailableDeliveryCard(item, courierId, vm)
-                    }
+            // Вибираємо список для відображення
+            val listToShow = when(selectedTab) {
+                0 -> available
+                1 -> active
+                else -> history
+            }
+
+            if (listToShow.isEmpty()) {
+                item {
+                    Text(
+                        "Список порожній",
+                        color = Color.Gray,
+                        modifier = Modifier.padding(8.dp)
+                    )
                 }
             } else {
-                // --- ВКЛАДКА 2: МОЇ ЗАМОВЛЕННЯ ---
-                if (myDeliveries.isEmpty()) {
-                    item {
-                        Text(
-                            "У вас немає активних замовлень",
-                            color = Color.Gray,
-                            modifier = Modifier.padding(8.dp)
-                        )
-                    }
-                } else {
-                    items(myDeliveries) { item ->
+                items(listToShow) { item ->
+                    if (selectedTab == 0) {
+                        AvailableDeliveryCard(item, courierId, vm)
+                    } else {
+                        // Для Активних та Історії використовуємо одну картку
                         DeliveryCard(item, courierId, vm)
                     }
                 }
@@ -110,12 +108,13 @@ fun DeliveriesScreen(
     }
 }
 
-// --- КАРТКА МОГО ЗАМОВЛЕННЯ (З оплатою і статусами) ---
+// --- КАРТКА АКТИВНОГО / ЗАВЕРШЕНОГО ЗАМОВЛЕННЯ ---
 @Composable
 fun DeliveryCard(item: DeliveryDto, courierId: Int, vm: DeliveriesViewModel) {
-    // Якщо доставлено (3) - картка сіра, інакше зеленувата
-    val cardColor = if (item.status == 3) Color(0xFFF5F5F5) else Color(0xFFE8F5E9)
-    val elevation = if (item.status == 3) 1.dp else 4.dp
+    val isHistory = (item.status == 3)
+    // Якщо історія - картка сіра, якщо активне - світло-зелена
+    val cardColor = if (isHistory) Color(0xFFF5F5F5) else Color(0xFFE8F5E9)
+    val elevation = if (isHistory) 1.dp else 4.dp
 
     Card(
         modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
@@ -123,21 +122,20 @@ fun DeliveryCard(item: DeliveryDto, courierId: Int, vm: DeliveriesViewModel) {
         elevation = CardDefaults.cardElevation(elevation)
     ) {
         Column(Modifier.padding(16.dp)) {
-            // Верхній рядок: ID та Статус
+            // Header
             Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
                 Text("Доставка #${item.id}", style = MaterialTheme.typography.titleSmall)
                 Text(getStatusText(item.status), style = MaterialTheme.typography.labelSmall, color = Color.Gray)
             }
             Divider(Modifier.padding(vertical = 8.dp))
 
-            // Інфо про клієнта
+            // Info
             Text("Клієнт: ${item.clientName ?: "Гість"}", fontWeight = FontWeight.Bold)
             Text("Адреса: ${item.clientAddress}")
             Text("Телефон: ${item.clientPhone ?: "-"}")
-
             Spacer(Modifier.height(8.dp))
 
-            // Інфо про оплату
+            // Payment Info
             Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
                 Text("${item.total} грн", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
                 if (item.isPaid) {
@@ -148,45 +146,51 @@ fun DeliveryCard(item: DeliveryDto, courierId: Int, vm: DeliveriesViewModel) {
             }
             Divider(Modifier.padding(vertical = 8.dp))
 
-            // Кнопка оплати (якщо ще не оплачено і не завершено)
-            if (!item.isPaid && item.status != 3) {
-                Button(
-                    onClick = { vm.payOrder(item.orderId, courierId) },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50))
-                ) { Text("💰 Прийняти оплату") }
-                Spacer(Modifier.height(8.dp))
-            }
+            // --- ДІЇ ---
+            if (isHistory) {
+                Text(
+                    "🏁 Доставлено",
+                    color = Color.Gray,
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
+            } else {
+                // Кнопка оплати (якщо не оплачено)
+                if (!item.isPaid) {
+                    Button(
+                        onClick = { vm.payOrder(item.orderId, courierId) },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50))
+                    ) { Text("💰 Прийняти оплату") }
+                    Spacer(Modifier.height(8.dp))
+                }
 
-            // Кнопки статусів
-            when (item.status) {
-                1 -> { // Assigned -> PickedUp
-                    val isReady = item.isReadyForPickup
-                    Button(
-                        onClick = { vm.updateStatus(item.id, courierId, 2) },
-                        modifier = Modifier.fillMaxWidth(),
-                        enabled = isReady,
-                        colors = ButtonDefaults.buttonColors(containerColor = if (isReady) Color(0xFF2196F3) else Color.Gray)
-                    ) { Text(if (isReady) "📦 Я забрав їжу" else "⏳ Кухня ще готує...") }
-                }
-                2 -> { // PickedUp -> Delivered
-                    val canDeliver = item.isPaid // Блокуємо, якщо не оплачено
-                    Button(
-                        onClick = { vm.updateStatus(item.id, courierId, 3) },
-                        modifier = Modifier.fillMaxWidth(),
-                        enabled = canDeliver,
-                        colors = ButtonDefaults.buttonColors(containerColor = if (canDeliver) Color(0xFF4CAF50) else Color.Gray)
-                    ) {
-                        if (canDeliver) Text("✅ Замовлення доставлено")
-                        else Text("⚠️ Спочатку прийміть оплату!")
+                // Кнопки статусу
+                when (item.status) {
+                    1 -> { // Assigned -> PickedUp
+                        val isReady = item.isReadyForPickup
+                        Button(
+                            onClick = { vm.updateStatus(item.id, courierId, 2) },
+                            modifier = Modifier.fillMaxWidth(),
+                            enabled = isReady,
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (isReady) Color(0xFF2196F3) else Color.Gray
+                            )
+                        ) { Text(if (isReady) "📦 Я забрав їжу" else "⏳ Кухня ще готує...") }
                     }
-                }
-                3 -> { // Delivered
-                    Text(
-                        "🏁 Замовлення закрито",
-                        color = Color.Gray,
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
-                    )
+                    2 -> { // PickedUp -> Delivered
+                        val canDeliver = item.isPaid
+                        Button(
+                            onClick = { vm.updateStatus(item.id, courierId, 3) },
+                            modifier = Modifier.fillMaxWidth(),
+                            enabled = canDeliver,
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (canDeliver) Color(0xFF4CAF50) else Color.Gray
+                            )
+                        ) {
+                            if (canDeliver) Text("✅ Замовлення доставлено")
+                            else Text("⚠️ Спочатку прийміть оплату!")
+                        }
+                    }
                 }
             }
         }
@@ -196,13 +200,17 @@ fun DeliveryCard(item: DeliveryDto, courierId: Int, vm: DeliveriesViewModel) {
 // --- КАРТКА ВІЛЬНОГО ЗАМОВЛЕННЯ ---
 @Composable
 fun AvailableDeliveryCard(item: DeliveryDto, courierId: Int, vm: DeliveriesViewModel) {
-    Card(modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp), elevation = CardDefaults.cardElevation(2.dp)) {
+    Card(
+        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+        elevation = CardDefaults.cardElevation(2.dp)
+    ) {
         Column(Modifier.padding(16.dp)) {
             Text("Замовлення від кухні", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
             Text("Клієнт: ${item.clientName ?: "Гість"}", fontWeight = FontWeight.Bold)
             Text("Куди: ${item.clientAddress}")
             Text("Сума: ${item.total} грн", fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(8.dp))
+
             Button(
                 onClick = { vm.takeOrder(item.id, courierId) },
                 modifier = Modifier.fillMaxWidth()

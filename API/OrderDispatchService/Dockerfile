@@ -29,9 +29,15 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app
 COPY --from=build /app/publish .
 
-# Порт, який слухає API
+# --- ВАЖЛИВО: Копіюємо файл ключів Firebase ---
+# Оскільки контекст білда - це API/OrderDispatchService,
+# а файл лежить всередині підпапки OrderDispatch.Api
+COPY OrderDispatch.Api/firebase-service-account.json .
+# ---------------------------------------------
+
+# Порт
 EXPOSE 8080
 
-# Змінна середовища (можеш задати ConnectionString у docker-compose)
+# Змінна середовища
 ENV ASPNETCORE_URLS=http://+:8080
 ENTRYPOINT ["dotnet", "OrderDispatch.Api.dll"]

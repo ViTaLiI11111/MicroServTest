@@ -1,5 +1,7 @@
 package com.example.ukrainianstylerestaurant.ui.delivery;
 
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -19,6 +21,7 @@ import com.example.ukrainianstylerestaurant.LocalStorage;
 import com.example.ukrainianstylerestaurant.R;
 import com.example.ukrainianstylerestaurant.data.OrdersRepository;
 import com.example.ukrainianstylerestaurant.model.DeliveryStatusResponse;
+import com.example.ukrainianstylerestaurant.model.OrderItemResponse;
 import com.example.ukrainianstylerestaurant.model.OrderResponse;
 import com.example.ukrainianstylerestaurant.net.DeliveryApi;
 import com.example.ukrainianstylerestaurant.net.DeliveryRetrofitClient;
@@ -31,16 +34,14 @@ import retrofit2.Response;
 public class DeliveryStatusFragment extends Fragment {
 
     private TextView tvBody, tvStatusHeader, tvPaymentStatus;
-    private LinearLayout layoutCourierInfo, layoutPaymentInfo;
+    private LinearLayout layoutCourierInfo, layoutPaymentInfo, layoutItems; // <--- Додали layoutItems
     private Button btnRefresh, btnPay;
 
     private ExecutorService executorService;
     private Handler mainHandler;
 
     private boolean isTracking = false;
-    // Оновлюємо кожні 3 секунди, щоб швидше бачити зміни
     private final int UPDATE_INTERVAL = 3000;
-
     private final Runnable statusChecker = new Runnable() {
         @Override
         public void run() {
@@ -58,9 +59,11 @@ public class DeliveryStatusFragment extends Fragment {
 
         tvStatusHeader = view.findViewById(R.id.tv_status_header);
         tvBody = view.findViewById(R.id.tv_status_body);
-        layoutCourierInfo = view.findViewById(R.id.layout_courier_info);
 
+        layoutItems = view.findViewById(R.id.layout_order_items); // <--- Знаходимо
+        layoutCourierInfo = view.findViewById(R.id.layout_courier_info);
         layoutPaymentInfo = view.findViewById(R.id.layout_payment_info);
+
         tvPaymentStatus = view.findViewById(R.id.tv_payment_status);
         btnPay = view.findViewById(R.id.btn_pay);
         btnRefresh = view.findViewById(R.id.btn_refresh_status);
@@ -104,7 +107,6 @@ public class DeliveryStatusFragment extends Fragment {
         executorService.execute(() -> {
             try {
                 OrdersRepository repo = new OrdersRepository();
-                // 1. Отримуємо актуальні дані про замовлення (в т.ч. isPaid)
                 OrderResponse order = repo.getOrder(activeOrderId);
 
                 mainHandler.post(() -> {
@@ -112,8 +114,11 @@ public class DeliveryStatusFragment extends Fragment {
                     btnRefresh.setText("Оновити статус");
 
                     if (order != null) {
-                        // Оновлюємо UI оплати
                         updatePaymentUI(order);
+
+                        // --- НОВЕ: Заповнюємо список страв ---
+                        fillOrderItems(order);
+                        // ------------------------------------
 
                         if ("Delivery".equalsIgnoreCase(order.type)) {
                             loadDeliveryDetails(activeOrderId);
@@ -131,10 +136,39 @@ public class DeliveryStatusFragment extends Fragment {
                     if(showLoading) {
                         btnRefresh.setEnabled(true);
                         btnRefresh.setText("Оновити статус");
+                        Toast.makeText(requireContext(), "Помилка з'єднання", Toast.LENGTH_SHORT).show();
                     }
                 });
             }
         });
+    }
+
+    // --- НОВИЙ МЕТОД ---
+    private void fillOrderItems(OrderResponse order) {
+        layoutItems.removeAllViews(); // Очищаємо перед оновленням
+
+        if (order.items != null) {
+            for (OrderItemResponse item : order.items) {
+                TextView tv = new TextView(getContext());
+                // Формат: "Борщ x2 — 200.0 грн"
+                double sum = item.price * item.qty;
+                String text = item.dishTitle + " x" + item.qty + " — " + sum + " грн";
+                tv.setText(text);
+                tv.setTextSize(16);
+                tv.setTextColor(Color.BLACK);
+                tv.setPadding(0, 4, 0, 4);
+                layoutItems.addView(tv);
+            }
+
+            // Разом
+            TextView totalTv = new TextView(getContext());
+            totalTv.setText("Всього до сплати: " + order.total + " грн");
+            totalTv.setTextSize(18);
+            totalTv.setTextColor(Color.BLACK);
+            totalTv.setTypeface(null, Typeface.BOLD);
+            totalTv.setPadding(0, 16, 0, 0);
+            layoutItems.addView(totalTv);
+        }
     }
 
     private void loadDeliveryDetails(String orderId) {
@@ -158,17 +192,49 @@ public class DeliveryStatusFragment extends Fragment {
         });
     }
 
+    private void showDineInStatus(OrderResponse order) {
+        layoutCourierInfo.setVisibility(View.GONE);
+        tvStatusHeader.setText("Статус: " + order.status);
+        tvBody.setText("Смачного!");
+    }
+
+    private void updateDeliveryUI(DeliveryStatusResponse data) {
+        switch (data.status) {
+            case 0:
+                tvStatusHeader.setText("Шукаємо кур'єра");
+                tvBody.setText("Замовлення прийнято.");
+                layoutCourierInfo.setVisibility(View.GONE);
+                break;
+            case 1:
+                tvStatusHeader.setText("Кур'єр знайдений!");
+                tvBody.setText("Кур'єр прямує до ресторану.");
+                layoutCourierInfo.setVisibility(View.VISIBLE);
+                break;
+            case 2:
+                tvStatusHeader.setText("Кур'єр в дорозі");
+                tvBody.setText("Замовлення їде до вас!");
+                layoutCourierInfo.setVisibility(View.VISIBLE);
+                break;
+            case 3:
+                tvStatusHeader.setText("Доставлено!");
+                tvBody.setText("Смачного! Дякуємо за замовлення.");
+                layoutCourierInfo.setVisibility(View.GONE);
+                isTracking = false;
+                LocalStorage.clearActiveOrder(requireContext());
+                break;
+        }
+    }
+
     private void updatePaymentUI(OrderResponse order) {
         layoutPaymentInfo.setVisibility(View.VISIBLE);
-
         if (order.isPaid) {
-            tvPaymentStatus.setText("✅ ОПЛАЧЕНО");
+            tvPaymentStatus.setText("✅ ЗАМОВЛЕННЯ ОПЛАЧЕНО");
             tvPaymentStatus.setTextColor(getResources().getColor(android.R.color.holo_green_dark));
-            btnPay.setVisibility(View.GONE); // Ховаємо кнопку, якщо вже оплачено
+            btnPay.setVisibility(View.GONE);
         } else {
             tvPaymentStatus.setText("💵 НЕ ОПЛАЧЕНО");
             tvPaymentStatus.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
-            btnPay.setVisibility(View.VISIBLE); // Показуємо кнопку
+            btnPay.setVisibility(View.VISIBLE);
             btnPay.setText("Сплатити " + order.total + " грн");
         }
     }
@@ -188,7 +254,7 @@ public class DeliveryStatusFragment extends Fragment {
                 mainHandler.post(() -> {
                     if (success) {
                         Toast.makeText(requireContext(), "Оплата успішна!", Toast.LENGTH_LONG).show();
-                        loadAllData(false); // Одразу оновлюємо екран
+                        loadAllData(false);
                     } else {
                         btnPay.setEnabled(true);
                         btnPay.setText("Спробувати ще раз");
@@ -206,39 +272,12 @@ public class DeliveryStatusFragment extends Fragment {
         });
     }
 
-    private void showDineInStatus(OrderResponse order) {
-        layoutCourierInfo.setVisibility(View.GONE);
-        tvStatusHeader.setText("Статус: " + order.status);
-        tvBody.setText("Смачного!");
-    }
-
-    private void updateDeliveryUI(DeliveryStatusResponse data) {
-        switch (data.status) {
-            case 0:
-                tvStatusHeader.setText("Шукаємо кур'єра");
-                tvBody.setText("Замовлення готується.");
-                break;
-            case 1:
-                tvStatusHeader.setText("Кур'єр прямує до ресторану");
-                tvBody.setText("Скоро забере ваше замовлення.");
-                break;
-            case 2:
-                tvStatusHeader.setText("Кур'єр в дорозі");
-                tvBody.setText("Очікуйте дзвінка!");
-                break;
-            case 3:
-                tvStatusHeader.setText("Доставлено!");
-                tvBody.setText("Дякуємо за замовлення.");
-                isTracking = false;
-                LocalStorage.clearActiveOrder(requireContext());
-                break;
-        }
-    }
-
     private void showEmptyState() {
-        tvStatusHeader.setText("Пусто");
-        tvBody.setText("Зробіть замовлення");
+        tvStatusHeader.setText("Немає активних замовлень");
+        tvBody.setText("Зробіть замовлення в меню");
+        layoutItems.removeAllViews(); // Очищуємо список
         layoutCourierInfo.setVisibility(View.GONE);
         layoutPaymentInfo.setVisibility(View.GONE);
+        btnRefresh.setEnabled(true);
     }
 }

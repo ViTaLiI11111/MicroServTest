@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ukrainianstylerestaurant.data.AuthRepository;
 import com.example.ukrainianstylerestaurant.model.LoginResponse;
+import com.google.firebase.messaging.FirebaseMessaging; // <--- Не забудьте цей імпорт
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -30,35 +31,31 @@ public class LoginActivity extends AppCompatActivity {
 
     private AuthRepository authRepository;
     private ExecutorService executorService;
-    private Handler mainThreadHandler; // Для оновлення UI з фонового потоку
+    private Handler mainThreadHandler;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Перевіряємо, чи юзер ВЖЕ залогінений
+        // Якщо вже залогінені - переходимо далі
         if (LocalStorage.isLoggedIn(this)) {
-            // Якщо так, одразу переходимо до вибору столика
             startActivity(new Intent(this, TableSelectActivity.class));
-            finish(); // Закриваємо LoginActivity
-            return; // Не завантажуємо layout
+            finish();
+            return;
         }
 
         setContentView(R.layout.activity_login);
 
-        // Ініціалізація
         authRepository = new AuthRepository();
         executorService = Executors.newSingleThreadExecutor();
         mainThreadHandler = new Handler(Looper.getMainLooper());
 
-        // Пошук View
         etUsername = findViewById(R.id.et_username);
         etPassword = findViewById(R.id.et_password);
         btnLogin = findViewById(R.id.btn_login);
         tvGoToRegister = findViewById(R.id.tv_go_to_register);
         progressBar = findViewById(R.id.progress_bar);
 
-        // Обробник кнопки "Увійти"
         btnLogin.setOnClickListener(v -> {
             String username = etUsername.getText().toString().trim();
             String password = etPassword.getText().toString().trim();
@@ -70,7 +67,6 @@ public class LoginActivity extends AppCompatActivity {
             performLogin(username, password);
         });
 
-        // Обробник тексту "Зареєструватись"
         tvGoToRegister.setOnClickListener(v -> {
             startActivity(new Intent(this, RegisterActivity.class));
         });
@@ -81,29 +77,45 @@ public class LoginActivity extends AppCompatActivity {
 
         executorService.execute(() -> {
             try {
-                // Виконуємо запит в фоновому потоці
+                // Виконуємо запит на логін
                 LoginResponse response = authRepository.login(username, password);
 
-                // Повертаємось на головний потік для оновлення UI
                 mainThreadHandler.post(() -> {
                     setLoading(false);
                     if (response != null) {
-                        // Успішний логін
                         showToast("Вхід успішний!");
-                        // Зберігаємо сесію
+
+                        // 1. Зберігаємо сесію
                         LocalStorage.saveLoginSession(this, response.userId, response.username);
-                        // Переходимо до вибору столика
+
+                        // 2. --- ОТРИМУЄМО ТА ВІДПРАВЛЯЄМО ТОКЕН ---
+                        FirebaseMessaging.getInstance().getToken()
+                                .addOnCompleteListener(task -> {
+                                    if (!task.isSuccessful()) {
+                                        // Якщо не вдалося отримати токен, просто ігноруємо,
+                                        // додаток все одно працюватиме, просто без пушів.
+                                        return;
+                                    }
+
+                                    // Отримуємо новий токен
+                                    String token = task.getResult();
+
+                                    // Відправляємо його на сервер
+                                    // "Client" - це роль цього додатку
+                                    authRepository.sendTokenToServer(response.username, "Client", token);
+                                });
+                        // -------------------------------------------
+
+                        // 3. Переходимо до вибору столика
                         Intent intent = new Intent(this, TableSelectActivity.class);
                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                         startActivity(intent);
                         finish();
                     } else {
-                        // Неправильний логін/пароль (401) або інша помилка
                         showToast("Неправильний логін або пароль");
                     }
                 });
             } catch (Exception e) {
-                // Мережева помилка
                 mainThreadHandler.post(() -> {
                     setLoading(false);
                     showToast("Помилка мережі: " + e.getMessage());

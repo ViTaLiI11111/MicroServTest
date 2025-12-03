@@ -3,6 +3,7 @@ package com.waiter.app.data.api
 import com.waiter.app.data.dto.LoginRequest
 import com.waiter.app.data.dto.LoginResponse
 import com.waiter.app.data.dto.RegisterRequest
+import com.waiter.app.data.dto.SaveTokenRequest // <--- Імпорт
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.POST
@@ -22,10 +23,14 @@ interface AuthApi {
     @POST("api/courier/register")
     suspend fun registerCourier(@Body request: RegisterRequest): Response<Unit>
 
-    // --- НОВІ МЕТОДИ КУХАРЯ ---
+    // ... Cook methods ...
     @POST("api/cook/login")
     suspend fun loginCook(@Body request: LoginRequest): Response<LoginResponse>
 
     @POST("api/cook/register")
     suspend fun registerCook(@Body request: RegisterRequest): Response<Unit>
+
+    // --- НОВИЙ МЕТОД ---
+    @POST("api/notifications/token")
+    suspend fun saveToken(@Body request: SaveTokenRequest): Response<Unit>
 }

@@ -4,22 +4,27 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.waiter.app.data.dto.DeliveryDto
 import com.waiter.app.data.repo.DeliveryRepository
-import com.waiter.app.data.repo.OrdersRepository // <--- Імпортуємо репо замовлень
+import com.waiter.app.data.repo.OrdersRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class DeliveriesViewModel(
     private val deliveryRepo: DeliveryRepository = DeliveryRepository(),
-    // Додаємо репозиторій замовлень, щоб проводити оплату
     private val ordersRepo: OrdersRepository = OrdersRepository()
 ) : ViewModel() {
 
+    // Вкладка 1: Вільні замовлення (Available)
     private val _available = MutableStateFlow<List<DeliveryDto>>(emptyList())
     val available = _available.asStateFlow()
 
-    private val _myDeliveries = MutableStateFlow<List<DeliveryDto>>(emptyList())
-    val myDeliveries = _myDeliveries.asStateFlow()
+    // Вкладка 2: Активні доставки (В процесі)
+    private val _activeDeliveries = MutableStateFlow<List<DeliveryDto>>(emptyList())
+    val activeDeliveries = _activeDeliveries.asStateFlow()
+
+    // Вкладка 3: Історія (Доставлені)
+    private val _historyDeliveries = MutableStateFlow<List<DeliveryDto>>(emptyList())
+    val historyDeliveries = _historyDeliveries.asStateFlow()
 
     private val _error = MutableStateFlow<String?>(null)
     val error = _error.asStateFlow()
@@ -27,14 +32,24 @@ class DeliveriesViewModel(
     fun loadData(courierId: Int) {
         viewModelScope.launch {
             try {
+                // 1. Отримуємо вільні замовлення
                 _available.value = deliveryRepo.getAvailable()
-                _myDeliveries.value = deliveryRepo.getMyDeliveries(courierId)
+
+                // 2. Отримуємо всі замовлення цього кур'єра
+                // Бекенд вже сортує їх, але ми розділимо на списки для зручності
+                val allMine = deliveryRepo.getMyDeliveries(courierId)
+
+                // 3 = Status Delivered
+                _activeDeliveries.value = allMine.filter { it.status != 3 }
+                _historyDeliveries.value = allMine.filter { it.status == 3 }
+
             } catch (e: Exception) {
                 _error.value = "Failed to load: ${e.message}"
             }
         }
     }
 
+    // Взяти замовлення в роботу
     fun takeOrder(deliveryId: Int, courierId: Int) {
         viewModelScope.launch {
             try {
@@ -46,6 +61,7 @@ class DeliveriesViewModel(
         }
     }
 
+    // Змінити статус (PickedUp -> Delivered)
     fun updateStatus(deliveryId: Int, courierId: Int, newStatus: Int) {
         viewModelScope.launch {
             try {
@@ -57,16 +73,12 @@ class DeliveriesViewModel(
         }
     }
 
-    // --- НОВИЙ МЕТОД: ОПЛАТА ---
+    // Прийняти оплату (викликаємо OrderDispatchService через OrdersRepository)
     fun payOrder(orderId: String, courierId: Int) {
         viewModelScope.launch {
             try {
-                // 1. Викликаємо головний сервіс замовлень для оплати
                 ordersRepo.payOrder(orderId)
-
-                // 2. Оновлюємо список.
-                // Оскільки OrderDispatchService повідомить DeliveryService,
-                // то при оновленні списку ми побачимо isPaid = true.
+                // Оновлюємо дані, щоб побачити isPaid = true
                 loadData(courierId)
             } catch (e: Exception) {
                 _error.value = "Error paying order: ${e.message}"

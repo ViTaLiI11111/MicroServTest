@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.google.firebase.messaging.FirebaseMessaging // <--- ВАЖЛИВИЙ ІМПОРТ
 import com.waiter.app.core.UserRole
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -20,7 +21,7 @@ fun LoginScreen(
     onLoginSuccess: () -> Unit,
     onNavigateToRegister: () -> Unit,
     onLoginSuccessSaveSession: (Int, String, Int?) -> Unit,
-    onBack: () -> Unit // <--- НОВИЙ ПАРАМЕТР (Повернутися до вибору ролі)
+    onBack: () -> Unit
 ) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -32,19 +33,30 @@ fun LoginScreen(
         UserRole.COOK -> "Кухар"
     }
 
+    // --- ОБРОБКА УСПІШНОГО ВХОДУ ---
     LaunchedEffect(uiState) {
         if (uiState is AuthUiState.Success) {
-            onLoginSuccess()
+            // 1. Отримуємо FCM токен від Firebase
+            FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val token = task.result
+                    // 2. Відправляємо токен на наш сервер
+                    authViewModel.saveToken(username, role, token)
+                }
+
+                // 3. Переходимо далі (навіть якщо токен не отримали, впускаємо в додаток)
+                onLoginSuccess()
+            }
         }
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("") }, // Пустий заголовок
+                title = { Text("") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Назад")
+                        Icon(Icons.Default.ArrowBack, "Назад")
                     }
                 }
             )

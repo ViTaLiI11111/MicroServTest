@@ -5,6 +5,7 @@ import com.example.ukrainianstylerestaurant.model.OrderResponse;
 import com.example.ukrainianstylerestaurant.net.OrdersApi;
 import com.example.ukrainianstylerestaurant.net.OrdersRetrofitClient;
 import java.io.IOException;
+import java.util.List;
 import okhttp3.ResponseBody;
 import retrofit2.Response;
 
@@ -20,6 +21,11 @@ public class OrdersRepository {
         return null;
     }
 
+    public boolean payOrder(String orderId) throws IOException {
+        Response<ResponseBody> r = api.payOrder(orderId).execute();
+        return r.isSuccessful();
+    }
+
     public OrderResponse getOrder(String id) throws IOException {
         Response<OrderResponse> r = api.getOrder(id).execute();
         if (r.isSuccessful()) {
@@ -28,10 +34,12 @@ public class OrdersRepository {
         return null;
     }
 
-    // --- МЕТОД ОПЛАТИ ---
-    public boolean payOrder(String orderId) throws IOException {
-        // Викликаємо POST orders/{id}/pay
-        Response<ResponseBody> r = api.payOrder(orderId).execute();
-        return r.isSuccessful();
+    // --- НОВИЙ МЕТОД ---
+    public List<OrderResponse> getClientHistory(String clientName) throws IOException {
+        Response<List<OrderResponse>> r = api.getClientHistory(clientName).execute();
+        if (r.isSuccessful()) {
+            return r.body();
+        }
+        return null;
     }
 }

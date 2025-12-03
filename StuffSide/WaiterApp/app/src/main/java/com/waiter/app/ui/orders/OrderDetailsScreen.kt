@@ -1,11 +1,13 @@
 package com.waiter.app.ui.orders
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -19,20 +21,17 @@ fun OrderDetailsScreen(
     modifier: Modifier = Modifier
 ) {
     val order = vm.selected.collectAsStateWithLifecycle().value
+    val context = LocalContext.current
 
     val settingsVm: SettingsViewModel = viewModel()
     val myWaiterId by settingsVm.userIdFlow.collectAsState(initial = 0)
 
-    // --- ВИПРАВЛЕННЯ: Додаємо Surface для фону ---
-    // Це прибере прозорість і "мерехтіння" при навігації
     Surface(
         modifier = modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background // Використовуємо колір фону теми (зазвичай білий)
+        color = MaterialTheme.colorScheme.background
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp), // Padding перенесли всередину Surface
+            modifier = Modifier.fillMaxSize().padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             if (order != null) {
@@ -83,7 +82,7 @@ fun OrderDetailsScreen(
                 Spacer(Modifier.weight(1f))
 
                 // =========================
-                // ЛОГІКА КНОПОК
+                // ЛОГІКА КНОПОК ДІЙ
                 // =========================
 
                 val isMine = (order.waiterId == myWaiterId)
@@ -91,7 +90,11 @@ fun OrderDetailsScreen(
 
                 if (isFree) {
                     Button(
-                        onClick = { vm.assignOrder(order.id, myWaiterId) },
+                        onClick = {
+                            vm.assignOrder(order.id, myWaiterId) {
+                                Toast.makeText(context, "Ви взяли замовлення!", Toast.LENGTH_SHORT).show()
+                            }
+                        },
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                     ) {
@@ -114,18 +117,24 @@ fun OrderDetailsScreen(
 
                     // 2. Кнопка Завершення
                     if (order.status != "completed") {
+                        // --- НОВА ЛОГІКА ПЕРЕВІРКИ ---
+                        // Завершити можна, ТІЛЬКИ якщо (Оплачено) І (Всі страви готові - status=="ready")
+                        val isKitchenReady = (order.status == "ready")
+                        val canComplete = order.isPaid && isKitchenReady
+
                         Button(
                             onClick = {
                                 vm.completeOrder(order.id, myWaiterId, onSuccess = onBack)
                             },
                             modifier = Modifier.fillMaxWidth(),
-                            enabled = order.isPaid,
+                            enabled = canComplete, // Блокування
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = if(order.isPaid) MaterialTheme.colorScheme.secondary else Color.Gray
+                                containerColor = if(canComplete) MaterialTheme.colorScheme.secondary else Color.Gray
                             )
                         ) {
-                            if (order.isPaid) Text("Завершити обслуговування")
-                            else Text("Спочатку оплата!")
+                            if (!isKitchenReady) Text("⏳ Чекаємо кухню...")
+                            else if (!order.isPaid) Text("💵 Спочатку оплата!")
+                            else Text("✅ Завершити обслуговування")
                         }
                     } else {
                         Text("🏁 Замовлення закрито", color = Color.Gray)
