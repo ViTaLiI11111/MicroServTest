@@ -6,7 +6,8 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
+import android.widget.Button;
+import android.widget.ImageButton; // Імпорт для кнопки назад
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -14,6 +15,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation; // Імпорт навігації
 
 import com.example.ukrainianstylerestaurant.R;
 import com.example.ukrainianstylerestaurant.model.Order;
@@ -40,7 +42,6 @@ public class CourseDetailFragment extends Fragment {
             Bundle args = getArguments();
 
             courseId = args.getInt("courseId", 0);
-            int courseBgColor = args.getInt("courseBg", 0);
             String courseTitleText = args.getString("courseTitle");
             String coursePriceText = args.getString("coursePrice");
             String coursePepperText = args.getString("coursePepper");
@@ -50,11 +51,16 @@ public class CourseDetailFragment extends Fragment {
             TextView courseTitle = view.findViewById(R.id.coursePageTitle);
             TextView coursePrice = view.findViewById(R.id.coursePagePrice);
             TextView coursePepper = view.findViewById(R.id.coursePagePepper);
-            ImageButton addToCartBtn = view.findViewById(R.id.addToCart);
 
-            view.findViewById(R.id.coursePageBg).setBackgroundColor(courseBgColor);
+            // Змінив тип кнопки на Button (бо в XML це Button, а не ImageButton)
+            Button addToCartBtn = view.findViewById(R.id.addToCart);
+
+            // Знаходимо кнопку назад
+            ImageButton btnBack = view.findViewById(R.id.btnBack);
+
+            // Встановлюємо дані
             courseTitle.setText(courseTitleText);
-            coursePrice.setText(coursePriceText);
+            coursePrice.setText(coursePriceText + " грн");
             coursePepper.setText(coursePepperText);
 
             if (imageFilePath != null && !imageFilePath.isEmpty()) {
@@ -69,16 +75,18 @@ public class CourseDetailFragment extends Fragment {
                 courseImage.setImageResource(R.drawable.default_image);
             }
 
-            addToCartBtn.setOnClickListener(this::addToCart);
+            // Обробник додавання в кошик
+            addToCartBtn.setOnClickListener(v -> addToCart(v));
+
+            // Обробник кнопки "Назад"
+            btnBack.setOnClickListener(v -> {
+                Navigation.findNavController(view).popBackStack();
+            });
         }
     }
 
     public void addToCart(View view) {
         if (courseId != 0) {
-            // --- НОВА ЛОГІКА ---
-            // Перевіряємо, чи є вже ця страва в кошику
-            // Якщо є - беремо поточну кількість і додаємо 1
-            // Якщо немає - ставимо 1
             int currentQty = Order.itemsMap.getOrDefault(courseId, 0);
             Order.itemsMap.put(courseId, currentQty + 1);
 

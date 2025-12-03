@@ -1,6 +1,8 @@
 package com.example.ukrainianstylerestaurant.data;
 
 import android.util.Log;
+
+import com.example.ukrainianstylerestaurant.model.ClientProfileResponse;
 import com.example.ukrainianstylerestaurant.model.LoginRequest;
 import com.example.ukrainianstylerestaurant.model.LoginResponse;
 import com.example.ukrainianstylerestaurant.model.RegisterRequest;
@@ -10,6 +12,7 @@ import com.example.ukrainianstylerestaurant.net.AuthApi;
 import com.example.ukrainianstylerestaurant.net.AuthRetrofitClient;
 
 import java.io.IOException;
+
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -33,8 +36,8 @@ public class AuthRepository {
         return r.isSuccessful();
     }
 
-    public boolean updateProfile(int userId, String fullName, String email, String phone) throws IOException {
-        UpdateProfileRequest req = new UpdateProfileRequest(userId, fullName, email, phone);
+    public boolean updateProfile(int userId, String fullName, String email, String phone, String address) throws IOException {
+        UpdateProfileRequest req = new UpdateProfileRequest(userId, fullName, email, phone, address);
         Response<ResponseBody> r = api.updateProfile(req).execute();
         return r.isSuccessful();
     }
@@ -52,5 +55,13 @@ public class AuthRepository {
                 Log.e("AuthRepo", "Failed to send token: " + t.getMessage());
             }
         });
+    }
+
+    public ClientProfileResponse getProfile(int userId) throws IOException {
+        Response<ClientProfileResponse> r = api.getProfile(userId).execute();
+        if (r.isSuccessful()) {
+            return r.body();
+        }
+        return null;
     }
 }

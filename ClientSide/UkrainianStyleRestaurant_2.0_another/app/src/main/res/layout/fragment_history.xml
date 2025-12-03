@@ -9,16 +9,18 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Історія замовлень"
-        android:textSize="24sp"
-        android:textStyle="bold"
+        android:fontFamily="@font/montserrat_bold"
+        android:textSize="28sp"
+        android:textColor="@color/black"
         android:gravity="center"
-        android:padding="16dp"
-        android:textColor="@color/black"/>
+        android:paddingTop="24dp"
+        android:paddingBottom="16dp"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/history_recycler"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="8dp"
+        android:paddingHorizontal="16dp"
+        android:paddingBottom="16dp"
         android:clipToPadding="false"/>
 </LinearLayout>

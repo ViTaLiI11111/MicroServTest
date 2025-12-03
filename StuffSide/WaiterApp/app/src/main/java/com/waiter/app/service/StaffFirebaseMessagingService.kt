@@ -6,6 +6,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import androidx.core.content.ContextCompat
 import androidx.core.app.NotificationCompat
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
@@ -38,9 +39,12 @@ class StaffFirebaseMessagingService : FirebaseMessagingService() {
 
         val pendingIntent = PendingIntent.getActivity(this, 0, intent, flags)
 
+        val accentColor = ContextCompat.getColor(this, R.color.name_of_app)
+
         val channelId = "StaffUpdates"
         val builder = NotificationCompat.Builder(this, channelId)
-            .setSmallIcon(R.mipmap.ic_launcher) // Переконайся, що іконка є
+            .setSmallIcon(R.drawable.ic_stat_logo) // <--- Ставимо БІЛУ іконку (силует)
+            .setColor(accentColor)                 // <--- Фарбуємо в червоний
             .setContentTitle(title)
             .setContentText(body)
             .setAutoCancel(true)

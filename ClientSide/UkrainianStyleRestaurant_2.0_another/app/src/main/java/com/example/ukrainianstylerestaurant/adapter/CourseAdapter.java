@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
@@ -21,6 +22,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ukrainianstylerestaurant.R;
 import com.example.ukrainianstylerestaurant.model.Course;
+import com.example.ukrainianstylerestaurant.model.Order;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -40,6 +42,7 @@ public class CourseAdapter extends RecyclerView.Adapter<CourseAdapter.CourseView
     @NonNull
     @Override
     public CourseViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        // Використовуємо оновлений course_item
         View courseItems = LayoutInflater.from(context).inflate(R.layout.course_item, parent, false);
         return new CourseAdapter.CourseViewHolder(courseItems);
     }
@@ -48,53 +51,64 @@ public class CourseAdapter extends RecyclerView.Adapter<CourseAdapter.CourseView
     public void onBindViewHolder(@NonNull CourseViewHolder holder, int position) {
         Course course = courses.get(holder.getAdapterPosition());
         if (course != null) {
+
+            // 1. Встановлюємо колір фону (або дефолтний, якщо помилка)
             try {
-                holder.courseBg.setCardBackgroundColor(Color.parseColor(course.getColor()));
-            } catch (IllegalArgumentException e) {
-                holder.courseBg.setCardBackgroundColor(Color.GRAY); // default color in case of error
-                Log.e("CourseAdapter", "Invalid color format: " + course.getColor());
+                // Якщо у тебе в базі колір текстом "#FFFFFF", то parseColor спрацює
+                // Але для нового дизайну краще фіксований темний фон у XML,
+                // проте якщо ти хочеш динамічний, розкоментуй рядок нижче:
+                // holder.courseBg.setCardBackgroundColor(Color.parseColor(course.getColor()));
+            } catch (Exception e) {
+                holder.courseBg.setCardBackgroundColor(Color.DKGRAY);
             }
 
+            // 2. Обробка зображення (Base64 -> Bitmap)
             String imageBase64 = course.getImageBase64();
+            Bitmap decodedByte = null;
             if (imageBase64 != null && !imageBase64.isEmpty()) {
                 try {
                     byte[] decodedString = Base64.decode(imageBase64, Base64.DEFAULT);
-                    Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+                    decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
                     holder.courseImage.setImageBitmap(decodedByte);
-
-
-                    File imageFile = saveImageToFile(decodedByte, "course_" + course.getId() + ".png");
-                    if (imageFile != null) {
-                        holder.itemView.setOnClickListener(view -> {
-
-                            // !!! КЛЮЧОВА ЗМІНА: ВИКОРИСТАННЯ BUNDLE І NAVIGATOR !!!
-                            Bundle bundle = new Bundle();
-                            bundle.putInt("courseId", course.getId());
-                            bundle.putInt("courseBg", Color.parseColor(course.getColor()));
-                            bundle.putString("courseImageFilePath", imageFile.getAbsolutePath());
-                            bundle.putString("courseTitle", course.getTitle());
-                            bundle.putString("coursePrice", course.getPrice());
-                            bundle.putString("coursePepper", course.getPepper());
-
-                            // Переходимо за допомогою NavController
-                            Navigation.findNavController(view).navigate(R.id.nav_course_detail, bundle);
-
-                        });
-                    }
-                } catch (IllegalArgumentException e) {
-                    Log.e("CourseAdapter", "Base64 decoding error: " + e.getMessage());
-                    holder.courseImage.setImageResource(R.drawable.default_image); // default image in case of error
                 } catch (Exception e) {
-                    Log.e("CourseAdapter", "Unexpected error: " + e.getMessage());
-                    holder.courseImage.setImageResource(R.drawable.default_image); // default image in case of error
+                    holder.courseImage.setImageResource(R.drawable.default_image);
                 }
             } else {
-                holder.courseImage.setImageResource(R.drawable.default_image); // default image
+                holder.courseImage.setImageResource(R.drawable.default_image);
             }
 
+            // 3. Текстові поля
             holder.courseTitle.setText(course.getTitle());
-            holder.coursePrice.setText(course.getPrice());
-            holder.coursePepper.setText(course.getPepper());
+            holder.coursePrice.setText(course.getPrice() + " грн"); // Додаємо валюту
+            holder.coursePepper.setText(course.getPepper() + "/5");
+
+            // 4. Клік по самій картці (перехід до деталей)
+            Bitmap finalDecodedByte = decodedByte;
+            holder.itemView.setOnClickListener(view -> {
+                File imageFile = null;
+                if (finalDecodedByte != null) {
+                    imageFile = saveImageToFile(finalDecodedByte, "course_" + course.getId() + ".png");
+                }
+
+                Bundle bundle = new Bundle();
+                bundle.putInt("courseId", course.getId());
+                // Якщо використовуєш динамічний колір, розкоментуй:
+                // bundle.putInt("courseBg", Color.parseColor(course.getColor()));
+                bundle.putString("courseImageFilePath", imageFile != null ? imageFile.getAbsolutePath() : null);
+                bundle.putString("courseTitle", course.getTitle());
+                bundle.putString("coursePrice", course.getPrice());
+                bundle.putString("coursePepper", course.getPepper());
+
+                Navigation.findNavController(view).navigate(R.id.nav_course_detail, bundle);
+            });
+
+            // 5. Клік по кнопці "Швидке додавання в кошик" (+)
+            holder.btnAddToCartSmall.setOnClickListener(v -> {
+                int currentQty = Order.itemsMap.getOrDefault(course.getId(), 0);
+                Order.itemsMap.put(course.getId(), currentQty + 1);
+
+                Toast.makeText(context, "Додано: " + course.getTitle(), Toast.LENGTH_SHORT).show();
+            });
         }
     }
 
@@ -103,6 +117,7 @@ public class CourseAdapter extends RecyclerView.Adapter<CourseAdapter.CourseView
         return courses.size();
     }
 
+    // Метод для збереження картинки у файл (щоб передати шлях у фрагмент деталей)
     private File saveImageToFile(Bitmap bitmap, String fileName) {
         File storageDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         if (storageDir != null && !storageDir.exists()) {
@@ -113,7 +128,7 @@ public class CourseAdapter extends RecyclerView.Adapter<CourseAdapter.CourseView
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
             return imageFile;
         } catch (IOException e) {
-            Log.e("CourseAdapter", "Error saving image file: " + e.getMessage());
+            Log.e("CourseAdapter", "Error saving image: " + e.getMessage());
             return null;
         }
     }
@@ -122,6 +137,7 @@ public class CourseAdapter extends RecyclerView.Adapter<CourseAdapter.CourseView
         CardView courseBg;
         ImageView courseImage;
         TextView courseTitle, coursePrice, coursePepper;
+        View btnAddToCartSmall; // Кнопка додавання (CardView або ImageView)
 
         public CourseViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -131,6 +147,9 @@ public class CourseAdapter extends RecyclerView.Adapter<CourseAdapter.CourseView
             courseTitle = itemView.findViewById(R.id.courseTitle);
             coursePrice = itemView.findViewById(R.id.coursePrice);
             coursePepper = itemView.findViewById(R.id.coursePepper);
+
+            // Ця кнопка була додана в новому course_item.xml
+            btnAddToCartSmall = itemView.findViewById(R.id.btnAddToCartSmall);
         }
     }
 }

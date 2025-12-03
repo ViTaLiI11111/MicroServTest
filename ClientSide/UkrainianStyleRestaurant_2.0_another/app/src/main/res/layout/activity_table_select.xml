@@ -1,48 +1,69 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:gravity="center"
-    android:padding="24dp"
-    tools:context=".TableSelectActivity">
+    android:background="@color/mainBgColor"
+    android:padding="32dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Ukrainian Style"
+        android:fontFamily="@font/montserrat_bold"
+        android:textSize="32sp"
+        android:textColor="@color/name_of_app"
+        android:layout_marginBottom="48dp"/>
 
     <TextView
         android:id="@+id/tv_welcome"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="22sp"
-        tools:text="Вітаємо, User!"/>
+        android:text="Вітаємо!"
+        android:fontFamily="@font/montserrat_bold"
+        android:textColor="@color/black"
+        android:textSize="24sp"
+        android:layout_marginBottom="8dp"/>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
         android:text="Введіть номер вашого столика:"
-        android:textSize="18sp" />
+        android:fontFamily="@font/montserrat_light"
+        android:textColor="@color/style"
+        android:textSize="16sp"
+        android:layout_marginBottom="24dp"/>
 
     <EditText
         android:id="@+id/et_table_number"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:hint="Номер столика"
-        android:inputType="number"/>
+        android:layout_height="56dp"
+        android:background="@drawable/custom_input_bg"
+        android:hint="№"
+        android:gravity="center"
+        android:inputType="number"
+        android:textSize="18sp"
+        android:textColor="@color/black"/>
 
-    <Button
+    <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/btn_confirm_table"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="56dp"
         android:layout_marginTop="24dp"
-        android:text="Перейти до меню"/>
+        android:background="@drawable/custom_button_bg"
+        android:text="Перейти до меню"
+        android:textColor="@color/white"
+        android:fontFamily="@font/montserrat_bold"
+        android:textSize="16sp"/>
 
     <Button
         android:id="@+id/btn_logout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="48dp"
+        android:layout_marginTop="32dp"
         android:text="Вийти з акаунту"
-        style="?android:attr/borderlessButtonStyle"/>
+        style="?android:attr/borderlessButtonStyle"
+        android:textColor="@color/style"/>
 
 </LinearLayout>

@@ -107,9 +107,14 @@ public class OrderFragment extends Fragment {
             return;
         }
 
+        // Перевіряємо, чи є дані
         String clientName = LocalStorage.getClientName(requireContext());
-        if (clientName.isEmpty()) {
-            Toast.makeText(requireContext(), "Будь ласка, вкажіть ваше ім'я в профілі!", Toast.LENGTH_LONG).show();
+        String clientPhone = LocalStorage.getClientPhone(requireContext()); // Додай перевірку телефону
+
+        if (clientName.isEmpty() || clientPhone.isEmpty()) {
+            Toast.makeText(requireContext(), "Для замовлення заповніть профіль (Ім'я та Телефон)!", Toast.LENGTH_LONG).show();
+
+            // Перехід в профіль
             Navigation.findNavController(requireView()).navigate(R.id.nav_profile);
             return;
         }

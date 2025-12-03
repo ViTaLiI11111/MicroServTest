@@ -5,31 +5,38 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:gravity="center"
-    android:padding="24dp"
+    android:padding="32dp"
+    android:background="@color/mainBgColor"
     tools:context=".LoginActivity">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Вхід для клієнта"
-        android:textSize="24sp"
-        android:textStyle="bold"/>
+        android:text="Вхід"
+        android:fontFamily="@font/montserrat_bold"
+        android:textColor="@color/name_of_app"
+        android:textSize="32sp"
+        android:layout_marginBottom="48dp"/>
 
     <EditText
         android:id="@+id/et_username"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
+        android:layout_height="50dp"
+        android:background="@drawable/custom_input_bg"
         android:hint="Логін (Username)"
-        android:inputType="text"/>
+        android:paddingStart="16dp"
+        android:inputType="text"
+        android:layout_marginBottom="16dp"/>
 
     <EditText
         android:id="@+id/et_password"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_height="50dp"
+        android:background="@drawable/custom_input_bg"
         android:hint="Пароль"
-        android:inputType="textPassword"/>
+        android:paddingStart="16dp"
+        android:inputType="textPassword"
+        android:layout_marginBottom="16dp"/>
 
     <ProgressBar
         android:id="@+id/progress_bar"
@@ -39,19 +46,25 @@
         android:visibility="gone"
         tools:visibility="visible"/>
 
-    <Button
+    <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/btn_login"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="Увійти"/>
+        android:layout_height="56dp"
+        android:layout_marginTop="24dp"
+        android:background="@drawable/custom_button_bg"
+        android:text="Увійти"
+        android:textColor="@color/white"
+        android:fontFamily="@font/montserrat_bold"
+        android:textSize="16sp"/>
 
     <TextView
         android:id="@+id/tv_go_to_register"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="32dp"
         android:text="Немає акаунту? Зареєструватись"
-        android:textColor="@color/design_default_color_primary"/>
+        android:fontFamily="@font/montserrat_light"
+        android:textColor="@color/style"
+        android:textSize="14sp"/>
 
 </LinearLayout>

@@ -10,80 +10,83 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="24dp"
-        android:clickable="true"
-        android:focusable="true">
+        android:gravity="center_horizontal">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Мій Профіль"
+            android:fontFamily="@font/montserrat_bold"
             android:textSize="28sp"
-            android:textStyle="bold"
             android:textColor="@color/black"
-            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="16dp"
             android:layout_marginBottom="32dp"/>
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Особисті дані"
-            android:textStyle="bold"
+            android:fontFamily="@font/montserrat_bold"
             android:textColor="@color/name_of_app"
             android:layout_marginBottom="8dp"/>
 
         <EditText
             android:id="@+id/et_profile_name"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@android:drawable/edit_text"
-            android:padding="12dp"
-            android:hint="Ім'я (як до вас звертатись)"
+            android:layout_height="50dp"
+            android:background="@drawable/custom_input_bg"
+            android:hint="Ім'я"
+            android:paddingStart="16dp"
             android:inputType="textPersonName"
             android:layout_marginBottom="12dp"/>
 
         <EditText
             android:id="@+id/et_profile_email"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@android:drawable/edit_text"
-            android:padding="12dp"
+            android:layout_height="50dp"
+            android:background="@drawable/custom_input_bg"
             android:hint="Email"
+            android:paddingStart="16dp"
             android:inputType="textEmailAddress"
             android:layout_marginBottom="12dp"/>
 
         <EditText
             android:id="@+id/et_profile_phone"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@android:drawable/edit_text"
-            android:padding="12dp"
+            android:layout_height="50dp"
+            android:background="@drawable/custom_input_bg"
             android:hint="Телефон"
+            android:paddingStart="16dp"
             android:inputType="phone"
             android:layout_marginBottom="24dp"/>
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Адреса доставки (за замовчуванням)"
-            android:textStyle="bold"
+            android:text="Адреса доставки"
+            android:fontFamily="@font/montserrat_bold"
             android:textColor="@color/name_of_app"
             android:layout_marginBottom="8dp"/>
 
         <EditText
             android:id="@+id/et_profile_address"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@android:drawable/edit_text"
-            android:padding="12dp"
+            android:layout_height="50dp"
+            android:background="@drawable/custom_input_bg"
             android:hint="Вул, Будинок, Квартира"
+            android:paddingStart="16dp"
             android:inputType="textPostalAddress"
-            android:layout_marginBottom="32dp"/>
+            android:layout_marginBottom="40dp"/>
 
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btn_save_profile"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:text="Зберегти зміни"/>
+            android:layout_height="56dp"
+            android:background="@drawable/custom_button_bg"
+            android:text="Зберегти зміни"
+            android:textColor="@color/white"
+            android:fontFamily="@font/montserrat_bold"
+            android:textSize="16sp"/>
 
     </LinearLayout>
 </ScrollView>

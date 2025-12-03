@@ -22,5 +22,6 @@ namespace AuthService.Entities
 
         [Phone]
         public string? Phone { get; set; }
+        public string? Address { get; set; }
     }
 }

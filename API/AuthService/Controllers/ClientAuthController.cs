@@ -70,14 +70,34 @@ namespace AuthService.Controllers
             var client = await _context.Clients.FindAsync(request.Id);
             if (client == null) return NotFound("Client not found");
 
-            // Оновлюємо ім'я в базі
-            client.FullName = request.FullName; // <--- Ось тут відбувається магія
-
+            client.FullName = request.FullName;
             client.Email = request.Email;
             client.Phone = request.Phone;
 
+            // Додай це:
+            client.Address = request.Address;
+
             await _context.SaveChangesAsync();
             return Ok(new { Message = "Profile updated successfully" });
+        }
+
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> GetProfile(int id)
+        {
+            var client = await _context.Clients.FindAsync(id);
+            if (client == null) return NotFound("Client not found");
+
+            return Ok(new
+            {
+                Id = client.Id,
+                Username = client.Username,
+                FullName = client.FullName,
+                Email = client.Email,
+                Phone = client.Phone,
+
+                // Додай це:
+                Address = client.Address
+            });
         }
     }
 }

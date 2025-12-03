@@ -13,10 +13,12 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
 
 import com.example.ukrainianstylerestaurant.LocalStorage;
 import com.example.ukrainianstylerestaurant.R;
 import com.example.ukrainianstylerestaurant.data.AuthRepository;
+import com.example.ukrainianstylerestaurant.model.ClientProfileResponse;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -26,78 +28,123 @@ public class ProfileFragment extends Fragment {
     private ExecutorService executorService = Executors.newSingleThreadExecutor();
     private Handler mainHandler = new Handler(Looper.getMainLooper());
 
+    private EditText etName, etEmail, etPhone, etAddress;
+    private Button btnSave;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_profile, container, false);
+        return inflater.inflate(R.layout.fragment_profile, container, false);
+    }
 
-        // 1. Знаходимо поле з іменем (те, що на скріншоті)
-        EditText etName = view.findViewById(R.id.et_profile_name);
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
-        EditText etEmail = view.findViewById(R.id.et_profile_email);
-        EditText etPhone = view.findViewById(R.id.et_profile_phone);
-        EditText etAddress = view.findViewById(R.id.et_profile_address);
-        Button btnSave = view.findViewById(R.id.btn_save_profile);
+        etName = view.findViewById(R.id.et_profile_name);
+        etEmail = view.findViewById(R.id.et_profile_email);
+        etPhone = view.findViewById(R.id.et_profile_phone);
+        etAddress = view.findViewById(R.id.et_profile_address);
+        btnSave = view.findViewById(R.id.btn_save_profile);
 
-        // Підтягуємо старі дані
+        // 1. Спочатку показуємо те, що вже збережено в телефоні
+        fillFieldsFromLocal();
+
+        // 2. Завжди пробуємо оновити дані з хмари (щоб підтягнути актуальну адресу)
+        loadProfileFromServer();
+
+        btnSave.setOnClickListener(v -> saveProfile());
+    }
+
+    private void fillFieldsFromLocal() {
         etName.setText(LocalStorage.getClientName(requireContext()));
         etEmail.setText(LocalStorage.getClientEmail(requireContext()));
         etPhone.setText(LocalStorage.getClientPhone(requireContext()));
-        etAddress.setText(LocalStorage.getClientAddress(requireContext()));
+        etAddress.setText(LocalStorage.getClientAddress(requireContext())); // Підтягуємо адресу
 
-        // Якщо в LocalStorage пусто, підставляємо логін як заглушку
+        // Заглушка, якщо ім'я пусте (показуємо логін)
         if (etName.getText().toString().isEmpty()) {
             etName.setText(LocalStorage.getUsername(requireContext()));
         }
+    }
 
-        btnSave.setOnClickListener(v -> {
-            // 2. Беремо текст, який ввів користувач ("Vitaliy" або щось нове)
-            String newName = etName.getText().toString().trim();
+    private void loadProfileFromServer() {
+        int userId = LocalStorage.getUserId(requireContext());
+        if (userId == -1) return;
 
-            String email = etEmail.getText().toString().trim();
-            String phone = etPhone.getText().toString().trim();
-            String address = etAddress.getText().toString().trim();
+        executorService.execute(() -> {
+            try {
+                AuthRepository repo = new AuthRepository();
+                // Цей запит повертає JSON з полями: id, username, fullName, email, phone, ADDRESS
+                ClientProfileResponse profile = repo.getProfile(userId);
 
-            if (newName.isEmpty() || phone.isEmpty()) {
-                Toast.makeText(requireContext(), "Ім'я та Телефон обов'язкові", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            btnSave.setEnabled(false);
-            btnSave.setText("Збереження...");
-
-            int userId = LocalStorage.getUserId(requireContext());
-
-            executorService.execute(() -> {
-                try {
-                    AuthRepository repo = new AuthRepository();
-
-                    // 3. Відправляємо newName (ім'я) на сервер
-                    boolean success = repo.updateProfile(userId, newName, email, phone);
-
+                if (profile != null) {
                     mainHandler.post(() -> {
-                        btnSave.setEnabled(true);
-                        btnSave.setText("Зберегти зміни");
+                        // --- ГОЛОВНА ЗМІНА ТУТ ---
+                        // Зберігаємо отриману адресу в пам'ять телефону
+                        LocalStorage.saveProfile(requireContext(),
+                                profile.fullName != null ? profile.fullName : profile.username,
+                                profile.phone,
+                                profile.email,
+                                profile.address); // <--- Беремо адресу з сервера!
 
-                        if (success) {
-                            // 4. Якщо сервер прийняв, зберігаємо це ім'я локально
-                            LocalStorage.saveProfile(requireContext(), newName, phone, email, address);
-                            Toast.makeText(requireContext(), "Ім'я оновлено!", Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(requireContext(), "Помилка сервера", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    mainHandler.post(() -> {
-                        btnSave.setEnabled(true);
-                        btnSave.setText("Зберегти зміни");
-                        Toast.makeText(requireContext(), "Помилка мережі", Toast.LENGTH_SHORT).show();
+                        // Оновлюємо поля на екрані новими даними
+                        fillFieldsFromLocal();
+                        // Можна показати маленький тост, що дані оновлено
+                        // Toast.makeText(requireContext(), "Профіль оновлено", Toast.LENGTH_SHORT).show();
                     });
                 }
-            });
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         });
+    }
 
-        return view;
+    private void saveProfile() {
+        String newName = etName.getText().toString().trim();
+        String email = etEmail.getText().toString().trim();
+        String phone = etPhone.getText().toString().trim();
+        String address = etAddress.getText().toString().trim();
+
+        if (newName.isEmpty() || phone.isEmpty()) {
+            Toast.makeText(requireContext(), "Ім'я та Телефон обов'язкові", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        btnSave.setEnabled(false);
+        btnSave.setText("Збереження...");
+
+        int userId = LocalStorage.getUserId(requireContext());
+
+        executorService.execute(() -> {
+            try {
+                AuthRepository repo = new AuthRepository();
+                // Відправляємо адресу на сервер для збереження
+                boolean success = repo.updateProfile(userId, newName, email, phone, address);
+
+                mainHandler.post(() -> {
+                    btnSave.setEnabled(true);
+                    btnSave.setText("Зберегти зміни");
+
+                    if (success) {
+                        // Якщо сервер зберіг ок - оновлюємо і локально
+                        LocalStorage.saveProfile(requireContext(), newName, phone, email, address);
+                        Toast.makeText(requireContext(), "Дані збережено!", Toast.LENGTH_SHORT).show();
+
+                        // Повертаємо користувача назад (в меню або кошик)
+                        Navigation.findNavController(requireView()).popBackStack();
+                    } else {
+                        Toast.makeText(requireContext(), "Помилка сервера", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
+                mainHandler.post(() -> {
+                    btnSave.setEnabled(true);
+                    btnSave.setText("Зберегти зміни");
+                    Toast.makeText(requireContext(), "Помилка мережі", Toast.LENGTH_SHORT).show();
+                });
+            }
+        });
     }
 }

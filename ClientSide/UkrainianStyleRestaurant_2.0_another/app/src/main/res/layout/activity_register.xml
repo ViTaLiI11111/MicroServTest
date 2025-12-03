@@ -1,65 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:gravity="center"
-    android:padding="24dp"
-    tools:context=".RegisterActivity">
+    android:padding="32dp"
+    android:background="@color/mainBgColor">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Реєстрація"
-        android:textSize="24sp"
-        android:textStyle="bold"/>
+        android:fontFamily="@font/montserrat_bold"
+        android:textColor="@color/name_of_app"
+        android:textSize="32sp"
+        android:layout_marginBottom="32dp"/>
 
     <EditText
         android:id="@+id/et_username"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:hint="Логін (Username)"
-        android:inputType="text"/>
+        android:layout_height="50dp"
+        android:background="@drawable/custom_input_bg"
+        android:hint="Логін"
+        android:paddingStart="16dp"
+        android:layout_marginBottom="16dp"/>
 
     <EditText
         android:id="@+id/et_password"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_height="50dp"
+        android:background="@drawable/custom_input_bg"
         android:hint="Пароль"
-        android:inputType="textPassword"/>
+        android:inputType="textPassword"
+        android:paddingStart="16dp"
+        android:layout_marginBottom="16dp"/>
 
     <EditText
         android:id="@+id/et_email"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:hint="Email (необов'язково)"
-        android:inputType="textEmailAddress"/>
+        android:layout_height="50dp"
+        android:background="@drawable/custom_input_bg"
+        android:hint="Email"
+        android:inputType="textEmailAddress"
+        android:paddingStart="16dp"
+        android:layout_marginBottom="16dp"/>
 
     <EditText
         android:id="@+id/et_phone"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:hint="Телефон (необов'язково)"
-        android:inputType="phone"/>
+        android:layout_height="50dp"
+        android:background="@drawable/custom_input_bg"
+        android:hint="Телефон"
+        android:inputType="phone"
+        android:paddingStart="16dp"
+        android:layout_marginBottom="24dp"/>
 
     <ProgressBar
         android:id="@+id/progress_bar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
         android:visibility="gone"/>
 
-    <Button
+    <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/btn_register"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="Зареєструватись"/>
+        android:layout_height="56dp"
+        android:background="@drawable/custom_button_bg"
+        android:text="Зареєструватись"
+        android:textColor="@color/white"
+        android:fontFamily="@font/montserrat_bold"
+        android:textSize="16sp"/>
 
     <TextView
         android:id="@+id/tv_go_to_login"
@@ -67,6 +78,6 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
         android:text="Вже є акаунт? Увійти"
-        android:textColor="@color/design_default_color_primary"/>
+        android:textColor="@color/style"/>
 
 </LinearLayout>

@@ -1,37 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="176dp"
-    android:background="@color/asideBgColor"
+    android:layout_height="180dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/white"
     android:gravity="bottom"
     android:orientation="vertical"
-    android:padding="16dp"
-    android:theme="@style/ThemeOverlay.AppCompat.Dark">
+    android:padding="24dp"
+    android:theme="@style/ThemeOverlay.AppCompat.Light"> <ImageView
+    android:id="@+id/imageView"
+    android:layout_width="64dp"
+    android:layout_height="64dp"
+    android:layout_marginBottom="16dp"
+    android:src="@drawable/hot_deal"
+    app:tint="@color/name_of_app"
+    android:contentDescription="@string/app_name" />
 
-    <ImageView
-        android:id="@+id/imageView"
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:src="@drawable/hot_deal"
-        android:contentDescription="@string/app_name" />
+        android:orientation="horizontal">
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:fontFamily="@font/montserrat_bold"
-        android:text="Ukrainian Style"
-        android:textColor="@color/black"
-        android:textSize="20sp"
-        android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ukrainian "
+            android:fontFamily="@font/montserrat_bold"
+            android:textColor="@color/name_of_app"
+            android:textSize="20sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Style"
+            android:fontFamily="@font/montserrat_light"
+            android:textColor="@color/black"
+            android:textSize="20sp" />
+    </LinearLayout>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:fontFamily="@font/montserrat_light"
         android:text="Restaurant App"
-        android:textColor="@color/black"
-        android:textSize="14sp" />
+        android:fontFamily="@font/montserrat_light"
+        android:textColor="@color/style"
+        android:textSize="14sp"
+        android:layout_marginTop="4dp"/>
 
 </LinearLayout>
