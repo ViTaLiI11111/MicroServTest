@@ -2,10 +2,13 @@ package com.example.ukrainianstylerestaurant.net;
 
 public final class ApiConfig {
 
-    public static final String BASE_URL = "http://10.0.2.2:5045/";
+    // СЮДИ ВСТАВ СВІЙ ДОМЕН З NGROK (Обов'язково з / в кінці)
+    // Приклад: "https://unsuburbed-omar-dioptrically.ngrok-free.dev/"
+    public static final String BASE_URL = "https://unsuburbed-omar-dioptrically.ngrok-free.dev/";
 
-    public static final String ORDERS_BASE_URL = "http://10.0.2.2:5245/"; // якщо інший порт — заміни
-    public static final String AUTH_BASE_URL = "http://10.0.2.2:5210/";
+    // Тепер всі сервіси доступні за однією адресою завдяки Nginx
+    public static final String ORDERS_BASE_URL = BASE_URL;
+    public static final String AUTH_BASE_URL = BASE_URL;
 
     private ApiConfig() {}
 }

@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white">
+    android:background="@color/main_background">
 
     <ImageView
         android:id="@+id/coursePageImage"
@@ -35,11 +35,13 @@
         app:tint="@color/black"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:fillViewport="true"
         android:background="@drawable/sheet_bg"
+        android:backgroundTint="@color/card_background"
         android:layout_marginTop="-24dp"
         android:elevation="4dp"
         app:layout_constraintTop_toBottomOf="@+id/coursePageImage"
@@ -58,7 +60,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Назва страви"
-                android:textColor="@color/black"
+                android:textColor="@color/primary_text"
                 android:textSize="28sp"
                 android:fontFamily="@font/montserrat_bold"
                 android:layout_marginBottom="8dp"/>
@@ -75,7 +77,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="150 грн"
-                    android:textColor="#FF5252"
+                    android:textColor="@color/name_of_app"
                     android:textSize="24sp"
                     android:textStyle="bold"
                     android:fontFamily="@font/montserrat_bold"/>
@@ -88,7 +90,7 @@
                 <TextView
                     android:text="Гострота:"
                     android:textSize="16sp"
-                    android:textColor="#757575"
+                    android:textColor="@color/secondary_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="8dp"/>
@@ -98,7 +100,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="3/5"
-                    android:textColor="@color/black"
+                    android:textColor="@color/primary_text"
                     android:textSize="18sp"
                     android:textStyle="bold"/>
             </LinearLayout>
@@ -109,16 +111,16 @@
                 android:text="Опис"
                 android:textSize="18sp"
                 android:textStyle="bold"
-                android:textColor="@color/black"
+                android:textColor="@color/primary_text"
                 android:layout_marginBottom="8dp"/>
 
             <TextView
                 android:id="@+id/coursePageDescription"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Смачна традиційна українська страва, приготована за старовинним рецептом. Спробуйте неперевершений смак!"
+                android:text="Смачна традиційна українська страва..."
                 android:textSize="16sp"
-                android:textColor="#616161"
+                android:textColor="@color/secondary_text"
                 android:lineSpacingExtra="4dp"/>
 
         </LinearLayout>
@@ -128,7 +130,7 @@
         android:id="@+id/bottomLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/white"
+        android:background="@color/card_background"
         android:elevation="10dp"
         android:padding="16dp"
         app:layout_constraintBottom_toBottomOf="parent">
@@ -139,8 +141,8 @@
             android:layout_height="56dp"
             android:text="Додати в кошик"
             android:textSize="18sp"
-            android:textColor="@color/white"
-            android:backgroundTint="#FF5252"
+            android:textColor="@android:color/white"
+            android:backgroundTint="@color/name_of_app"
             app:cornerRadius="12dp"/>
     </LinearLayout>
 

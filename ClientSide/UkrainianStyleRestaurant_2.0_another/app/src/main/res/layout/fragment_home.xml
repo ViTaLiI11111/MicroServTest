@@ -4,40 +4,42 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F5F5"> <LinearLayout
-    android:id="@+id/headerLayout"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:gravity="center_vertical"
-    android:paddingVertical="12dp"
-    android:paddingStart="16dp"
-    android:paddingEnd="0dp"
-    android:clipToPadding="false"
-    app:layout_constraintTop_toTopOf="parent">
+    android:background="@color/main_background">
 
-    <ImageButton
-        android:id="@+id/return_first_list"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:background="@drawable/round_bg"
-        android:padding="12dp"
-        android:scaleType="fitCenter"
-        android:contentDescription="@string/app_name"
-        app:srcCompat="@drawable/filter"
-        app:tint="@color/black" />
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/categoryRecycler"
+    <LinearLayout
+        android:id="@+id/headerLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
         android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingVertical="12dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="0dp"
         android:clipToPadding="false"
-        android:paddingEnd="16dp"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        tools:listitem="@layout/category_item" />
-</LinearLayout>
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageButton
+            android:id="@+id/return_first_list"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@drawable/round_bg"
+            android:padding="12dp"
+            android:scaleType="fitCenter"
+            android:contentDescription="@string/app_name"
+            app:srcCompat="@drawable/filter"
+            app:tint="@color/black" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/categoryRecycler"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:orientation="horizontal"
+            android:clipToPadding="false"
+            android:paddingEnd="16dp"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            tools:listitem="@layout/category_item" />
+    </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/courseRecycler"

@@ -3,18 +3,20 @@
     android:layout_width="match_parent"
     android:layout_height="180dp"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="@color/white"
+    android:background="@color/card_background"
     android:gravity="bottom"
     android:orientation="vertical"
     android:padding="24dp"
-    android:theme="@style/ThemeOverlay.AppCompat.Light"> <ImageView
-    android:id="@+id/imageView"
-    android:layout_width="64dp"
-    android:layout_height="64dp"
-    android:layout_marginBottom="16dp"
-    android:src="@drawable/hot_deal"
-    app:tint="@color/name_of_app"
-    android:contentDescription="@string/app_name" />
+    android:theme="@style/ThemeOverlay.AppCompat.Light">
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_marginBottom="16dp"
+        android:src="@drawable/hot_deal"
+        app:tint="@color/name_of_app"
+        android:contentDescription="@string/app_name" />
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -34,7 +36,7 @@
             android:layout_height="wrap_content"
             android:text="Style"
             android:fontFamily="@font/montserrat_light"
-            android:textColor="@color/black"
+            android:textColor="@color/primary_text"
             android:textSize="20sp" />
     </LinearLayout>
 
@@ -43,7 +45,7 @@
         android:layout_height="wrap_content"
         android:text="Restaurant App"
         android:fontFamily="@font/montserrat_light"
-        android:textColor="@color/style"
+        android:textColor="@color/name_of_app"
         android:textSize="14sp"
         android:layout_marginTop="4dp"/>
 

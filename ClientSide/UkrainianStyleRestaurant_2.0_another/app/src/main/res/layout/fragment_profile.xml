@@ -2,7 +2,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/mainBgColor"
+    android:background="@color/main_background"
     android:fillViewport="true">
 
     <LinearLayout
@@ -18,7 +18,7 @@
             android:text="Мій Профіль"
             android:fontFamily="@font/montserrat_bold"
             android:textSize="28sp"
-            android:textColor="@color/black"
+            android:textColor="@color/primary_text"
             android:layout_marginTop="16dp"
             android:layout_marginBottom="32dp"/>
 
@@ -37,6 +37,8 @@
             android:background="@drawable/custom_input_bg"
             android:hint="Ім'я"
             android:paddingStart="16dp"
+            android:textColor="@color/primary_text"
+            android:textColorHint="@color/secondary_text"
             android:inputType="textPersonName"
             android:layout_marginBottom="12dp"/>
 
@@ -47,6 +49,8 @@
             android:background="@drawable/custom_input_bg"
             android:hint="Email"
             android:paddingStart="16dp"
+            android:textColor="@color/primary_text"
+            android:textColorHint="@color/secondary_text"
             android:inputType="textEmailAddress"
             android:layout_marginBottom="12dp"/>
 
@@ -57,6 +61,8 @@
             android:background="@drawable/custom_input_bg"
             android:hint="Телефон"
             android:paddingStart="16dp"
+            android:textColor="@color/primary_text"
+            android:textColorHint="@color/secondary_text"
             android:inputType="phone"
             android:layout_marginBottom="24dp"/>
 
@@ -75,6 +81,8 @@
             android:background="@drawable/custom_input_bg"
             android:hint="Вул, Будинок, Квартира"
             android:paddingStart="16dp"
+            android:textColor="@color/primary_text"
+            android:textColorHint="@color/secondary_text"
             android:inputType="textPostalAddress"
             android:layout_marginBottom="40dp"/>
 
@@ -84,7 +92,7 @@
             android:layout_height="56dp"
             android:background="@drawable/custom_button_bg"
             android:text="Зберегти зміни"
-            android:textColor="@color/white"
+            android:textColor="@android:color/white"
             android:fontFamily="@font/montserrat_bold"
             android:textSize="16sp"/>
 

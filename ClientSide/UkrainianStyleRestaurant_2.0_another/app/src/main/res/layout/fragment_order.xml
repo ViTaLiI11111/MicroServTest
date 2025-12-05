@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/mainBgColor">
+    android:background="@color/main_background">
 
     <TextView
         android:id="@+id/titleCart"
@@ -13,7 +13,7 @@
         android:layout_marginTop="24dp"
         android:text="Кошик"
         android:fontFamily="@font/montserrat_bold"
-        android:textColor="@color/black"
+        android:textColor="@color/primary_text"
         android:textSize="28sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -26,7 +26,7 @@
         android:layout_margin="24dp"
         app:cardCornerRadius="16dp"
         app:cardElevation="2dp"
-        app:cardBackgroundColor="@color/white"
+        app:cardBackgroundColor="@color/card_background"
         app:layout_constraintTop_toBottomOf="@+id/titleCart"
         app:layout_constraintBottom_toTopOf="@+id/cardSum"
         app:layout_constraintStart_toStartOf="parent"
@@ -37,7 +37,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:dividerHeight="1dp"
-            android:divider="#F0F0F0"
+            android:divider="@color/secondary_text"
             android:padding="16dp"/>
     </androidx.cardview.widget.CardView>
 
@@ -48,7 +48,7 @@
         android:layout_marginHorizontal="24dp"
         android:layout_marginBottom="24dp"
         app:cardCornerRadius="16dp"
-        app:cardBackgroundColor="@color/white"
+        app:cardBackgroundColor="@color/card_background"
         app:cardElevation="2dp"
         app:layout_constraintBottom_toTopOf="@+id/button"
         app:layout_constraintStart_toStartOf="parent"
@@ -67,7 +67,7 @@
                 android:layout_height="wrap_content"
                 android:text="Разом:"
                 android:textSize="18sp"
-                android:textColor="@color/black"
+                android:textColor="@color/primary_text"
                 android:fontFamily="@font/montserrat_bold"/>
 
             <ListView
@@ -88,7 +88,7 @@
         android:background="@drawable/custom_button_bg"
         android:text="Оформити"
         android:onClick="toBuy"
-        android:textColor="@color/white"
+        android:textColor="@android:color/white"
         android:fontFamily="@font/montserrat_bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -104,7 +104,7 @@
         android:background="@android:color/transparent"
         android:text="Очистити"
         android:onClick="toClearCart"
-        android:textColor="#F44336"
+        android:textColor="@color/name_of_app"
         android:fontFamily="@font/montserrat_light"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@+id/button"

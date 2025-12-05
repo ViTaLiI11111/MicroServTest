@@ -15,4 +15,8 @@
     <style name="Theme.UkrainianStyleRestaurant.NewActivity" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:windowIsFloating">true</item>
     </style>
+    <style name="ToolbarAdaptive" parent="ThemeOverlay.AppCompat.Light">
+        <item name="colorControlNormal">@color/primary_text</item>
+        <item name="titleTextColor">@color/primary_text</item>
+    </style>
 </resources>

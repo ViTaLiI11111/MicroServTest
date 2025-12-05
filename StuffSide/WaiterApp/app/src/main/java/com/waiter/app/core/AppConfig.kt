@@ -1,14 +1,14 @@
 package com.waiter.app.core
 
 object AppConfig {
-    // URL для замовлень
-    const val ORDER_BASE_URL = "http://10.0.2.2:5245"
+    // ВСТАВ СВІЙ ДОМЕН NGROK ТУТ (без слеша в кінці, якщо так використовується в коді, або зі слешем)
+    // Оскільки в RetrofitFactory зазвичай base url має бути з /, давай напишемо з /
+    const val GLOBAL_BASE_URL = "https://unsuburbed-omar-dioptrically.ngrok-free.dev/"
 
-    // URL для авторизації (переконався, що порт 5210, як ми вирішили раніше)
-    const val AUTH_BASE_URL = "http://10.0.2.2:5210"
+    // Тепер всі посилаються на одну адресу
+    const val ORDER_BASE_URL = GLOBAL_BASE_URL
+    const val AUTH_BASE_URL = GLOBAL_BASE_URL
+    const val DELIVERY_BASE_URL = GLOBAL_BASE_URL
 
-    // URL для доставки (новий сервіс)
-    const val DELIVERY_BASE_URL = "http://10.0.2.2:5300"
-
-    const val SSE_URL = "$ORDER_BASE_URL/orders/stream"
+    const val SSE_URL = "${GLOBAL_BASE_URL}orders/stream"
 }

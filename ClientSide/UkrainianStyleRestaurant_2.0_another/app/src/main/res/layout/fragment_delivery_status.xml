@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/mainBgColor"
+    android:background="@color/main_background"
     android:fillViewport="true">
 
     <LinearLayout
@@ -18,7 +18,7 @@
             android:layout_height="wrap_content"
             app:cardCornerRadius="16dp"
             app:cardElevation="4dp"
-            app:cardBackgroundColor="@color/white"
+            app:cardBackgroundColor="@color/card_background"
             android:layout_marginBottom="16dp">
 
             <LinearLayout
@@ -35,7 +35,7 @@
                     android:text="Завантаження..."
                     android:textSize="22sp"
                     android:fontFamily="@font/montserrat_bold"
-                    android:textColor="@color/black"
+                    android:textColor="@color/primary_text"
                     android:textAlignment="center"/>
 
                 <TextView
@@ -45,7 +45,7 @@
                     android:text="Оновлення даних..."
                     android:textSize="16sp"
                     android:fontFamily="@font/montserrat_light"
-                    android:textColor="@color/style"
+                    android:textColor="@color/name_of_app"
                     android:layout_marginTop="8dp"
                     android:textAlignment="center"/>
             </LinearLayout>
@@ -63,14 +63,15 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:cardCornerRadius="16dp"
-                app:cardBackgroundColor="#E3F2FD"
-                app:cardElevation="0dp"> <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="16dp"
-                android:text="🛵 Кур'єр призначений і прямує до вас!"
-                android:textColor="#0D47A1"
-                android:fontFamily="@font/montserrat_bold"/>
+                app:cardBackgroundColor="@color/card_background"
+                app:cardElevation="0dp">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="16dp"
+                    android:text="🛵 Кур'єр призначений і прямує до вас!"
+                    android:textColor="@color/name_of_app"
+                    android:fontFamily="@font/montserrat_bold"/>
             </androidx.cardview.widget.CardView>
         </LinearLayout>
 
@@ -79,7 +80,7 @@
             android:layout_height="wrap_content"
             android:text="Ваше замовлення"
             android:fontFamily="@font/montserrat_bold"
-            android:textColor="@color/black"
+            android:textColor="@color/primary_text"
             android:layout_marginBottom="8dp"
             android:layout_marginStart="4dp"/>
 
@@ -87,7 +88,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:cardCornerRadius="16dp"
-            app:cardBackgroundColor="@color/white"
+            app:cardBackgroundColor="@color/card_background"
             app:cardElevation="2dp"
             android:layout_marginBottom="24dp">
 
@@ -124,7 +125,7 @@
                 android:layout_height="56dp"
                 android:text="Оплатити зараз"
                 android:background="@drawable/custom_button_bg"
-                android:textColor="@color/white"
+                android:textColor="@android:color/white"
                 android:fontFamily="@font/montserrat_bold"/>
         </LinearLayout>
 
@@ -135,7 +136,7 @@
             android:layout_gravity="center"
             android:text="Оновити статус"
             style="?android:attr/borderlessButtonStyle"
-            android:textColor="@color/style"/>
+            android:textColor="@color/name_of_app"/>
 
     </LinearLayout>
 </ScrollView>

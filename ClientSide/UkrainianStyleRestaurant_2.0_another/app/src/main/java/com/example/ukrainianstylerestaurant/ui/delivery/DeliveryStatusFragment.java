@@ -1,6 +1,5 @@
 package com.example.ukrainianstylerestaurant.ui.delivery;
 
-import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
@@ -147,6 +146,11 @@ public class DeliveryStatusFragment extends Fragment {
     private void fillOrderItems(OrderResponse order) {
         layoutItems.removeAllViews(); // Очищаємо перед оновленням
 
+        // 1. Отримуємо правильні кольори з ресурсів, які залежать від теми
+        // Використовуємо ContextCompat для сумісності, або getResources().getColor()
+        int primaryColor = androidx.core.content.ContextCompat.getColor(getContext(), R.color.primary_text);
+        int secondaryColor = androidx.core.content.ContextCompat.getColor(getContext(), R.color.secondary_text);
+
         if (order.items != null) {
             for (OrderItemResponse item : order.items) {
                 TextView tv = new TextView(getContext());
@@ -155,8 +159,13 @@ public class DeliveryStatusFragment extends Fragment {
                 String text = item.dishTitle + " x" + item.qty + " — " + sum + " грн";
                 tv.setText(text);
                 tv.setTextSize(16);
-                tv.setTextColor(Color.BLACK);
+
+                // ЗМІНА ТУТ: Замість Color.BLACK ставимо сірий (або основний) колір з теми
+                tv.setTextColor(secondaryColor);
+
                 tv.setPadding(0, 4, 0, 4);
+                // Додаємо шрифт Montserrat (опціонально, якщо хочеш красу)
+                // tv.setTypeface(ResourcesCompat.getFont(getContext(), R.font.montserrat_light));
                 layoutItems.addView(tv);
             }
 
@@ -164,7 +173,10 @@ public class DeliveryStatusFragment extends Fragment {
             TextView totalTv = new TextView(getContext());
             totalTv.setText("Всього до сплати: " + order.total + " грн");
             totalTv.setTextSize(18);
-            totalTv.setTextColor(Color.BLACK);
+
+            // ЗМІНА ТУТ: Основний колір (чорний вдень, білий вночі)
+            totalTv.setTextColor(primaryColor);
+
             totalTv.setTypeface(null, Typeface.BOLD);
             totalTv.setPadding(0, 16, 0, 0);
             layoutItems.addView(totalTv);

@@ -18,36 +18,40 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@android:color/transparent"
-            app:elevation="0dp"> <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="@color/white"
-            app:titleTextColor="@color/black"
-            app:theme="@style/Theme.AppCompat.Light"> <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center">
+            app:elevation="0dp">
 
-            <TextView
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:fontFamily="@font/montserrat_bold"
-                android:text="Ukrainian "
-                android:textColor="#FF5252"
-                android:textSize="24sp" />
+                android:layout_height="?attr/actionBarSize"
+                android:background="@color/card_background"
+                app:titleTextColor="@color/primary_text"
+                app:theme="@style/ToolbarAdaptive">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/montserrat_light"
-                android:text="Style"
-                android:textColor="@color/black"
-                android:textSize="24sp" />
-        </LinearLayout>
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center">
 
-        </androidx.appcompat.widget.Toolbar>
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:fontFamily="@font/montserrat_bold"
+                        android:text="Ukrainian "
+                        android:textColor="@color/name_of_app"
+                        android:textSize="24sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/montserrat_light"
+                        android:text="Style"
+                        android:textColor="@color/primary_text"
+                        android:textSize="24sp" />
+                </LinearLayout>
+
+            </androidx.appcompat.widget.Toolbar>
         </com.google.android.material.appbar.AppBarLayout>
 
         <androidx.fragment.app.FragmentContainerView
@@ -66,12 +70,11 @@
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
-
+        android:background="@color/card_background"
         app:headerLayout="@layout/nav_header_main"
         app:menu="@menu/nav_drawer_menu"
-
-        app:itemIconTint="@color/nav_item_color"
-        app:itemTextColor="@color/nav_item_color"
+        app:itemIconTint="@color/primary_text"
+        app:itemTextColor="@color/primary_text"
         app:itemBackground="@drawable/nav_item_background" />
 
 </androidx.drawerlayout.widget.DrawerLayout>

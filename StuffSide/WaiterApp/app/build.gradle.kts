@@ -17,7 +17,7 @@ android {
         versionName = "1.0"
 
         // ВАЖЛИВО: з лапками та зі слешем в кінці
-        buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:5245/\"")
+        buildConfigField("String", "API_BASE_URL", "\"https://unsuburbed-omar-dioptrically.ngrok-free.dev/\"")
     }
 
     buildFeatures {

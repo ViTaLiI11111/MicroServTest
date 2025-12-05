@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/mainBgColor">
+    android:background="@color/main_background">
 
     <TextView
         android:layout_width="match_parent"
@@ -11,7 +11,7 @@
         android:text="Історія замовлень"
         android:fontFamily="@font/montserrat_bold"
         android:textSize="28sp"
-        android:textColor="@color/black"
+        android:textColor="@color/primary_text"
         android:gravity="center"
         android:paddingTop="24dp"
         android:paddingBottom="16dp"/>

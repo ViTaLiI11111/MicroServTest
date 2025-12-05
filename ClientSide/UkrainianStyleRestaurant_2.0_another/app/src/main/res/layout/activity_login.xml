@@ -6,7 +6,7 @@
     android:orientation="vertical"
     android:gravity="center"
     android:padding="32dp"
-    android:background="@color/mainBgColor"
+    android:background="@color/main_background"
     tools:context=".LoginActivity">
 
     <TextView
@@ -24,6 +24,8 @@
         android:layout_height="50dp"
         android:background="@drawable/custom_input_bg"
         android:hint="Логін (Username)"
+        android:textColor="@color/primary_text"
+        android:textColorHint="@color/secondary_text"
         android:paddingStart="16dp"
         android:inputType="text"
         android:layout_marginBottom="16dp"/>
@@ -34,6 +36,8 @@
         android:layout_height="50dp"
         android:background="@drawable/custom_input_bg"
         android:hint="Пароль"
+        android:textColor="@color/primary_text"
+        android:textColorHint="@color/secondary_text"
         android:paddingStart="16dp"
         android:inputType="textPassword"
         android:layout_marginBottom="16dp"/>
@@ -53,7 +57,7 @@
         android:layout_marginTop="24dp"
         android:background="@drawable/custom_button_bg"
         android:text="Увійти"
-        android:textColor="@color/white"
+        android:textColor="@android:color/white"
         android:fontFamily="@font/montserrat_bold"
         android:textSize="16sp"/>
 
@@ -64,7 +68,7 @@
         android:layout_marginTop="32dp"
         android:text="Немає акаунту? Зареєструватись"
         android:fontFamily="@font/montserrat_light"
-        android:textColor="@color/style"
+        android:textColor="@color/name_of_app"
         android:textSize="14sp"/>
 
 </LinearLayout>

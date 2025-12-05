@@ -6,7 +6,7 @@
     android:layout_marginBottom="12dp"
     app:cardCornerRadius="16dp"
     app:cardElevation="2dp"
-    app:cardBackgroundColor="@color/white">
+    app:cardBackgroundColor="@color/card_background">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -28,14 +28,14 @@
                 android:layout_weight="1"
                 android:text="2023-10-25"
                 android:fontFamily="@font/montserrat_bold"
-                android:textColor="@color/black"
+                android:textColor="@color/primary_text"
                 android:textSize="16sp"/>
 
             <androidx.cardview.widget.CardView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:cardCornerRadius="8dp"
-                app:cardBackgroundColor="#F5F5F5"
+                app:cardBackgroundColor="@color/main_background"
                 app:cardElevation="0dp">
                 <TextView
                     android:id="@+id/tv_history_type"
@@ -46,7 +46,7 @@
                     android:paddingVertical="4dp"
                     android:textSize="12sp"
                     android:fontFamily="@font/montserrat_bold"
-                    android:textColor="@color/style"/>
+                    android:textColor="@color/name_of_app"/>
             </androidx.cardview.widget.CardView>
         </LinearLayout>
 
@@ -57,7 +57,7 @@
             android:text="Борщ x1, Вареники x2..."
             android:fontFamily="@font/montserrat_light"
             android:textSize="14sp"
-            android:textColor="#616161"
+            android:textColor="@color/secondary_text"
             android:maxLines="2"
             android:ellipsize="end"
             android:layout_marginBottom="12dp"/>
@@ -65,7 +65,7 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="#F0F0F0"
+            android:background="@color/main_background"
             android:layout_marginBottom="12dp"/>
 
         <LinearLayout

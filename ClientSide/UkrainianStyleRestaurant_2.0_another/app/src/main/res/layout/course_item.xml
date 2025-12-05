@@ -7,7 +7,7 @@
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="16dp"
     android:layout_marginVertical="8dp"
-    app:cardBackgroundColor="#333333"
+    app:cardBackgroundColor="@color/card_background"
     app:cardCornerRadius="16dp"
     app:cardElevation="4dp">
 
@@ -34,7 +34,7 @@
             android:layout_marginTop="12dp"
             android:layout_marginEnd="16dp"
             android:fontFamily="@font/montserrat_bold"
-            android:textColor="@color/white"
+            android:textColor="@color/primary_text"
             android:textSize="20sp"
             android:maxLines="2"
             android:ellipsize="end"
@@ -50,7 +50,7 @@
             android:layout_marginTop="8dp"
             android:fontFamily="@font/montserrat_light"
             android:text="Ціна:"
-            android:textColor="#AAAAAA"
+            android:textColor="@color/secondary_text"
             android:textSize="14sp"
             app:layout_constraintStart_toStartOf="@+id/courseTitle"
             app:layout_constraintTop_toBottomOf="@+id/courseTitle" />
@@ -61,7 +61,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:fontFamily="@font/montserrat_bold"
-            android:textColor="@color/white"
+            android:textColor="@color/primary_text"
             android:textSize="18sp"
             app:layout_constraintStart_toStartOf="@+id/labelPrice"
             app:layout_constraintTop_toBottomOf="@+id/labelPrice"
@@ -73,7 +73,7 @@
             android:layout_height="wrap_content"
             android:fontFamily="@font/montserrat_light"
             android:text="Гострота:"
-            android:textColor="#AAAAAA"
+            android:textColor="@color/secondary_text"
             android:textSize="14sp"
             android:layout_marginStart="24dp"
             app:layout_constraintStart_toEndOf="@+id/coursePrice"
@@ -85,7 +85,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:fontFamily="@font/montserrat_bold"
-            android:textColor="@color/white"
+            android:textColor="@color/primary_text"
             android:textSize="18sp"
             app:layout_constraintStart_toStartOf="@+id/labelPepper"
             app:layout_constraintTop_toBottomOf="@+id/labelPepper"
@@ -96,7 +96,7 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_marginEnd="16dp"
-            app:cardBackgroundColor="#FF5252"
+            app:cardBackgroundColor="@color/name_of_app"
             app:cardCornerRadius="20dp"
             app:cardElevation="2dp"
             app:layout_constraintBottom_toBottomOf="@+id/coursePrice"
@@ -108,7 +108,7 @@
                 android:layout_height="24dp"
                 android:layout_gravity="center"
                 android:src="@drawable/shop"
-                app:tint="@color/white"/>
+                app:tint="@android:color/white"/>
         </androidx.cardview.widget.CardView>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

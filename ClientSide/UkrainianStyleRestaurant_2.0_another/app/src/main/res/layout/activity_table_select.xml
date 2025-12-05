@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:gravity="center"
-    android:background="@color/mainBgColor"
+    android:background="@color/main_background"
     android:padding="32dp">
 
     <TextView
@@ -22,7 +22,7 @@
         android:layout_height="wrap_content"
         android:text="Вітаємо!"
         android:fontFamily="@font/montserrat_bold"
-        android:textColor="@color/black"
+        android:textColor="@color/primary_text"
         android:textSize="24sp"
         android:layout_marginBottom="8dp"/>
 
@@ -31,7 +31,7 @@
         android:layout_height="wrap_content"
         android:text="Введіть номер вашого столика:"
         android:fontFamily="@font/montserrat_light"
-        android:textColor="@color/style"
+        android:textColor="@color/name_of_app"
         android:textSize="16sp"
         android:layout_marginBottom="24dp"/>
 
@@ -44,7 +44,8 @@
         android:gravity="center"
         android:inputType="number"
         android:textSize="18sp"
-        android:textColor="@color/black"/>
+        android:textColor="@color/primary_text"
+        android:textColorHint="@color/secondary_text"/>
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/btn_confirm_table"
@@ -53,7 +54,7 @@
         android:layout_marginTop="24dp"
         android:background="@drawable/custom_button_bg"
         android:text="Перейти до меню"
-        android:textColor="@color/white"
+        android:textColor="@android:color/white"
         android:fontFamily="@font/montserrat_bold"
         android:textSize="16sp"/>
 
@@ -64,6 +65,6 @@
         android:layout_marginTop="32dp"
         android:text="Вийти з акаунту"
         style="?android:attr/borderlessButtonStyle"
-        android:textColor="@color/style"/>
+        android:textColor="@color/name_of_app"/>
 
 </LinearLayout>

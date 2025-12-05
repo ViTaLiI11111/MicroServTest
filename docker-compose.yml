@@ -26,6 +26,19 @@ services:
     depends_on: [postgres]
     restart: unless-stopped
 
+  gateway:
+    image: nginx:alpine
+    container_name: api_gateway
+    ports:
+      - "8080:80" # Всі запити будуть йти сюди!
+    volumes:
+      - ./gateway/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - menusvc
+      - authservice
+      - order-dispatch-service
+      - deliveryservice
+
   menusvc:
     build:
       context: ./API/MenuService
