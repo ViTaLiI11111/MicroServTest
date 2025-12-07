@@ -1,14 +1,20 @@
 package com.example.ukrainianstylerestaurant;
 
+import android.Manifest;
+import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 public class TableSelectActivity extends AppCompatActivity {
 
@@ -16,6 +22,10 @@ public class TableSelectActivity extends AppCompatActivity {
     private EditText etTableNumber;
     private Button btnConfirmTable;
     private Button btnLogout;
+    private Button btnScanQr; // Нова кнопка
+
+    private static final int CAMERA_PERMISSION_CODE = 100;
+    private static final int SCAN_REQUEST_CODE = 101;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -26,6 +36,7 @@ public class TableSelectActivity extends AppCompatActivity {
         etTableNumber = findViewById(R.id.et_table_number);
         btnConfirmTable = findViewById(R.id.btn_confirm_table);
         btnLogout = findViewById(R.id.btn_logout);
+        btnScanQr = findViewById(R.id.btn_scan_qr); // Знаходимо нову кнопку
 
         // Встановлюємо привітання
         String username = LocalStorage.getUsername(this);
@@ -37,14 +48,38 @@ public class TableSelectActivity extends AppCompatActivity {
             etTableNumber.setText(String.valueOf(savedTableNo));
         }
 
+        // --- ЛОГІКА СКАНУВАННЯ ---
+        btnScanQr.setOnClickListener(v -> {
+            // Перевіряємо дозвіл на камеру
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+                    == PackageManager.PERMISSION_DENIED) {
+                // Якщо дозволу немає, просимо його
+                ActivityCompat.requestPermissions(this,
+                        new String[] { Manifest.permission.CAMERA },
+                        CAMERA_PERMISSION_CODE);
+            } else {
+                // Якщо дозвіл є, запускаємо сканер
+                startScanning();
+            }
+        });
+
         btnConfirmTable.setOnClickListener(v -> {
             String tableNoStr = etTableNumber.getText().toString().trim();
+
+            // Якщо поле пусте або там не число - це помилка
             if (tableNoStr.isEmpty()) {
-                Toast.makeText(this, "Будь ласка, введіть номер столика", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Будь ласка, введіть номер столика або відскануйте QR", Toast.LENGTH_SHORT).show();
                 return;
             }
 
             try {
+                // Спробуємо розпарсити. Якщо QR-код містив JSON (наприклад {"id":5}),
+                // тут треба буде складніший парсинг.
+                // Але ми домовились, що QR містить просто цифру "5".
+
+                // Видаляємо зайві символи, якщо раптом QR містить пробіли
+                tableNoStr = tableNoStr.replaceAll("[^0-9]", "");
+
                 int tableNo = Integer.parseInt(tableNoStr);
                 if (tableNo <= 0) {
                     Toast.makeText(this, "Номер столика має бути позитивним", Toast.LENGTH_SHORT).show();
@@ -54,23 +89,53 @@ public class TableSelectActivity extends AppCompatActivity {
                 // Зберігаємо номер столика
                 LocalStorage.saveTableNumber(this, tableNo);
 
-                // Переходимо до головного меню (MainActivity)
+                // Переходимо до головного меню
                 Intent intent = new Intent(this, MainActivity.class);
                 startActivity(intent);
 
             } catch (NumberFormatException e) {
-                Toast.makeText(this, "Некоректний номер столика", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Некоректний формат номера (очікується число)", Toast.LENGTH_SHORT).show();
             }
         });
 
         btnLogout.setOnClickListener(v -> {
-            // Вихід
             LocalStorage.logout(this);
-            // Повертаємось на екран логіну
             Intent intent = new Intent(this, LoginActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
             finish();
         });
+    }
+
+    private void startScanning() {
+        Intent intent = new Intent(this, ScannerActivity.class);
+        startActivityForResult(intent, SCAN_REQUEST_CODE);
+    }
+
+    // Обробка відповіді користувача на запит дозволу камери
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == CAMERA_PERMISSION_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                startScanning();
+            } else {
+                Toast.makeText(this, "Для сканування потрібен дозвіл на камеру", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    // Отримання результату сканування від ScannerActivity
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == SCAN_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            if (data != null) {
+                String scannedData = data.getStringExtra("SCANNED_TABLE_ID");
+                // Записуємо результат у поле вводу
+                etTableNumber.setText(scannedData);
+                Toast.makeText(this, "Код скановано: " + scannedData, Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 }
