@@ -1,6 +1,8 @@
-name: Andriod Stuff CI
+name: Android Stuff CI
 
 on:
+  workflow_dispatch:
+  
   push:
     branches: ["main"]
     paths:

@@ -1,6 +1,8 @@
 name: Android Client CI
 
 on:
+  workflow_dispatch:
+
   push:
     branches: ["main"]
     paths:
@@ -27,7 +29,7 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-          cach: gradle
+          cache: gradle
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
