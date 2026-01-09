@@ -4,11 +4,11 @@ on:
   push:
     branches: ["main"]
     paths:
-      - 'StuffSide/**'
+      - 'StuffSide/WaiterApp/**'
   pull_request:
     branches: ["main"]
     paths:
-      - 'StuffSide/**'
+      - 'StuffSide/WaiterApp/**'
 
 jobs:
   build-android:
@@ -16,7 +16,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: ./StuffSide
+        working-directory: ./StuffSide/WaiterApp
     
     steps:
       - name: Checkout code
@@ -42,4 +42,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: stuff-app-debug
-          path: StuffSide/app/build/outputs/apk/debug/app-debug.apk
+          path: StuffSide/WaiterApp/app/build/outputs/apk/debug/app-debug.apk
