@@ -1,0 +1,12 @@
+name: Gateway Config Check
+on:
+  push:
+    paths: ['gateway/**']
+jobs:
+  check-nginx:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Запускаємо валідацію конфігу через Docker
+      - name: Test Nginx Config
+        run: docker run --rm -v $(pwd)/gateway/nginx.conf:/etc/nginx/nginx.conf:ro nginx nginx -t

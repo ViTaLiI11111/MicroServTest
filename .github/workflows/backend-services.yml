@@ -1,0 +1,46 @@
+name: Backend Services CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'API/**' # Слідкуємо за всією папкою API
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # Тут перелічи назви папок твоїх сервісів
+        service: [AuthService, DeliveryService, MenuService, OrderDispatchService]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    # 1. Перевірка коду (Unit Tests)
+    # Ми заходимо в папку конкретного сервісу і запускаємо тести
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+
+    - name: Restore Dependencies
+      run: dotnet restore
+      working-directory: ./API/${{ matrix.service }}
+
+    - name: Build Code
+      run: dotnet build --no-restore --configuration Release
+      working-directory: ./API/${{ matrix.service }}
+
+    # Якщо у тебе є тести, розкоментуй цей блок:
+    # - name: Run Tests
+    #   run: dotnet test --no-build --verbosity normal
+    #   working-directory: ./API/${{ matrix.service }}
+
+    # 2. Перевірка Docker (чи збирається контейнер)
+    # Це важливо, бо ти запускаєш їх у контейнерах
+    - name: Check Docker Build
+      run: |
+        docker build . -t test-${{ matrix.service }}
+      working-directory: ./API/${{ matrix.service }}
