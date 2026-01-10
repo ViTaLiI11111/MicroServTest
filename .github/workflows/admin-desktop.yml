@@ -24,12 +24,11 @@ jobs:
         dotnet-version: 8.0.x 
 
     - name: Restore
-      run: dotnet restore
+      run: dotnet restore USRest_Admin.sln --packages ./packages
 
     # Публікуємо в один файл (SingleFile), щоб було зручніше
     - name: Publish EXE
-      run: dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o ./publish
-
+      run: dotnet publish USRest_Admin/USRest_Admin.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o ./publish --no-restore
     # Запаковуємо в ZIP (Telegram любить архіви більше, ніж exe)
     - name: Zip Build
       run: |
