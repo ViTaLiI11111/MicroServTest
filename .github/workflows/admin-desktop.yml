@@ -18,35 +18,36 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 8.0.x 
+    # 1. Налаштовуємо MSBuild (компілятор для старих проектів)
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
 
+    # 2. Налаштовуємо NuGet (менеджер пакетів)
     - name: Setup NuGet
       uses: NuGet/setup-nuget@v2
 
-    # --- НОВИЙ КРОК ---
-    # Додаємо бібліотеку, якої не вистачає для роботи з картинками/іконками
-    - name: Fix Resources (Add Package)
-      run: dotnet add USRest_Admin/USRest_Admin.csproj package System.Resources.Extensions
-
-    - name: Restore Packages (Legacy)
+    # 3. Відновлюємо пакети (це створить папку packages поруч із sln)
+    - name: Restore Packages
       run: nuget restore USRest_Admin.sln
 
-    # --- ОНОВЛЕНИЙ КРОК ---
-    # Додали прапорець -p:GenerateResourceUsePreserializedResources=true
-    - name: Publish EXE
-      run: dotnet publish USRest_Admin/USRest_Admin.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:GenerateResourceUsePreserializedResources=true -o ./publish --no-restore
+    # 4. Збираємо проект через MSBuild (як це робить Visual Studio)
+    # Ми не використовуємо dotnet publish, бо він не дружить зі старими .resx файлами
+    - name: Build Solution
+      run: msbuild USRest_Admin.sln /p:Configuration=Release /p:Platform="Any CPU"
 
+    # 5. Запаковуємо результат (він буде лежати в папці bin/Release)
     - name: Zip Build
       run: |
-        Compress-Archive -Path ./publish/* -DestinationPath AdminPanel.zip
+        # Переходимо в папку, куди MSBuild склав готові файли
+        cd USRest_Admin/bin/Release
+        # Запаковуємо все, що там є
+        Compress-Archive -Path * -DestinationPath ..\..\..\AdminPanel.zip
 
+    # 6. Відправка в Telegram
     - name: Send to Telegram
       if: success()
       run: |
         curl -v -F "chat_id=${{ secrets.TELEGRAM_TO }}" `
-             -F "caption= Admin Panel Build Success!" `
+             -F "caption= Admin Panel (MSBuild) Success!" `
              -F "document=@AdminPanel.zip" `
              https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendDocument
