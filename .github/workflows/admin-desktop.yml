@@ -9,7 +9,7 @@ on:
 
 jobs:
   build-windows:
-    runs-on: windows-latest # Обов'язково Windows
+    runs-on: windows-latest
 
     defaults:
       run:
@@ -23,22 +23,27 @@ jobs:
       with:
         dotnet-version: 8.0.x 
 
-    - name: Restore
-      run: dotnet restore USRest_Admin.sln --packages ./packages
+    # ДОДАНО: Встановлюємо класичний NuGet.exe
+    - name: Setup NuGet
+      uses: NuGet/setup-nuget@v2
 
-    # Публікуємо в один файл (SingleFile), щоб було зручніше
+    # ВИПРАВЛЕНО: Використовуємо nuget restore замість dotnet restore
+    # Це створить правильну структуру папок (Name.Version), яку вимагає твій проект
+    - name: Restore Packages (Legacy)
+      run: nuget restore USRest_Admin.sln
+
+    # Публікація залишається без змін (додаємо --no-restore, щоб він не намагався переробити папки по-своєму)
     - name: Publish EXE
       run: dotnet publish USRest_Admin/USRest_Admin.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o ./publish --no-restore
-    # Запаковуємо в ZIP (Telegram любить архіви більше, ніж exe)
+
     - name: Zip Build
       run: |
         Compress-Archive -Path ./publish/* -DestinationPath AdminPanel.zip
 
-    # Відправка в Telegram
     - name: Send to Telegram
       if: success()
       run: |
         curl -v -F "chat_id=${{ secrets.TELEGRAM_TO }}" `
-             -F "caption= Admin Panel Build Success!" `
+             -F "caption=🖥 Admin Panel Build Success!" `
              -F "document=@AdminPanel.zip" `
              https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendDocument
