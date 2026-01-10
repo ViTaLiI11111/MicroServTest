@@ -1,51 +1,45 @@
-name: Backend Services CI
+name: Backend Services CI (Publish)
 
 on:
   workflow_dispatch:
   push:
     branches: [ "main" ]
     paths:
-      - 'API/**' # Слідкуємо за всією папкою API
+      - 'API/**'
 
 jobs:
-  build-and-test:
+  build-and-push:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        # Тут перелічи назви папок твоїх сервісів
         service: [AuthService, DeliveryService, MenuService, OrderDispatchService]
 
     steps:
     - uses: actions/checkout@v4
 
-    # 1. Перевірка коду (Unit Tests)
-    # Ми заходимо в папку конкретного сервісу і запускаємо тести
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
+    # 1. Логінимося в DockerHub (використовуючи секрети)
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
       with:
-        dotnet-version: 8.0.x
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    - name: Restore Dependencies
-      run: dotnet restore
-      working-directory: ./API/${{ matrix.service }}
-
-    - name: Build Code
-      run: dotnet build --no-restore --configuration Release
-      working-directory: ./API/${{ matrix.service }}
-
-    # Якщо у тебе є тести, розкоментуй цей блок:
-    # - name: Run Tests
-    #   run: dotnet test --no-build --verbosity normal
-    #   working-directory: ./API/${{ matrix.service }}
-
-    # 2. Перевірка Docker (чи збирається контейнер)
-    # Це важливо, бо ти запускаєш їх у контейнерах
-    - name: Check Docker Build
-      shell: bash # Явно вказуємо bash для роботи з рядками
+    # 2. Збираємо і Пушимо
+    - name: Build and Push Docker image
+      shell: bash
       run: |
         # Перетворюємо назву сервісу в маленькі літери (AuthService -> authservice)
         SERVICE_NAME=$(echo "${{ matrix.service }}" | tr '[:upper:]' '[:lower:]')
         
-        echo "Building docker image for: $SERVICE_NAME"
-        docker build . -t test-$SERVICE_NAME
+        # Формуємо повну назву образу: юзернейм/назва-сервісу:тег
+        # :latest означає "остання версія"
+        IMAGE_TAG="${{ secrets.DOCKERHUB_USERNAME }}/$SERVICE_NAME:latest"
+        
+        echo "Building and Pushing $IMAGE_TAG..."
+        
+        # Збираємо (build)
+        docker build . -t $IMAGE_TAG
+        
+        # Відправляємо в хмару (push)
+        docker push $IMAGE_TAG
       working-directory: ./API/${{ matrix.service }}
