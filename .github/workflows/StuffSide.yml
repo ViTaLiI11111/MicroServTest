@@ -2,7 +2,7 @@ name: Android Stuff CI
 
 on:
   workflow_dispatch:
-  
+
   push:
     branches: ["main"]
     paths:
@@ -33,6 +33,10 @@ jobs:
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
+
+      - name: Create google-services.json
+        run: |
+          echo "${{ secrets.STAFF.GOOGLE_SERVICES_JSON }}" base64 -d > app/google-services.json
       
       - name: Run Unit Tests
         run: ./gradlew testDebugUnitTest
