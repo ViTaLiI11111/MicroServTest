@@ -40,7 +40,7 @@ public class DeliveryStatusFragment extends Fragment {
     private Handler mainHandler;
 
     private boolean isTracking = false;
-    private final int UPDATE_INTERVAL = 3000;
+    private final int UPDATE_INTERVAL = 1000;
     private final Runnable statusChecker = new Runnable() {
         @Override
         public void run() {

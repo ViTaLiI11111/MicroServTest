@@ -1,0 +1,105 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: appuser
+      POSTGRES_PASSWORD: app123
+      POSTGRES_DB: restaurant_db
+    ports: ["5432:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U appuser -d restaurant_db || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: always
+
+  redis:
+    image: redis:7
+    ports: ["6379:6379"]
+    restart: always
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "admin@example.com"
+      PGADMIN_DEFAULT_PASSWORD: "admin"
+    ports: ["8081:80"]
+    depends_on: [postgres]
+    restart: unless-stopped
+
+  
+  menusvc:
+    image: 1488884114888841/menuservice 
+    container_name: menusvc
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=restaurant_db;Username=appuser;Password=app123
+      - Redis__ConnectionString=redis:6379
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    ports: ["5045:80"]
+    restart: always
+
+  order-dispatch-service:
+    image: 1488884114888841/orderdispatchservice
+    container_name: order-dispatch-service
+    environment:
+      - ASPNETCORE_URLS=http://+:80
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=dispatch_db;Username=appuser;Password=app123
+      - MenuService__BaseUrl=http://menusvc
+      - DeliveryService__BaseUrl=http://deliveryservice:80
+    depends_on:
+      - postgres
+      - menusvc
+    ports: ["5245:80"]
+    restart: always
+
+  authservice:
+    image: 1488884114888841/authservice
+    container_name: authservice
+    environment:
+      - ASPNETCORE_URLS=http://+:80
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__AuthDb=Host=postgres;Port=5432;Database=authdb;Username=appuser;Password=app123
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports: ["5210:80"]
+    restart: unless-stopped
+
+  deliveryservice:
+    image: 1488884114888841/deliveryservice
+    container_name: deliveryservice
+    environment:
+      - ASPNETCORE_URLS=http://+:80
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DeliveryDb=Host=postgres;Port=5432;Database=delivery_db;Username=appuser;Password=app123
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports: ["5300:80"]
+    restart: unless-stopped
+
+  gateway:
+    image: nginx:alpine
+    container_name: api_gateway
+    ports:
+      - "8080:80"
+    volumes:
+      #локальний конфіг
+      - ./gateway/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - menusvc
+      - authservice
+      - order-dispatch-service
+      - deliveryservice
+    restart: always
+
+volumes:
+  pgdata:

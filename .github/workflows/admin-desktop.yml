@@ -18,24 +18,18 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    # 1. Налаштовуємо MSBuild (компілятор для старих проектів)
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v2
 
-    # 2. Налаштовуємо NuGet (менеджер пакетів)
     - name: Setup NuGet
       uses: NuGet/setup-nuget@v2
 
-    # 3. Відновлюємо пакети (це створить папку packages поруч із sln)
     - name: Restore Packages
       run: nuget restore USRest_Admin.sln
 
-    # 4. Збираємо проект через MSBuild (як це робить Visual Studio)
-    # Ми не використовуємо dotnet publish, бо він не дружить зі старими .resx файлами
     - name: Build Solution
       run: msbuild USRest_Admin.sln /p:Configuration=Release /p:Platform="Any CPU"
 
-    # 5. Запаковуємо результат (він буде лежати в папці bin/Release)
     - name: Zip Build
       run: |
         # Переходимо в папку, куди MSBuild склав готові файли
@@ -43,7 +37,6 @@ jobs:
         # Запаковуємо все, що там є
         Compress-Archive -Path * -DestinationPath ..\..\..\AdminPanel.zip
 
-    # 6. Відправка в Telegram
     - name: Send to Telegram
       if: success()
       run: |
