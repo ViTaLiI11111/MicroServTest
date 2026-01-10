@@ -1,13 +1,26 @@
 name: Gateway Config Check
+
 on:
   workflow_dispatch:
   push:
-    paths: ['gateway/**']
+    branches: [ "main" ]
+    paths:
+      - 'gateway/**'
+
 jobs:
   check-nginx:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      # Запускаємо валідацію конфігу через Docker
+      
       - name: Test Nginx Config
-        run: docker run --rm -v $(pwd)/gateway/nginx.conf:/etc/nginx/nginx.conf:ro nginx nginx -t
+        # Ми додаємо --add-host для кожного сервісу, який згадується у твоєму nginx.conf
+        # Це емулює наявність цих сервісів, щоб Nginx не падав з помилкою "host not found"
+        run: |
+          docker run --rm \
+            -v $(pwd)/gateway/nginx.conf:/etc/nginx/nginx.conf:ro \
+            --add-host authservice:127.0.0.1 \
+            --add-host deliveryservice:127.0.0.1 \
+            --add-host menuservice:127.0.0.1 \
+            --add-host orderdispatchservice:127.0.0.1 \
+            nginx nginx -t
