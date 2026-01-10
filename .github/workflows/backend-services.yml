@@ -41,6 +41,11 @@ jobs:
     # 2. Перевірка Docker (чи збирається контейнер)
     # Це важливо, бо ти запускаєш їх у контейнерах
     - name: Check Docker Build
+      shell: bash # Явно вказуємо bash для роботи з рядками
       run: |
-        docker build . -t test-${{ matrix.service }}
+        # Перетворюємо назву сервісу в маленькі літери (AuthService -> authservice)
+        SERVICE_NAME=$(echo "${{ matrix.service }}" | tr '[:upper:]' '[:lower:]')
+        
+        echo "Building docker image for: $SERVICE_NAME"
+        docker build . -t test-$SERVICE_NAME
       working-directory: ./API/${{ matrix.service }}
