@@ -1,5 +1,6 @@
 name: Gateway Config Check
 on:
+  workflow_dispatch:
   push:
     paths: ['gateway/**']
 jobs:
