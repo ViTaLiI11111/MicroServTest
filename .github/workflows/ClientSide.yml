@@ -48,4 +48,21 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: client-app-debug
-          path: ClientSide/UkrainianStyleRestaurant_2.0_another/app/build/outputs/apk/debug/app-debug.apk 
+          path: ClientSide/UkrainianStyleRestaurant_2.0_another/app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Send APK to Telegram
+        if: success()
+        run: |
+          APK_PATH="app/build/outputs/apk/debug/app-debug.apk"
+          
+          if [ -f "$APK_PATH" ]; then
+            echo "File found. Sending to Telegram..."
+            
+            curl -v -F "chat_id=${{ secrets.TELEGRAM_TO }}" \
+                 -F "caption=🚀 Project: Client App | Build: Success ✅ | Branch: ${{ github.ref_name }}" \
+                 -F "document=@$APK_PATH" \
+                 https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendDocument
+          else
+            echo "Error: APK file not found at $APK_PATH"
+            exit 1
+          fi
