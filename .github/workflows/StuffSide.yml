@@ -36,7 +36,7 @@ jobs:
 
       - name: Create google-services.json
         run: |
-          echo "${{ secrets.STAFF.GOOGLE_SERVICES_JSON }}" | base64 -d > app/google-services.json
+          echo "${{ secrets.STAFF_GOOGLE_SERVICES_JSON }}" | base64 -d > app/google-services.json
       
       - name: Run Unit Tests
         run: ./gradlew testDebugUnitTest
