@@ -23,18 +23,21 @@ jobs:
       with:
         dotnet-version: 8.0.x 
 
-    # ДОДАНО: Встановлюємо класичний NuGet.exe
     - name: Setup NuGet
       uses: NuGet/setup-nuget@v2
 
-    # ВИПРАВЛЕНО: Використовуємо nuget restore замість dotnet restore
-    # Це створить правильну структуру папок (Name.Version), яку вимагає твій проект
+    # --- НОВИЙ КРОК ---
+    # Додаємо бібліотеку, якої не вистачає для роботи з картинками/іконками
+    - name: Fix Resources (Add Package)
+      run: dotnet add USRest_Admin/USRest_Admin.csproj package System.Resources.Extensions
+
     - name: Restore Packages (Legacy)
       run: nuget restore USRest_Admin.sln
 
-    # Публікація залишається без змін (додаємо --no-restore, щоб він не намагався переробити папки по-своєму)
+    # --- ОНОВЛЕНИЙ КРОК ---
+    # Додали прапорець -p:GenerateResourceUsePreserializedResources=true
     - name: Publish EXE
-      run: dotnet publish USRest_Admin/USRest_Admin.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o ./publish --no-restore
+      run: dotnet publish USRest_Admin/USRest_Admin.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:GenerateResourceUsePreserializedResources=true -o ./publish --no-restore
 
     - name: Zip Build
       run: |
@@ -44,6 +47,6 @@ jobs:
       if: success()
       run: |
         curl -v -F "chat_id=${{ secrets.TELEGRAM_TO }}" `
-             -F "caption=🖥 Admin Panel Build Success!" `
+             -F "caption= Admin Panel Build Success!" `
              -F "document=@AdminPanel.zip" `
              https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendDocument
