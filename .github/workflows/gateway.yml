@@ -14,13 +14,12 @@ jobs:
       - uses: actions/checkout@v4
       
       - name: Test Nginx Config
-        # Ми додаємо --add-host для кожного сервісу, який згадується у твоєму nginx.conf
-        # Це емулює наявність цих сервісів, щоб Nginx не падав з помилкою "host not found"
+        # Ми додаємо --add-host для ТОЧНИХ назв, які є у твоєму nginx.conf
         run: |
           docker run --rm \
             -v $(pwd)/gateway/nginx.conf:/etc/nginx/nginx.conf:ro \
             --add-host authservice:127.0.0.1 \
+            --add-host menusvc:127.0.0.1 \
+            --add-host order-dispatch-service:127.0.0.1 \
             --add-host deliveryservice:127.0.0.1 \
-            --add-host menuservice:127.0.0.1 \
-            --add-host orderdispatchservice:127.0.0.1 \
             nginx nginx -t
