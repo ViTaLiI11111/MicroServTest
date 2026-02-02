@@ -65,9 +65,7 @@ jobs:
             for chat_id in ${{ secrets.TELEGRAM_TO }}; do
               echo "Sending to $chat_id..."
               curl -v -F "chat_id=$chat_id" \
-                  -F "caption= Project: Client App 
-                  Branch: ${{ github.ref_name }}
-                  Commit: $CLEAN_MESSAGE" \
+                  -F "caption=Project: Client App | Branch: ${{ github.ref_name }} | Commit: $CLEAN_MESSAGE" \
                   -F "document=@$APK_PATH" \
                   https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendDocument
             done
