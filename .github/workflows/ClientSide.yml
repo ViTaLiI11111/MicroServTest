@@ -58,10 +58,14 @@ jobs:
           if [ -f "$APK_PATH" ]; then
             echo "File found. Sending to Telegram..."
             
-            curl -v -F "chat_id=${{ secrets.TELEGRAM_TO }}" \
-                 -F "caption= Project: Client App | Build: Success | Branch: ${{ github.ref_name }}" \
-                 -F "document=@$APK_PATH" \
-                 https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendDocument
+            # Перетворюємо секрет у список і проходимо циклом
+            for chat_id in ${{ secrets.TELEGRAM_TO }}; do
+              echo "Sending to $chat_id..."
+              curl -v -F "chat_id=$chat_id" \
+                  -F "caption= Project: Client App | Build: Success | Branch: ${{ github.ref_name }}" \
+                  -F "document=@$APK_PATH" \
+                  https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendDocument
+            done
           else
             echo "Error: APK file not found at $APK_PATH"
             exit 1
