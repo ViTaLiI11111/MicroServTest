@@ -22,7 +22,7 @@ object SseClient {
             try {
                 call.execute().use { resp ->
                     if (!resp.isSuccessful || resp.body == null) {
-                        close(IllegalStateException("SSE response not ok"))
+                        close(IllegalStateException("SSE response not ok!"))
                         return@use
                     }
                     BufferedReader(InputStreamReader(resp.body!!.byteStream())).use { br ->

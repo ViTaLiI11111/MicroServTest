@@ -98,7 +98,7 @@ fun OrderDetailsScreen(
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                     ) {
-                        Text("🙋‍♂️ Взяти замовлення в роботу")
+                        Text("Взяти замовлення в роботу")
                     }
                 } else if (isMine) {
 
