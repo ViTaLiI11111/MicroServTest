@@ -54,15 +54,20 @@ jobs:
         if: success()
         run: |
           APK_PATH="app/build/outputs/apk/debug/app-debug.apk"
+
+          COMMIT_MESSAGE="${{ github.event.head_commit.message }}"
+          
+          CLEAN_MESSAGE=$(echo "$COMMIT_MESSAGE" | head -n 1 | tr -d '"')
           
           if [ -f "$APK_PATH" ]; then
             echo "File found. Sending to Telegram..."
             
-            # Перетворюємо секрет у список і проходимо циклом
             for chat_id in ${{ secrets.TELEGRAM_TO }}; do
               echo "Sending to $chat_id..."
               curl -v -F "chat_id=$chat_id" \
-                  -F "caption= Project: Client App | Build: Success | Branch: ${{ github.ref_name }}" \
+                  -F "caption= Project: Client App 
+                  Branch: ${{ github.ref_name }}
+                  Commit: $CLEAN_MESSAGE" \
                   -F "document=@$APK_PATH" \
                   https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendDocument
             done
