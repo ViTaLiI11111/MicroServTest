@@ -5,7 +5,7 @@ This project is a full-stack distributed system that demonstrates the integratio
 ---
 
 ## 🏗 System Architecture
-<img width="482" height="293" alt="image" src="https://github.com/user-attachments/assets/5ab9b42f-5518-4bdd-bc48-96777a6ed7df" />
+<img width="1403" height="1125" alt="image" src="https://github.com/user-attachments/assets/0ff95c7b-3d16-48eb-8b5b-2d5ec8c5764c" />
 
 ---
 
