@@ -1,4 +1,5 @@
 # Comprehensive Microservices & Mobile Ecosystem 🚀
+# Name: Ukrainian Style Restaurant
 
 This project is a full-stack distributed system that demonstrates the integration between a microservices backend, native mobile applications, and a desktop administration panel, all unified by a robust CI/CD pipeline.
 
