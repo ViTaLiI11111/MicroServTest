@@ -42,8 +42,6 @@ public class AuthRepository {
         return r.isSuccessful();
     }
 
-    // --- НОВИЙ МЕТОД ---
-    // Відправляємо асинхронно, бо це не блокує UI
     public void sendTokenToServer(String username, String role, String token) {
         api.saveToken(new SaveTokenRequest(username, role, token)).enqueue(new Callback<ResponseBody>() {
             @Override

@@ -37,7 +37,6 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Якщо вже залогінені - переходимо далі
         if (LocalStorage.isLoggedIn(this)) {
             startActivity(new Intent(this, TableSelectActivity.class));
             finish();
@@ -77,7 +76,6 @@ public class LoginActivity extends AppCompatActivity {
 
         executorService.execute(() -> {
             try {
-                // Виконуємо запит на логін
                 LoginResponse response = authRepository.login(username, password);
 
                 mainThreadHandler.post(() -> {
@@ -85,28 +83,19 @@ public class LoginActivity extends AppCompatActivity {
                     if (response != null) {
                         showToast("Вхід успішний!");
 
-                        // 1. Зберігаємо сесію
                         LocalStorage.saveLoginSession(this, response.userId, response.username);
 
-                        // 2. --- ОТРИМУЄМО ТА ВІДПРАВЛЯЄМО ТОКЕН ---
                         FirebaseMessaging.getInstance().getToken()
                                 .addOnCompleteListener(task -> {
                                     if (!task.isSuccessful()) {
-                                        // Якщо не вдалося отримати токен, просто ігноруємо,
-                                        // додаток все одно працюватиме, просто без пушів.
                                         return;
                                     }
 
-                                    // Отримуємо новий токен
                                     String token = task.getResult();
 
-                                    // Відправляємо його на сервер
-                                    // "Client" - це роль цього додатку
                                     authRepository.sendTokenToServer(response.username, "Client", token);
                                 });
-                        // -------------------------------------------
 
-                        // 3. Переходимо до вибору столика
                         Intent intent = new Intent(this, TableSelectActivity.class);
                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                         startActivity(intent);

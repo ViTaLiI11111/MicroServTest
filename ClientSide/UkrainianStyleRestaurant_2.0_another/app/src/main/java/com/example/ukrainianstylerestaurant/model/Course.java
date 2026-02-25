@@ -8,15 +8,14 @@ public class Course {
     private int id;
 
     @SerializedName("categoryId")
-    private int categoryId;          // <-- було category
+    private int categoryId;
 
     @SerializedName("imageBase64")
-    private String imageBase64;      // <-- було img
+    private String imageBase64;
 
     @SerializedName("title")
     private String title;
 
-    // Якщо price у бекенді decimal — лиши String або зроби BigDecimal
     @SerializedName("price")
     private String price;
 

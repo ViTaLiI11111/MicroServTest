@@ -14,37 +14,28 @@ public class LocalStorage {
 
     private static final String PREFS_NAME = "ukrainianstylerestaurant";
 
-    // --- Ключі для Кешування Меню ---
     private static final String KEY_COURSES = "courses";
     private static final String KEY_CATEGORIES = "categories";
 
-    // --- Ключі для Сесії (Auth) ---
     private static final String KEY_IS_LOGGED_IN = "is_logged_in";
     private static final String KEY_USER_ID = "user_id";
     private static final String KEY_USERNAME = "username";
 
-    // --- Ключі для Профілю Клієнта (Постійні дані) ---
     private static final String KEY_CLIENT_NAME = "client_name";
     private static final String KEY_CLIENT_PHONE = "client_phone";
-    private static final String KEY_CLIENT_EMAIL = "client_email"; // Додано Email
+    private static final String KEY_CLIENT_EMAIL = "client_email";
     private static final String KEY_CLIENT_ADDRESS = "client_address";
 
-    // --- Ключі для Поточного Замовлення (Транзакційні дані) ---
-    private static final String KEY_TABLE_NO = "table_no";       // Якщо в закладі
-    private static final String KEY_IS_DELIVERY = "is_delivery"; // Якщо доставка
-    private static final String KEY_DELIVERY_ADDR_TEMP = "del_addr_temp"; // Адреса конкретно цього замовлення
-    private static final String KEY_DELIVERY_PHONE_TEMP = "del_phone_temp"; // Телефон конкретно цього замовлення
+    private static final String KEY_TABLE_NO = "table_no";
+    private static final String KEY_IS_DELIVERY = "is_delivery";
+    private static final String KEY_DELIVERY_ADDR_TEMP = "del_addr_temp";
+    private static final String KEY_DELIVERY_PHONE_TEMP = "del_phone_temp";
 
-    // --- Ключ для Відстеження ---
     private static final String KEY_ACTIVE_ORDER_ID = "active_order_id";
 
     private static SharedPreferences getPrefs(Context context) {
         return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
     }
-
-    // ==========================================
-    // 1. МЕТОДИ ПРОФІЛЮ (ProfileFragment)
-    // ==========================================
 
     public static void saveProfile(Context context, String name, String phone, String email, String address) {
         SharedPreferences.Editor editor = getPrefs(context).edit();
@@ -71,10 +62,6 @@ public class LocalStorage {
         return getPrefs(context).getString(KEY_CLIENT_ADDRESS, "");
     }
 
-    // ==========================================
-    // 2. МЕТОДИ СЕСІЇ (Login/Logout)
-    // ==========================================
-
     public static void saveLoginSession(Context context, int userId, String username) {
         SharedPreferences.Editor editor = getPrefs(context).edit();
         editor.putBoolean(KEY_IS_LOGGED_IN, true);
@@ -97,7 +84,6 @@ public class LocalStorage {
 
     public static void logout(Context context) {
         SharedPreferences.Editor editor = getPrefs(context).edit();
-        // Видаляємо дані сесії та профілю, але можна залишити кеш меню
         editor.remove(KEY_IS_LOGGED_IN);
         editor.remove(KEY_USER_ID);
         editor.remove(KEY_USERNAME);
@@ -111,13 +97,7 @@ public class LocalStorage {
         editor.apply();
     }
 
-    // ==========================================
-    // 3. МЕТОДИ ОФОРМЛЕННЯ ЗАМОВЛЕННЯ
-    // ==========================================
 
-    /**
-     * Встановлює режим доставки та зберігає дані для поточного замовлення.
-     */
     public static void setDeliveryMode(Context context, boolean isDelivery, String address, String phone) {
         SharedPreferences.Editor editor = getPrefs(context).edit();
         editor.putBoolean(KEY_IS_DELIVERY, isDelivery);
@@ -125,7 +105,7 @@ public class LocalStorage {
         if (isDelivery) {
             editor.putString(KEY_DELIVERY_ADDR_TEMP, address);
             editor.putString(KEY_DELIVERY_PHONE_TEMP, phone);
-            editor.remove(KEY_TABLE_NO); // Якщо доставка, то столик не актуальний
+            editor.remove(KEY_TABLE_NO);
         } else {
             editor.remove(KEY_DELIVERY_ADDR_TEMP);
             editor.remove(KEY_DELIVERY_PHONE_TEMP);
@@ -148,7 +128,6 @@ public class LocalStorage {
     public static void saveTableNumber(Context context, int tableNo) {
         SharedPreferences.Editor editor = getPrefs(context).edit();
         editor.putInt(KEY_TABLE_NO, tableNo);
-        // Якщо вибрали столик, значить це не доставка
         editor.putBoolean(KEY_IS_DELIVERY, false);
         editor.apply();
     }
@@ -156,10 +135,6 @@ public class LocalStorage {
     public static int getTableNumber(Context context) {
         return getPrefs(context).getInt(KEY_TABLE_NO, 1);
     }
-
-    // ==========================================
-    // 4. МЕТОДИ ВІДСТЕЖЕННЯ (Tracking)
-    // ==========================================
 
     public static void saveActiveOrderId(Context context, String orderId) {
         getPrefs(context).edit().putString(KEY_ACTIVE_ORDER_ID, orderId).apply();
@@ -172,10 +147,6 @@ public class LocalStorage {
     public static void clearActiveOrder(Context context) {
         getPrefs(context).edit().remove(KEY_ACTIVE_ORDER_ID).apply();
     }
-
-    // ==========================================
-    // 5. МЕТОДИ КЕШУВАННЯ МЕНЮ (Старі, без змін)
-    // ==========================================
 
     public static void saveCourses(Context context, List<Course> courses) {
         SharedPreferences.Editor editor = getPrefs(context).edit();

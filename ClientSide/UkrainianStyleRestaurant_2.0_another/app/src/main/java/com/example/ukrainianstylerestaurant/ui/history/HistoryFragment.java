@@ -98,7 +98,6 @@ public class HistoryFragment extends Fragment {
 
         executorService.execute(() -> {
             try {
-                // 1. Копіюємо список страв
                 List<OrderItemRequest> newItems = new ArrayList<>();
                 if (oldOrder.items != null) {
                     for (OrderItemResponse oldItem : oldOrder.items) {
@@ -106,7 +105,6 @@ public class HistoryFragment extends Fragment {
                     }
                 }
 
-                // 2. Беремо АКТУАЛЬНІ дані клієнта
                 String address = LocalStorage.getClientAddress(requireContext());
                 String phone = LocalStorage.getClientPhone(requireContext());
                 String name = LocalStorage.getClientName(requireContext());
@@ -114,7 +112,6 @@ public class HistoryFragment extends Fragment {
 
                 CreateOrderRequest req;
 
-                // 3. Перевіряємо тип
                 if ("DineIn".equalsIgnoreCase(oldOrder.type)) {
                     int tableNo = LocalStorage.getTableNumber(requireContext());
                     req = new CreateOrderRequest(tableNo, newItems, name);
@@ -126,10 +123,8 @@ public class HistoryFragment extends Fragment {
                 OrderResponse response = repo.createOrder(req);
 
                 if (response != null && response.id != null) {
-                    // Зберігаємо ID
                     LocalStorage.saveActiveOrderId(requireContext(), response.id);
 
-                    // Оплата
                     boolean paid = false;
                     if (payImmediately) {
                         paid = repo.payOrder(response.id);
@@ -138,11 +133,9 @@ public class HistoryFragment extends Fragment {
                     boolean finalPaid = paid;
 
                     mainHandler.post(() -> {
-                        // --- ЗМІНЕНО: Використовуємо звичайний Toast ---
                         String msg = "Замовлення створено!" + (finalPaid ? " (Оплачено)" : "");
                         Toast.makeText(getContext(), msg, Toast.LENGTH_LONG).show();
 
-                        // Оновлюємо список, щоб побачити нове замовлення зверху
                         loadHistory();
                     });
                 }

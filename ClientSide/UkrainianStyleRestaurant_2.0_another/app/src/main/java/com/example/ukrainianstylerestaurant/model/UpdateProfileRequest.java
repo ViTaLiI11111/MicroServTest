@@ -2,7 +2,7 @@ package com.example.ukrainianstylerestaurant.model;
 
 public class UpdateProfileRequest {
     public int id;
-    public String fullName; // <--- Має збігатися з C# (FullName -> fullName)
+    public String fullName;
     public String email;
     public String phone;
     public String address;

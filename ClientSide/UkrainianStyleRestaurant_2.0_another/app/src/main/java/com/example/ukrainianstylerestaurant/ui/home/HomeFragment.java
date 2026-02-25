@@ -38,7 +38,6 @@ public class HomeFragment extends Fragment {
     private CategoryAdapter categoryAdapter;
     private CourseAdapter courseAdapter;
 
-    // Змінні, що раніше були в MainActivity.java
     List<Course> courseList = new ArrayList<>();
     public static List<Course> fullCoursesList = new ArrayList<>();
 
@@ -52,7 +51,6 @@ public class HomeFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        // Завантажуємо оновлений layout fragment_home.xml
         return inflater.inflate(R.layout.fragment_home, container, false);
     }
 
@@ -62,27 +60,18 @@ public class HomeFragment extends Fragment {
 
         repo = new MenuRepository();
         executorService = Executors.newFixedThreadPool(2);
-        mainThreadHandler = new Handler(Looper.getMainLooper()); // Для роботи з UI потоком
+        mainThreadHandler = new Handler(Looper.getMainLooper());
 
-        // Встановлюємо RecyclerView
         setCategoryRecycler(categoryList, view);
         setCourseRecycler(courseList, view);
 
-        // Обробник натискання для повернення всіх курсів
         ImageButton returnAllBtn = view.findViewById(R.id.return_first_list);
         returnAllBtn.setOnClickListener(v -> returnAllCourses());
 
-        // Кнопки "btnLogoutMain" та "imageButton" краще прибрати з fragment_home.xml
-        // і використовувати Drawer, але якщо вони необхідні:
-        // view.findViewById(R.id.btnLogoutMain).setOnClickListener(v -> logout());
-        // view.findViewById(R.id.imageButton).setOnClickListener(v -> openShoppingCart());
 
-
-        // Завантаження даних
         if (!isInternetAvailable()) {
             Toast.makeText(getContext(), "Немає з'єднання з Інтернетом", Toast.LENGTH_SHORT).show();
 
-            // Логіка завантаження з LocalStorage
             List<Category> savedCategories = LocalStorage.loadCategories(requireContext());
             if (savedCategories != null) {
                 categoryList.addAll(savedCategories);
@@ -101,7 +90,6 @@ public class HomeFragment extends Fragment {
         }
     }
 
-    // --- API Loaders (Перенесені з MainActivity) ---
     private void fetchCategoriesFromApi() {
         try {
             List<Category> cats = repo.getCategories();
@@ -134,9 +122,8 @@ public class HomeFragment extends Fragment {
         }
     }
 
-    // --- Utility Methods ---
     private boolean isInternetAvailable() {
-        Context context = requireContext(); // Використовуємо requireContext()
+        Context context = requireContext();
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         if (cm == null) return false;
         NetworkInfo ni = cm.getActiveNetworkInfo();
@@ -147,7 +134,6 @@ public class HomeFragment extends Fragment {
         RecyclerView.LayoutManager lm = new LinearLayoutManager(requireContext(), RecyclerView.HORIZONTAL, false);
         categoryRecycler = view.findViewById(R.id.categoryRecycler);
         categoryRecycler.setLayoutManager(lm);
-        // Передаємо "this" (поточний Fragment) для обробки кліків
         categoryAdapter = new CategoryAdapter(requireContext(), list, this);
         categoryRecycler.setAdapter(categoryAdapter);
     }
@@ -160,7 +146,6 @@ public class HomeFragment extends Fragment {
         courseRecycler.setAdapter(courseAdapter);
     }
 
-    // --- Public methods for CategoryAdapter ---
 
     public void returnAllCourses() {
         courseList.clear();
@@ -182,21 +167,4 @@ public class HomeFragment extends Fragment {
         courseList.addAll(filtered);
         courseAdapter.notifyDataSetChanged();
     }
-
-    // Приклад того, як тепер обробляються переходи на інші екрани через NavController
-    /*
-    public void openShoppingCart() {
-        NavController navController = NavHostFragment.findNavController(this);
-        navController.navigate(R.id.nav_order_page);
-    }
-
-    public void logout() {
-        // Цю логіку краще лишити в MainActivity/Drawer, але якщо треба тут:
-        LocalStorage.logout(requireContext());
-        Intent intent = new Intent(requireContext(), LoginActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
-        requireActivity().finish();
-    }
-    */
 }

@@ -19,23 +19,19 @@ import com.google.firebase.messaging.RemoteMessage;
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
-    // Цей метод викликається, коли токен оновлюється (наприклад, при першому запуску)
     @Override
     public void onNewToken(@NonNull String token) {
         super.onNewToken(token);
-        // Якщо користувач вже залогінений, відправляємо токен на сервер
         String username = LocalStorage.getUsername(this);
         if (LocalStorage.isLoggedIn(this) && !username.isEmpty()) {
             new AuthRepository().sendTokenToServer(username, "Client", token);
         }
     }
 
-    // Цей метод викликається, коли приходить повідомлення (пуш)
     @Override
     public void onMessageReceived(@NonNull RemoteMessage message) {
         super.onMessageReceived(message);
 
-        // Якщо є payload повідомлення
         if (message.getNotification() != null) {
             sendNotification(message.getNotification().getTitle(), message.getNotification().getBody());
         }
@@ -45,7 +41,6 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
-        // Прапор mutability обов'язковий для Android 12+
         int flags = PendingIntent.FLAG_ONE_SHOT;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             flags |= PendingIntent.FLAG_IMMUTABLE;
@@ -58,7 +53,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
         NotificationCompat.Builder notificationBuilder =
                 new NotificationCompat.Builder(this, channelId)
-                        .setSmallIcon(R.mipmap.ic_launcher) // Переконайся, що іконка існує, або зміни на R.drawable.ic_...
+                        .setSmallIcon(R.mipmap.ic_launcher)
                         .setContentTitle(title)
                         .setContentText(messageBody)
                         .setAutoCancel(true)
@@ -68,7 +63,6 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-        // Для Android 8.0+ потрібен канал
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(channelId,
                     "Order Updates",

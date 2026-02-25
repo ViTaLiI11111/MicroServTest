@@ -26,15 +26,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // --- ДОДАНО: ЗАПИТ ДОЗВОЛУ НА ПОВІДОМЛЕННЯ (Android 13+) ---
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, 101);
             }
         }
-        // -----------------------------------------------------------
 
-        // Налаштування Toolbar
         androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
@@ -42,14 +39,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
 
-        // Отримання NavController
         NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.nav_host_fragment);
 
         if (navHostFragment != null) {
             NavController navController = navHostFragment.getNavController();
 
-            // Додаємо всі ID фрагментів, де має бути кнопка "гамбургер" (меню)
             appBarConfiguration = new AppBarConfiguration.Builder(
                     R.id.nav_home,
                     R.id.nav_order_page,
@@ -57,7 +52,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     R.id.nav_contacts,
                     R.id.nav_profile,
                     R.id.nav_delivery_status,
-                    R.id.nav_history // Додано історію
+                    R.id.nav_history
             )
                     .setOpenableLayout(drawer)
                     .build();

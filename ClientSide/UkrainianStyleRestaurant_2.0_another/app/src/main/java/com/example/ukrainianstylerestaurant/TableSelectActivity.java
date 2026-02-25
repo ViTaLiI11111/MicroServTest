@@ -22,7 +22,7 @@ public class TableSelectActivity extends AppCompatActivity {
     private EditText etTableNumber;
     private Button btnConfirmTable;
     private Button btnLogout;
-    private Button btnScanQr; // Нова кнопка
+    private Button btnScanQr;
 
     private static final int CAMERA_PERMISSION_CODE = 100;
     private static final int SCAN_REQUEST_CODE = 101;
@@ -36,29 +36,23 @@ public class TableSelectActivity extends AppCompatActivity {
         etTableNumber = findViewById(R.id.et_table_number);
         btnConfirmTable = findViewById(R.id.btn_confirm_table);
         btnLogout = findViewById(R.id.btn_logout);
-        btnScanQr = findViewById(R.id.btn_scan_qr); // Знаходимо нову кнопку
+        btnScanQr = findViewById(R.id.btn_scan_qr);
 
-        // Встановлюємо привітання
         String username = LocalStorage.getUsername(this);
         tvWelcome.setText("Вітаємо, " + username + "!");
 
-        // Встановлюємо збережений номер столика, якщо він є
         int savedTableNo = LocalStorage.getTableNumber(this);
         if (savedTableNo > 0) {
             etTableNumber.setText(String.valueOf(savedTableNo));
         }
 
-        // --- ЛОГІКА СКАНУВАННЯ ---
         btnScanQr.setOnClickListener(v -> {
-            // Перевіряємо дозвіл на камеру
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
                     == PackageManager.PERMISSION_DENIED) {
-                // Якщо дозволу немає, просимо його
                 ActivityCompat.requestPermissions(this,
                         new String[] { Manifest.permission.CAMERA },
                         CAMERA_PERMISSION_CODE);
             } else {
-                // Якщо дозвіл є, запускаємо сканер
                 startScanning();
             }
         });
@@ -66,18 +60,13 @@ public class TableSelectActivity extends AppCompatActivity {
         btnConfirmTable.setOnClickListener(v -> {
             String tableNoStr = etTableNumber.getText().toString().trim();
 
-            // Якщо поле пусте або там не число - це помилка
             if (tableNoStr.isEmpty()) {
                 Toast.makeText(this, "Будь ласка, введіть номер столика або відскануйте QR", Toast.LENGTH_SHORT).show();
                 return;
             }
 
             try {
-                // Спробуємо розпарсити. Якщо QR-код містив JSON (наприклад {"id":5}),
-                // тут треба буде складніший парсинг.
-                // Але ми домовились, що QR містить просто цифру "5".
 
-                // Видаляємо зайві символи, якщо раптом QR містить пробіли
                 tableNoStr = tableNoStr.replaceAll("[^0-9]", "");
 
                 int tableNo = Integer.parseInt(tableNoStr);
@@ -86,10 +75,8 @@ public class TableSelectActivity extends AppCompatActivity {
                     return;
                 }
 
-                // Зберігаємо номер столика
                 LocalStorage.saveTableNumber(this, tableNo);
 
-                // Переходимо до головного меню
                 Intent intent = new Intent(this, MainActivity.class);
                 startActivity(intent);
 
@@ -112,7 +99,6 @@ public class TableSelectActivity extends AppCompatActivity {
         startActivityForResult(intent, SCAN_REQUEST_CODE);
     }
 
-    // Обробка відповіді користувача на запит дозволу камери
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -125,14 +111,12 @@ public class TableSelectActivity extends AppCompatActivity {
         }
     }
 
-    // Отримання результату сканування від ScannerActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == SCAN_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
             if (data != null) {
                 String scannedData = data.getStringExtra("SCANNED_TABLE_ID");
-                // Записуємо результат у поле вводу
                 etTableNumber.setText(scannedData);
                 Toast.makeText(this, "Код скановано: " + scannedData, Toast.LENGTH_SHORT).show();
             }

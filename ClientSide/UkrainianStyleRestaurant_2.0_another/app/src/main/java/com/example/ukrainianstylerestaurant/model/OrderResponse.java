@@ -13,8 +13,7 @@ public class OrderResponse {
     public String clientPhone;
     public String clientName;
 
-    // --- ВАЖЛИВІ ПОЛЯ ---
-    public boolean isPaid; // Має бути точно як в JSON (isPaid)
+    public boolean isPaid;
     public String paidAt;
 
     public List<OrderItemResponse> items;

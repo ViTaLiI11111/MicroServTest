@@ -20,7 +20,7 @@ public final class DeliveryRetrofitClient {
             Gson gson = new GsonBuilder().setLenient().create();
 
             retrofit = new Retrofit.Builder()
-                    .baseUrl(ApiConfig.BASE_URL) // <--- ЗМІНИЛИ ТУТ
+                    .baseUrl(ApiConfig.BASE_URL)
                     .client(http)
                     .addConverterFactory(GsonConverterFactory.create(gson))
                     .build();

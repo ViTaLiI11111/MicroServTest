@@ -5,12 +5,11 @@ import java.util.List;
 public class CreateOrderRequest {
     public int tableNo;
     public List<OrderItemRequest> items;
-    public int type; // 0 = DineIn, 1 = Delivery
+    public int type;
     public String address;
     public String phone;
-    public String clientName; // <--- НОВЕ ПОЛЕ
+    public String clientName;
 
-    // Конструктор 1: Для закладу (DineIn)
     public CreateOrderRequest(int tableNo, List<OrderItemRequest> items, String clientName) {
         this.tableNo = tableNo;
         this.items = items;
@@ -20,7 +19,6 @@ public class CreateOrderRequest {
         this.phone = null;
     }
 
-    // Конструктор 2: Для доставки (Delivery)
     public CreateOrderRequest(List<OrderItemRequest> items, String address, String phone, String clientName) {
         this.tableNo = 0;
         this.items = items;

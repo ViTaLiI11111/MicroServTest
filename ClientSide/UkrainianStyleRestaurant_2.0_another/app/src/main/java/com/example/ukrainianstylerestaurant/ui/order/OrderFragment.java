@@ -71,24 +71,19 @@ public class OrderFragment extends Fragment {
         List<String> coursesSum = new ArrayList<>();
         float totalSum = 0;
 
-        // Проходимось по всіх доступних стравах
         for (Course c : HomeFragment.fullCoursesList) {
-            // Перевіряємо, чи є ID цієї страви в нашій Map
             if (Order.itemsMap.containsKey(c.getId())) {
 
-                int qty = Order.itemsMap.get(c.getId()); // Отримуємо кількість
+                int qty = Order.itemsMap.get(c.getId());
 
-                // Формуємо рядок: "Борщ x2"
                 coursesOrder.add(c.getTitle() + " x" + qty);
 
-                // Ціна за одну порцію
                 coursesOrder.add(c.getPrice());
 
                 try {
                     float price = Float.parseFloat(c.getPrice());
-                    totalSum += price * qty; // Додаємо до суми (ціна * кількість)
+                    totalSum += price * qty;
                 } catch (NumberFormatException e) {
-                    /* ігноруємо */
                 }
             }
         }
@@ -107,14 +102,12 @@ public class OrderFragment extends Fragment {
             return;
         }
 
-        // Перевіряємо, чи є дані
         String clientName = LocalStorage.getClientName(requireContext());
-        String clientPhone = LocalStorage.getClientPhone(requireContext()); // Додай перевірку телефону
+        String clientPhone = LocalStorage.getClientPhone(requireContext());
 
         if (clientName.isEmpty() || clientPhone.isEmpty()) {
             Toast.makeText(requireContext(), "Для замовлення заповніть профіль (Ім'я та Телефон)!", Toast.LENGTH_LONG).show();
 
-            // Перехід в профіль
             Navigation.findNavController(requireView()).navigate(R.id.nav_profile);
             return;
         }
@@ -162,15 +155,12 @@ public class OrderFragment extends Fragment {
 
         executorService.execute(() -> {
             try {
-                // 1. Збираємо дані з Map
                 List<OrderItemRequest> items = new ArrayList<>();
 
-                // Проходимо по кожному запису в Map (ID -> Quantity)
                 for (Map.Entry<Integer, Integer> entry : Order.itemsMap.entrySet()) {
                     int dishId = entry.getKey();
                     int qty = entry.getValue();
 
-                    // Додаємо в список для відправки на сервер
                     items.add(new OrderItemRequest(dishId, qty, null));
                 }
 
@@ -216,7 +206,6 @@ public class OrderFragment extends Fragment {
 
                         Toast.makeText(requireContext(), msg, Toast.LENGTH_LONG).show();
 
-                        // Очищаємо кошик
                         Order.itemsMap.clear();
                         loadOrderData();
                     });

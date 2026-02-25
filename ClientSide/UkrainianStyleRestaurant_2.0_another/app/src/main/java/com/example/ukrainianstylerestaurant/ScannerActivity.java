@@ -22,13 +22,10 @@ public class ScannerActivity extends AppCompatActivity {
 
         CodeScannerView scannerView = findViewById(R.id.scanner_view);
 
-        // --- ЛОГІКА КНОПКИ НАЗАД ---
         ImageButton btnBack = findViewById(R.id.btn_back_scanner);
         btnBack.setOnClickListener(v -> {
-            // Просто закриваємо цю Activity, і користувач повертається на попередню
             finish();
         });
-        // ---------------------------
 
         mCodeScanner = new CodeScanner(this, scannerView);
 

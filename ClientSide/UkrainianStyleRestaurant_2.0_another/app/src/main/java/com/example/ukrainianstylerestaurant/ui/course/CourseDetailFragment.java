@@ -52,13 +52,10 @@ public class CourseDetailFragment extends Fragment {
             TextView coursePrice = view.findViewById(R.id.coursePagePrice);
             TextView coursePepper = view.findViewById(R.id.coursePagePepper);
 
-            // Змінив тип кнопки на Button (бо в XML це Button, а не ImageButton)
             Button addToCartBtn = view.findViewById(R.id.addToCart);
 
-            // Знаходимо кнопку назад
             ImageButton btnBack = view.findViewById(R.id.btnBack);
 
-            // Встановлюємо дані
             courseTitle.setText(courseTitleText);
             coursePrice.setText(coursePriceText + " грн");
             coursePepper.setText(coursePepperText);
@@ -75,10 +72,8 @@ public class CourseDetailFragment extends Fragment {
                 courseImage.setImageResource(R.drawable.default_image);
             }
 
-            // Обробник додавання в кошик
             addToCartBtn.setOnClickListener(v -> addToCart(v));
 
-            // Обробник кнопки "Назад"
             btnBack.setOnClickListener(v -> {
                 Navigation.findNavController(view).popBackStack();
             });

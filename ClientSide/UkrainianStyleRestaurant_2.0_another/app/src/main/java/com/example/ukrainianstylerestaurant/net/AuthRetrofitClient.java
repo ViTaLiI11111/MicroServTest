@@ -26,7 +26,7 @@ public final class AuthRetrofitClient {
             Gson gson = new GsonBuilder().setLenient().create();
 
             retrofit = new Retrofit.Builder()
-                    .baseUrl(ApiConfig.AUTH_BASE_URL) // Використовуємо новий URL
+                    .baseUrl(ApiConfig.AUTH_BASE_URL)
                     .client(http)
                     .addConverterFactory(GsonConverterFactory.create(gson))
                     .build();

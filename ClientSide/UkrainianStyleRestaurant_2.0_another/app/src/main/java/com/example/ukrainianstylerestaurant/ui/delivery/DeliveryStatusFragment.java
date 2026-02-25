@@ -33,7 +33,7 @@ import retrofit2.Response;
 public class DeliveryStatusFragment extends Fragment {
 
     private TextView tvBody, tvStatusHeader, tvPaymentStatus;
-    private LinearLayout layoutCourierInfo, layoutPaymentInfo, layoutItems; // <--- Додали layoutItems
+    private LinearLayout layoutCourierInfo, layoutPaymentInfo, layoutItems;
     private Button btnRefresh, btnPay;
 
     private ExecutorService executorService;
@@ -59,7 +59,7 @@ public class DeliveryStatusFragment extends Fragment {
         tvStatusHeader = view.findViewById(R.id.tv_status_header);
         tvBody = view.findViewById(R.id.tv_status_body);
 
-        layoutItems = view.findViewById(R.id.layout_order_items); // <--- Знаходимо
+        layoutItems = view.findViewById(R.id.layout_order_items);
         layoutCourierInfo = view.findViewById(R.id.layout_courier_info);
         layoutPaymentInfo = view.findViewById(R.id.layout_payment_info);
 
@@ -115,9 +115,7 @@ public class DeliveryStatusFragment extends Fragment {
                     if (order != null) {
                         updatePaymentUI(order);
 
-                        // --- НОВЕ: Заповнюємо список страв ---
                         fillOrderItems(order);
-                        // ------------------------------------
 
                         if ("Delivery".equalsIgnoreCase(order.type)) {
                             loadDeliveryDetails(activeOrderId);
@@ -142,39 +140,30 @@ public class DeliveryStatusFragment extends Fragment {
         });
     }
 
-    // --- НОВИЙ МЕТОД ---
     private void fillOrderItems(OrderResponse order) {
-        layoutItems.removeAllViews(); // Очищаємо перед оновленням
+        layoutItems.removeAllViews();
 
-        // 1. Отримуємо правильні кольори з ресурсів, які залежать від теми
-        // Використовуємо ContextCompat для сумісності, або getResources().getColor()
         int primaryColor = androidx.core.content.ContextCompat.getColor(getContext(), R.color.primary_text);
         int secondaryColor = androidx.core.content.ContextCompat.getColor(getContext(), R.color.secondary_text);
 
         if (order.items != null) {
             for (OrderItemResponse item : order.items) {
                 TextView tv = new TextView(getContext());
-                // Формат: "Борщ x2 — 200.0 грн"
                 double sum = item.price * item.qty;
                 String text = item.dishTitle + " x" + item.qty + " — " + sum + " грн";
                 tv.setText(text);
                 tv.setTextSize(16);
 
-                // ЗМІНА ТУТ: Замість Color.BLACK ставимо сірий (або основний) колір з теми
                 tv.setTextColor(secondaryColor);
 
                 tv.setPadding(0, 4, 0, 4);
-                // Додаємо шрифт Montserrat (опціонально, якщо хочеш красу)
-                // tv.setTypeface(ResourcesCompat.getFont(getContext(), R.font.montserrat_light));
                 layoutItems.addView(tv);
             }
 
-            // Разом
             TextView totalTv = new TextView(getContext());
             totalTv.setText("Всього до сплати: " + order.total + " грн");
             totalTv.setTextSize(18);
 
-            // ЗМІНА ТУТ: Основний колір (чорний вдень, білий вночі)
             totalTv.setTextColor(primaryColor);
 
             totalTv.setTypeface(null, Typeface.BOLD);

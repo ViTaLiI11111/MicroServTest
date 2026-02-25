@@ -34,7 +34,6 @@ public class OrdersRepository {
         return null;
     }
 
-    // --- НОВИЙ МЕТОД ---
     public List<OrderResponse> getClientHistory(String clientName) throws IOException {
         Response<List<OrderResponse>> r = api.getClientHistory(clientName).execute();
         if (r.isSuccessful()) {

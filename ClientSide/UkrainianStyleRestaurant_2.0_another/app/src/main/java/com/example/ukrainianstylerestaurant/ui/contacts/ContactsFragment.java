@@ -18,7 +18,6 @@ public class ContactsFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        // Використовуємо оновлений layout
         return inflater.inflate(R.layout.fragment_contacts, container, false);
     }
 
@@ -26,13 +25,6 @@ public class ContactsFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Тут міг бути код для:
-        // - Встановлення обробників кліків на номери телефонів (для дзвінка)
-        // - Завантаження даних, якщо вони були динамічними
-
-        // Оскільки в ContactsFragment.java логіки не було, цей Fragment залишається чистим.
     }
 
-    // Всі методи aboutUs(), mainPage() більше не потрібні,
-    // оскільки навігація обробляється DrawerLayout у MainActivity.
 }

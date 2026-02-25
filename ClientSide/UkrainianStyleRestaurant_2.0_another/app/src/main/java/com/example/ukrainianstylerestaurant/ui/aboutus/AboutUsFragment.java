@@ -24,13 +24,5 @@ public class AboutUsFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Тут ви б знайшли TextView та інший вміст і встановили дані,
-        // але оскільки в AboutUs Activity не було багато логіки,
-        // тут зазвичай нічого не потрібно, якщо вся логіка в XML.
-
-        // ВАЖЛИВО: Видаліть всі посилання на "constraintLayout" з бічною панеллю,
-        // оскільки вона тепер знаходиться у MainActivity.
-        // Видаліть також onClick методи "goToContacts", "mainPage" і т.д.
-        // Вони будуть замінені Navigation Component.
     }
 }

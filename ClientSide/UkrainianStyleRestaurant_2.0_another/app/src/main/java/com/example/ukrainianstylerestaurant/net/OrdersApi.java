@@ -22,7 +22,6 @@ public interface OrdersApi {
     @GET("orders/{id}")
     Call<OrderResponse> getOrder(@Path("id") String id);
 
-    // --- НОВИЙ МЕТОД ---
     @GET("orders")
     Call<List<OrderResponse>> getClientHistory(@Query("clientName") String clientName);
 }

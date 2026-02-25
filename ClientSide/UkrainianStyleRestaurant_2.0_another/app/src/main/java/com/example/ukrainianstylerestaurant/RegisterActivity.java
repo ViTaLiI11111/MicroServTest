@@ -60,7 +60,6 @@ public class RegisterActivity extends AppCompatActivity {
         });
 
         tvGoToLogin.setOnClickListener(v -> {
-            // Просто закриваємо цей екран, повертаючись до LoginActivity
             finish();
         });
     }
@@ -76,7 +75,7 @@ public class RegisterActivity extends AppCompatActivity {
                     setLoading(false);
                     if (success) {
                         showToast("Реєстрація успішна! Тепер увійдіть.");
-                        finish(); // Повертаємось до LoginActivity
+                        finish();
                     } else {
                         showToast("Помилка: цей логін вже зайнятий");
                     }

@@ -47,10 +47,8 @@ public class ProfileFragment extends Fragment {
         etAddress = view.findViewById(R.id.et_profile_address);
         btnSave = view.findViewById(R.id.btn_save_profile);
 
-        // 1. Спочатку показуємо те, що вже збережено в телефоні
         fillFieldsFromLocal();
 
-        // 2. Завжди пробуємо оновити дані з хмари (щоб підтягнути актуальну адресу)
         loadProfileFromServer();
 
         btnSave.setOnClickListener(v -> saveProfile());
@@ -60,9 +58,8 @@ public class ProfileFragment extends Fragment {
         etName.setText(LocalStorage.getClientName(requireContext()));
         etEmail.setText(LocalStorage.getClientEmail(requireContext()));
         etPhone.setText(LocalStorage.getClientPhone(requireContext()));
-        etAddress.setText(LocalStorage.getClientAddress(requireContext())); // Підтягуємо адресу
+        etAddress.setText(LocalStorage.getClientAddress(requireContext()));
 
-        // Заглушка, якщо ім'я пусте (показуємо логін)
         if (etName.getText().toString().isEmpty()) {
             etName.setText(LocalStorage.getUsername(requireContext()));
         }
@@ -75,23 +72,17 @@ public class ProfileFragment extends Fragment {
         executorService.execute(() -> {
             try {
                 AuthRepository repo = new AuthRepository();
-                // Цей запит повертає JSON з полями: id, username, fullName, email, phone, ADDRESS
                 ClientProfileResponse profile = repo.getProfile(userId);
 
                 if (profile != null) {
                     mainHandler.post(() -> {
-                        // --- ГОЛОВНА ЗМІНА ТУТ ---
-                        // Зберігаємо отриману адресу в пам'ять телефону
                         LocalStorage.saveProfile(requireContext(),
                                 profile.fullName != null ? profile.fullName : profile.username,
                                 profile.phone,
                                 profile.email,
-                                profile.address); // <--- Беремо адресу з сервера!
+                                profile.address);
 
-                        // Оновлюємо поля на екрані новими даними
                         fillFieldsFromLocal();
-                        // Можна показати маленький тост, що дані оновлено
-                        // Toast.makeText(requireContext(), "Профіль оновлено", Toast.LENGTH_SHORT).show();
                     });
                 }
             } catch (Exception e) {
@@ -119,7 +110,6 @@ public class ProfileFragment extends Fragment {
         executorService.execute(() -> {
             try {
                 AuthRepository repo = new AuthRepository();
-                // Відправляємо адресу на сервер для збереження
                 boolean success = repo.updateProfile(userId, newName, email, phone, address);
 
                 mainHandler.post(() -> {
@@ -127,11 +117,9 @@ public class ProfileFragment extends Fragment {
                     btnSave.setText("Зберегти зміни");
 
                     if (success) {
-                        // Якщо сервер зберіг ок - оновлюємо і локально
                         LocalStorage.saveProfile(requireContext(), newName, phone, email, address);
                         Toast.makeText(requireContext(), "Дані збережено!", Toast.LENGTH_SHORT).show();
 
-                        // Повертаємо користувача назад (в меню або кошик)
                         Navigation.findNavController(requireView()).popBackStack();
                     } else {
                         Toast.makeText(requireContext(), "Помилка сервера", Toast.LENGTH_SHORT).show();

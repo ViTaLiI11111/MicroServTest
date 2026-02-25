@@ -26,7 +26,6 @@ public interface AuthApi {
     @PUT("api/client/profile")
     Call<ResponseBody> updateProfile(@Body UpdateProfileRequest request);
 
-    // --- НОВИЙ МЕТОД: Збереження токена ---
     @POST("api/notifications/token")
     Call<ResponseBody> saveToken(@Body SaveTokenRequest request);
 
