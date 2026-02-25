@@ -24,14 +24,13 @@ import com.waiter.app.ui.settings.SettingsViewModel
 @Composable
 fun OrdersListScreen(
     vm: OrdersViewModel,
-    settingsVm: SettingsViewModel = viewModel(), // Потрібен для отримання ID офіціанта
+    settingsVm: SettingsViewModel = viewModel(),
     onOpenDetails: (String) -> Unit,
     onOpenSettings: () -> Unit
 ) {
-    val context = LocalContext.current // Контекст для Toast
+    val context = LocalContext.current
     val waiterId by settingsVm.userIdFlow.collectAsState(initial = 0)
 
-    // Підписуємося на три різні списки з ViewModel
     val available by vm.availableOrders.collectAsState()
     val active by vm.activeOrders.collectAsState()
     val history by vm.historyOrders.collectAsState()
@@ -39,10 +38,8 @@ fun OrdersListScreen(
     val isLoading by vm.isLoading.collectAsState()
     val error by vm.error.collectAsState()
 
-    // Стан вкладок: 0=Вільні, 1=В роботі, 2=Історія
     var selectedTab by remember { mutableIntStateOf(0) }
 
-    // Завантажуємо дані при вході на екран
     LaunchedEffect(waiterId) {
         if (waiterId != 0) vm.loadData(waiterId)
     }
@@ -53,18 +50,14 @@ fun OrdersListScreen(
                 TopAppBar(
                     title = { Text("Зал (Офіціант)") },
                     actions = {
-                        // Кнопка оновлення
                         IconButton(onClick = { vm.loadData(waiterId) }) {
                             Icon(Icons.Default.Refresh, "Refresh")
                         }
-                        // Кнопка налаштувань
                         IconButton(onClick = onOpenSettings) {
                             Icon(Icons.Default.Settings, "Settings")
                         }
                     }
                 )
-
-                // --- ВКЛАДКИ ---
                 TabRow(selectedTabIndex = selectedTab) {
                     Tab(
                         selected = selectedTab == 0,
@@ -94,7 +87,6 @@ fun OrdersListScreen(
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    // Визначаємо, який список показувати
                     val listToShow = when(selectedTab) {
                         0 -> available
                         1 -> active
@@ -114,9 +106,8 @@ fun OrdersListScreen(
                     items(listToShow) { o ->
                         OrderCard(
                             order = o,
-                            tabIndex = selectedTab, // Передаємо індекс вкладки для логіки відображення
+                            tabIndex = selectedTab,
                             onTake = {
-                                // Викликаємо метод ViewModel і показуємо Toast при успіху
                                 vm.assignOrder(o.id, waiterId) {
                                     Toast.makeText(context, "Ви взяли столик №${o.tableNo}!", Toast.LENGTH_SHORT).show()
                                 }
@@ -126,8 +117,6 @@ fun OrdersListScreen(
                     }
                 }
             }
-
-            // Відображення помилки (якщо є)
             if (error != null) {
                 Snackbar(
                     modifier = Modifier.align(Alignment.BottomCenter).padding(16.dp),
@@ -141,11 +130,10 @@ fun OrdersListScreen(
 @Composable
 fun OrderCard(
     order: UiOrder,
-    tabIndex: Int, // 0=Free, 1=Active, 2=History
+    tabIndex: Int,
     onTake: () -> Unit,
     onClick: () -> Unit
 ) {
-    // Якщо це "Історія", робимо картку сірою, щоб відрізнялася
     val cardColor = if (tabIndex == 2) Color(0xFFF5F5F5) else Color.White
     val elevation = if (tabIndex == 2) 1.dp else 3.dp
 
@@ -155,7 +143,6 @@ fun OrderCard(
         colors = CardDefaults.cardColors(containerColor = cardColor)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            // Верхній рядок: Номер столу та Сума
             Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
                 Text(
                     text = "Стіл №${order.tableNo}",
@@ -172,11 +159,10 @@ fun OrderCard(
 
             Spacer(Modifier.height(8.dp))
 
-            // Статус
+
             val statusText = if (tabIndex == 2) "🏁 Завершено" else "Статус: ${order.status}"
             Text(statusText, color = if(tabIndex == 2) Color.Gray else Color.Black)
 
-            // Оплата
             if (order.isPaid) {
                 Text("✅ Оплачено", color = Color(0xFF2E7D32), fontWeight = FontWeight.Bold)
             } else {
@@ -185,9 +171,7 @@ fun OrderCard(
 
             Spacer(Modifier.height(12.dp))
 
-            // --- КНОПКА ДІЇ ---
             if (tabIndex == 0) {
-                // Вкладка "Вільні": Кнопка "Взяти"
                 Button(
                     onClick = onTake,
                     modifier = Modifier.fillMaxWidth(),
@@ -196,14 +180,12 @@ fun OrderCard(
                     Text("🙋‍♂️ Взяти замовлення")
                 }
             } else if (tabIndex == 1) {
-                // Вкладка "В роботі": Підказка
                 Text(
                     "Натисніть на картку для управління",
                     style = MaterialTheme.typography.bodySmall,
                     color = Color.Gray
                 )
             }
-            // Для "Історії" (tabIndex == 2) нічого не показуємо знизу
         }
     }
 }

@@ -47,7 +47,6 @@ fun RootNavGraph(modifier: Modifier = Modifier) {
         route = "root_graph",
         modifier = modifier
     ) {
-        // --- 1. SPLASH ---
         composable(Routes.SPLASH_SCREEN) {
             LaunchedEffect(isLoggedIn, userRoleString) {
                 if (isLoggedIn == true && userRoleString != null) {
@@ -62,12 +61,10 @@ fun RootNavGraph(modifier: Modifier = Modifier) {
             }
         }
 
-        // --- 2. ВИБІР РОЛІ ---
         composable(Routes.ROLE_SELECTION) {
             RoleSelectionScreen(onRoleSelected = { role -> navController.navigate("${Routes.LOGIN}/${role.name}") })
         }
 
-        // --- 3. АВТОРИЗАЦІЯ ---
         navigation(startDestination = "${Routes.LOGIN}/{role}", route = Routes.AUTH_GRAPH) {
             composable(
                 route = "${Routes.LOGIN}/{role}",
@@ -111,7 +108,6 @@ fun RootNavGraph(modifier: Modifier = Modifier) {
             }
         }
 
-        // --- 4. ГРАФ ОФІЦІАНТА ---
         navigation(route = Routes.WAITER_GRAPH, startDestination = Routes.LIST) {
             composable(Routes.LIST) {
                 val graphEntry = remember(it) { navController.getBackStackEntry(Routes.WAITER_GRAPH) }
@@ -135,13 +131,11 @@ fun RootNavGraph(modifier: Modifier = Modifier) {
                         settingsViewModel.logout()
                         navController.navigate(Routes.ROLE_SELECTION) { popUpTo(0) { inclusive = true } }
                     },
-                    // --- ДОДАНО ---
                     onBack = { navController.popBackStack() }
                 )
             }
         }
 
-        // --- 5. ГРАФ КУР'ЄРА ---
         navigation(route = Routes.COURIER_GRAPH, startDestination = "courier_home") {
             composable("courier_home") {
                 val userId by settingsViewModel.userIdFlow.collectAsState(0)
@@ -157,13 +151,11 @@ fun RootNavGraph(modifier: Modifier = Modifier) {
                         settingsViewModel.logout()
                         navController.navigate(Routes.ROLE_SELECTION) { popUpTo(0) { inclusive = true } }
                     },
-                    // --- ДОДАНО ---
                     onBack = { navController.popBackStack() }
                 )
             }
         }
 
-        // --- 6. ГРАФ КУХАРЯ ---
         navigation(route = Routes.COOK_GRAPH, startDestination = "kitchen") {
             composable("kitchen") {
                 val stationId by settingsViewModel.stationIdFlow.collectAsState(initial = 0)
@@ -179,7 +171,6 @@ fun RootNavGraph(modifier: Modifier = Modifier) {
                         settingsViewModel.logout()
                         navController.navigate(Routes.ROLE_SELECTION) { popUpTo(0) { inclusive = true } }
                     },
-                    // --- ДОДАНО ---
                     onBack = { navController.popBackStack() }
                 )
             }

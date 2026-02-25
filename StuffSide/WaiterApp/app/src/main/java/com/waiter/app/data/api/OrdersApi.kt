@@ -12,12 +12,11 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface OrdersApi {
-    // --- ОНОВЛЕНИЙ МЕТОД ---
     @GET("orders")
     suspend fun getOrders(
         @Query("type") type: String? = null,
-        @Query("waiterId") waiterId: Int? = null,    // Фільтр "Мої"
-        @Query("onlyFree") onlyFree: Boolean? = null // Фільтр "Вільні"
+        @Query("waiterId") waiterId: Int? = null,
+        @Query("onlyFree") onlyFree: Boolean? = null
     ): List<OrderDto>
 
     @GET("orders/{id}")
@@ -26,20 +25,16 @@ interface OrdersApi {
     @POST("orders/{id}/pay")
     suspend fun payOrder(@Path("id") id: String): Response<Unit>
 
-    // --- НОВІ МЕТОДИ ---
 
-    // Взяти замовлення (Assign)
     @POST("orders/{id}/assign")
     suspend fun assignOrder(
         @Path("id") id: String,
         @Query("waiterId") waiterId: Int
     ): Response<OrderDto>
 
-    // Завершити замовлення (Complete)
     @POST("orders/{id}/complete")
     suspend fun completeOrder(@Path("id") id: String): Response<Unit>
 
-    // -------------------
 
     @PATCH("orders/items/{itemId}/status")
     suspend fun updateItemStatus(

@@ -13,7 +13,7 @@ import androidx.compose.ui.unit.dp
 fun SettingsScreen(
     vm: SettingsViewModel,
     onLogout: () -> Unit,
-    onBack: () -> Unit // <--- НОВИЙ ПАРАМЕТР
+    onBack: () -> Unit
 ) {
     val username by vm.usernameFlow.collectAsState(initial = "Waiter")
 
@@ -21,13 +21,11 @@ fun SettingsScreen(
         topBar = {
             TopAppBar(
                 title = { Text("Налаштування") },
-                // --- ДОДАНО КНОПКУ НАЗАД ---
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Назад")
                     }
                 }
-                // ---------------------------
             )
         }
     ) { pad ->

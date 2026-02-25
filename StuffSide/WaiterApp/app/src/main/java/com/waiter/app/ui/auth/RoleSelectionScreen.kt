@@ -22,7 +22,6 @@ fun RoleSelectionScreen(
 
         Spacer(Modifier.height(48.dp))
 
-        // Кнопка Офіціанта
         Button(
             onClick = { onRoleSelected(UserRole.WAITER) },
             modifier = Modifier.fillMaxWidth().height(60.dp)
@@ -32,7 +31,6 @@ fun RoleSelectionScreen(
 
         Spacer(Modifier.height(16.dp))
 
-        // Кнопка Кур'єра
         Button(
             onClick = { onRoleSelected(UserRole.COURIER) },
             modifier = Modifier.fillMaxWidth().height(60.dp),
@@ -43,7 +41,6 @@ fun RoleSelectionScreen(
 
         Spacer(Modifier.height(16.dp))
 
-        // Кнопка Кухаря
         Button(
             onClick = { onRoleSelected(UserRole.COOK) },
             modifier = Modifier.fillMaxWidth().height(60.dp),

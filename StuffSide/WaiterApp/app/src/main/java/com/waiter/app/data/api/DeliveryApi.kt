@@ -11,16 +11,13 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface DeliveryApi {
-    // Отримати всі вільні замовлення (для кур'єра)
     @GET("api/deliveries/available")
     suspend fun getAvailableDeliveries(): List<DeliveryDto>
 
-    // Отримати мої активні доставки
     @GET("api/deliveries/my/{courierId}")
     suspend fun getMyDeliveries(@Path("courierId") courierId: Int): List<DeliveryDto>
 
-    // Взяти замовлення в роботу
-    // Використовуємо POST з query параметром, як в контролері C#
+
     @POST("api/deliveries/{id}/take")
     suspend fun takeDelivery(
         @Path("id") id: Int,

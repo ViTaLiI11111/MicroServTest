@@ -12,15 +12,12 @@ class OrdersViewModel(
     private val repo: OrdersRepository = OrdersRepository()
 ) : ViewModel() {
 
-    // Вкладка 1: Вільні
     private val _availableOrders = MutableStateFlow<List<UiOrder>>(emptyList())
     val availableOrders: StateFlow<List<UiOrder>> = _availableOrders
 
-    // Вкладка 2: В роботі (Мої Активні)
     private val _activeOrders = MutableStateFlow<List<UiOrder>>(emptyList())
     val activeOrders: StateFlow<List<UiOrder>> = _activeOrders
 
-    // Вкладка 3: Історія (Мої Завершені) - НОВЕ
     private val _historyOrders = MutableStateFlow<List<UiOrder>>(emptyList())
     val historyOrders: StateFlow<List<UiOrder>> = _historyOrders
 
@@ -35,19 +32,15 @@ class OrdersViewModel(
 
     fun loadData(waiterId: Int) {
         viewModelScope.launch {
-            // Показуємо лоадер тільки якщо всі списки пусті
             if (_availableOrders.value.isEmpty() && _activeOrders.value.isEmpty()) {
                 _isLoading.value = true
             }
             try {
-                // 1. Вільні
                 val free = repo.getOrders(type = "DineIn", onlyFree = true)
                 _availableOrders.value = free
 
-                // 2. Мої (всі)
                 val allMine = repo.getOrders(type = "DineIn", waiterId = waiterId)
 
-                // Розділяємо на Активні та Історію
                 _activeOrders.value = allMine.filter { it.status != "completed" }
                 _historyOrders.value = allMine.filter { it.status == "completed" }
 
@@ -64,7 +57,7 @@ class OrdersViewModel(
             try {
                 repo.assignOrder(orderId, waiterId)
                 loadData(waiterId)
-                onSuccess() // Викликаємо callback (наприклад, для Toast)
+                onSuccess()
             } catch (e: Exception) {
                 _error.value = "Не вдалося взяти замовлення: ${e.message}"
             }

@@ -6,7 +6,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class DeliveryRepository {
-    // Створюємо API через модуль
     private val api = RetrofitModule.createDeliveryApi()
 
     suspend fun getAvailable(): List<DeliveryDto> = withContext(Dispatchers.IO) {

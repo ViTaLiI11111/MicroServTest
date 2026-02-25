@@ -26,7 +26,6 @@ object RetrofitModule {
         .add(KotlinJsonAdapterFactory())
         .build()
 
-    // --- Order Service ---
     fun createApi(): OrdersApi {
         val baseUrl = if (BuildConfig.API_BASE_URL.endsWith("/"))
             BuildConfig.API_BASE_URL
@@ -42,7 +41,6 @@ object RetrofitModule {
         return retrofit.create(OrdersApi::class.java)
     }
 
-    // --- Auth Service ---
     fun createAuthApi(): AuthApi {
         val retrofit = Retrofit.Builder()
             .baseUrl(AppConfig.AUTH_BASE_URL)
@@ -53,7 +51,6 @@ object RetrofitModule {
         return retrofit.create(AuthApi::class.java)
     }
 
-    // --- Delivery Service (Новий метод) ---
     fun createDeliveryApi(): DeliveryApi {
         val retrofit = Retrofit.Builder()
             .baseUrl(AppConfig.DELIVERY_BASE_URL)

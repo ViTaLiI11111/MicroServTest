@@ -22,7 +22,6 @@ fun OrderDto.toUi(): UiOrder =
         clientName = clientName ?: "Гість",
         isPaid = isPaid,
 
-        // --- МАПИНГ ---
         waiterId = waiterId,
 
         items = items.map { it.toUi() }

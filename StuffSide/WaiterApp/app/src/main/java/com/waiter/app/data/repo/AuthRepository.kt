@@ -57,7 +57,6 @@ class AuthRepository(
         }
     }
 
-    // --- НОВИЙ МЕТОД ---
     suspend fun saveToken(username: String, role: String, token: String) = withContext(Dispatchers.IO) {
         try {
             api.saveToken(SaveTokenRequest(username, role, token))

@@ -12,7 +12,7 @@ data class KitchenUiItem(
     val orderId: String,
     val title: String,
     val qty: Int,
-    val status: String, // "Pending", "Cooking", "Ready"
+    val status: String,
     val sortIndex: Int
 )
 
@@ -20,15 +20,12 @@ class KitchenViewModel(
     private val repo: KitchenRepository = KitchenRepository()
 ) : ViewModel() {
 
-    // Вкладка 1: Черга
     private val _pendingItems = MutableStateFlow<List<KitchenUiItem>>(emptyList())
     val pendingItems = _pendingItems.asStateFlow()
 
-    // Вкладка 2: В роботі
     private val _cookingItems = MutableStateFlow<List<KitchenUiItem>>(emptyList())
     val cookingItems = _cookingItems.asStateFlow()
 
-    // Вкладка 3: Видано (Готові) - НОВЕ
     private val _readyItems = MutableStateFlow<List<KitchenUiItem>>(emptyList())
     val readyItems = _readyItems.asStateFlow()
 
@@ -46,8 +43,6 @@ class KitchenViewModel(
                 val readyList = mutableListOf<KitchenUiItem>()
 
                 for (order in orders) {
-                    // Ігноруємо ТІЛЬКИ повністю закриті (архівні) замовлення.
-                    // Замовлення зі статусом "ready" ми залишаємо, щоб бачити історію видачі.
                     if (order.status == "completed") continue
 
                     val myItems = order.items.filter { it.stationId == myStationId }
@@ -62,20 +57,17 @@ class KitchenViewModel(
                             sortIndex = 0
                         )
 
-                        // Розподіляємо по 3-х списках
                         when (item.status) {
                             "Cooking" -> cookingList.add(uiItem)
-                            "Ready" -> readyList.add(uiItem) // Додаємо в готове
-                            else -> pendingList.add(uiItem) // Pending
+                            "Ready" -> readyList.add(uiItem)
+                            else -> pendingList.add(uiItem)
                         }
                     }
                 }
 
-                // Оновлюємо StateFlow
                 _pendingItems.value = pendingList.distinctBy { it.itemId }
                 _cookingItems.value = cookingList.distinctBy { it.itemId }
 
-                // Сортуємо готові так, щоб останні зроблені були зверху (за ID)
                 _readyItems.value = readyList
                     .distinctBy { it.itemId }
                     .sortedByDescending { it.itemId }
@@ -92,9 +84,9 @@ class KitchenViewModel(
         viewModelScope.launch {
             // Логіка переходу
             val newStatusInt = when (currentStatus) {
-                "Pending" -> 1 // -> Cooking
-                "Cooking" -> 2 // -> Ready
-                else -> return@launch // З Ready далі нікуди
+                "Pending" -> 1
+                "Cooking" -> 2
+                else -> return@launch
             }
 
             try {

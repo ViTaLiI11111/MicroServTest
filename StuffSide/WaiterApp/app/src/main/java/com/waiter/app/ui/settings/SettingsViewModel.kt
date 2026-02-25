@@ -19,7 +19,6 @@ class SettingsViewModel(app: Application): AndroidViewModel(app) {
         private val KEY_IS_LOGGED_IN = booleanPreferencesKey("is_logged_in")
         private val KEY_USER_ID = intPreferencesKey("user_id")
         private val KEY_USERNAME = stringPreferencesKey("username")
-        // НОВИЙ КЛЮЧ
         private val KEY_ROLE = stringPreferencesKey("user_role")
         private val KEY_STATION_ID = intPreferencesKey("station_id")
     }
@@ -32,19 +31,17 @@ class SettingsViewModel(app: Application): AndroidViewModel(app) {
 
     val stationIdFlow = app.dataStore.data.map { p -> p[KEY_STATION_ID] ?: 0 }
 
-    // Отримуємо роль (за замовчуванням WAITER, щоб не зламати стару логіку)
     val userRoleFlow = app.dataStore.data.map { p ->
         p[KEY_ROLE] ?: "WAITER"
     }
 
-    // Оновлений метод збереження сесії
     fun saveLoginSession(userId: Int, username: String, role: String, stationId: Int = 0) = viewModelScope.launch {
         getApplication<Application>().dataStore.edit { p ->
             p[KEY_IS_LOGGED_IN] = true
             p[KEY_USER_ID] = userId
             p[KEY_USERNAME] = username
             p[KEY_ROLE] = role
-            p[KEY_STATION_ID] = stationId // Зберігаємо цех
+            p[KEY_STATION_ID] = stationId
         }
     }
 
@@ -54,7 +51,7 @@ class SettingsViewModel(app: Application): AndroidViewModel(app) {
             p[KEY_USER_ID] = -1
             p[KEY_USERNAME] = ""
             p[KEY_ROLE] = "WAITER"
-            p[KEY_STATION_ID] = 0 // Очищаємо
+            p[KEY_STATION_ID] = 0
         }
     }
 }

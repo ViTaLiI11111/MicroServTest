@@ -17,8 +17,6 @@ class StaffFirebaseMessagingService : FirebaseMessagingService() {
 
     override fun onNewToken(token: String) {
         super.onNewToken(token)
-        // Тут ми не можемо легко дістати логін, тому просто ігноруємо.
-        // Токен буде оновлено при наступному вході в додаток.
     }
 
     override fun onMessageReceived(message: RemoteMessage) {
@@ -43,8 +41,8 @@ class StaffFirebaseMessagingService : FirebaseMessagingService() {
 
         val channelId = "StaffUpdates"
         val builder = NotificationCompat.Builder(this, channelId)
-            .setSmallIcon(R.drawable.ic_stat_logo) // <--- Ставимо БІЛУ іконку (силует)
-            .setColor(accentColor)                 // <--- Фарбуємо в червоний
+            .setSmallIcon(R.drawable.ic_stat_logo)
+            .setColor(accentColor)
             .setContentTitle(title)
             .setContentText(body)
             .setAutoCancel(true)

@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.google.firebase.messaging.FirebaseMessaging // <--- ВАЖЛИВИЙ ІМПОРТ
+import com.google.firebase.messaging.FirebaseMessaging
 import com.waiter.app.core.UserRole
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -33,18 +33,14 @@ fun LoginScreen(
         UserRole.COOK -> "Кухар"
     }
 
-    // --- ОБРОБКА УСПІШНОГО ВХОДУ ---
     LaunchedEffect(uiState) {
         if (uiState is AuthUiState.Success) {
-            // 1. Отримуємо FCM токен від Firebase
             FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     val token = task.result
-                    // 2. Відправляємо токен на наш сервер
                     authViewModel.saveToken(username, role, token)
                 }
 
-                // 3. Переходимо далі (навіть якщо токен не отримали, впускаємо в додаток)
                 onLoginSuccess()
             }
         }

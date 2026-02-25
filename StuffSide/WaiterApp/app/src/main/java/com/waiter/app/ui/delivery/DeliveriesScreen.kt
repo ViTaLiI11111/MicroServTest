@@ -28,7 +28,6 @@ fun DeliveriesScreen(
     val history by vm.historyDeliveries.collectAsState()
     val error by vm.error.collectAsState()
 
-    // 0 = Вільні, 1 = Активні, 2 = Історія
     var selectedTab by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(courierId) {
@@ -49,7 +48,6 @@ fun DeliveriesScreen(
                         }
                     }
                 )
-                // --- 3 ВКЛАДКИ ---
                 TabRow(selectedTabIndex = selectedTab) {
                     Tab(
                         selected = selectedTab == 0,
@@ -72,7 +70,6 @@ fun DeliveriesScreen(
     ) { pad ->
         LazyColumn(Modifier.padding(pad).padding(16.dp)) {
 
-            // Вибираємо список для відображення
             val listToShow = when(selectedTab) {
                 0 -> available
                 1 -> active
@@ -92,7 +89,6 @@ fun DeliveriesScreen(
                     if (selectedTab == 0) {
                         AvailableDeliveryCard(item, courierId, vm)
                     } else {
-                        // Для Активних та Історії використовуємо одну картку
                         DeliveryCard(item, courierId, vm)
                     }
                 }
@@ -108,11 +104,9 @@ fun DeliveriesScreen(
     }
 }
 
-// --- КАРТКА АКТИВНОГО / ЗАВЕРШЕНОГО ЗАМОВЛЕННЯ ---
 @Composable
 fun DeliveryCard(item: DeliveryDto, courierId: Int, vm: DeliveriesViewModel) {
     val isHistory = (item.status == 3)
-    // Якщо історія - картка сіра, якщо активне - світло-зелена
     val cardColor = if (isHistory) Color(0xFFF5F5F5) else Color(0xFFE8F5E9)
     val elevation = if (isHistory) 1.dp else 4.dp
 
@@ -122,20 +116,17 @@ fun DeliveryCard(item: DeliveryDto, courierId: Int, vm: DeliveriesViewModel) {
         elevation = CardDefaults.cardElevation(elevation)
     ) {
         Column(Modifier.padding(16.dp)) {
-            // Header
             Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
                 Text("Доставка #${item.id}", style = MaterialTheme.typography.titleSmall)
                 Text(getStatusText(item.status), style = MaterialTheme.typography.labelSmall, color = Color.Gray)
             }
             Divider(Modifier.padding(vertical = 8.dp))
 
-            // Info
             Text("Клієнт: ${item.clientName ?: "Гість"}", fontWeight = FontWeight.Bold)
             Text("Адреса: ${item.clientAddress}")
             Text("Телефон: ${item.clientPhone ?: "-"}")
             Spacer(Modifier.height(8.dp))
 
-            // Payment Info
             Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
                 Text("${item.total} грн", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
                 if (item.isPaid) {
@@ -146,7 +137,6 @@ fun DeliveryCard(item: DeliveryDto, courierId: Int, vm: DeliveriesViewModel) {
             }
             Divider(Modifier.padding(vertical = 8.dp))
 
-            // --- ДІЇ ---
             if (isHistory) {
                 Text(
                     "🏁 Доставлено",
@@ -154,7 +144,6 @@ fun DeliveryCard(item: DeliveryDto, courierId: Int, vm: DeliveriesViewModel) {
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
             } else {
-                // Кнопка оплати (якщо не оплачено)
                 if (!item.isPaid) {
                     Button(
                         onClick = { vm.payOrder(item.orderId, courierId) },
@@ -166,7 +155,7 @@ fun DeliveryCard(item: DeliveryDto, courierId: Int, vm: DeliveriesViewModel) {
 
                 // Кнопки статусу
                 when (item.status) {
-                    1 -> { // Assigned -> PickedUp
+                    1 -> {
                         val isReady = item.isReadyForPickup
                         Button(
                             onClick = { vm.updateStatus(item.id, courierId, 2) },
@@ -177,7 +166,7 @@ fun DeliveryCard(item: DeliveryDto, courierId: Int, vm: DeliveriesViewModel) {
                             )
                         ) { Text(if (isReady) "📦 Я забрав їжу" else "⏳ Кухня ще готує...") }
                     }
-                    2 -> { // PickedUp -> Delivered
+                    2 -> {
                         val canDeliver = item.isPaid
                         Button(
                             onClick = { vm.updateStatus(item.id, courierId, 3) },
@@ -197,7 +186,6 @@ fun DeliveryCard(item: DeliveryDto, courierId: Int, vm: DeliveriesViewModel) {
     }
 }
 
-// --- КАРТКА ВІЛЬНОГО ЗАМОВЛЕННЯ ---
 @Composable
 fun AvailableDeliveryCard(item: DeliveryDto, courierId: Int, vm: DeliveriesViewModel) {
     Card(

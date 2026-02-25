@@ -24,9 +24,8 @@ fun RegisterScreen(
     onRegisterSuccess: () -> Unit,
     onBack: () -> Unit
 ) {
-    val context = LocalContext.current // Для Toast
+    val context = LocalContext.current
 
-    // Змінні стану
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var fullName by remember { mutableStateOf("") }
@@ -42,14 +41,10 @@ fun RegisterScreen(
         UserRole.COOK -> "Кухар"
     }
 
-    // --- ЛОГІКА УСПІХУ ---
     LaunchedEffect(uiState) {
         if (uiState is AuthUiState.Success) {
-            // Показуємо повідомлення
             Toast.makeText(context, "Реєстрація успішна! Увійдіть.", Toast.LENGTH_LONG).show()
-            // Повертаємось на екран логіну
             onRegisterSuccess()
-            // Скидаємо стан (хоча при навігації назад VM знищиться, але для надійності)
             authViewModel.clearError()
         }
     }
@@ -83,7 +78,6 @@ fun RegisterScreen(
             Text("Реєстрація: $roleTitle", style = MaterialTheme.typography.headlineMedium)
             Spacer(modifier = Modifier.height(32.dp))
 
-            // --- СПІЛЬНІ ПОЛЯ ---
             OutlinedTextField(
                 value = fullName,
                 onValueChange = { fullName = it },
@@ -93,7 +87,6 @@ fun RegisterScreen(
             )
             Spacer(modifier = Modifier.height(16.dp))
 
-            // --- СПЕЦИФІЧНІ ПОЛЯ ---
             if (role == UserRole.COURIER) {
                 OutlinedTextField(
                     value = phone,
@@ -127,7 +120,6 @@ fun RegisterScreen(
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
-            // --- ПРОДОВЖЕННЯ СПІЛЬНИХ ПОЛІВ ---
             OutlinedTextField(
                 value = username,
                 onValueChange = { username = it },
@@ -157,7 +149,6 @@ fun RegisterScreen(
             Button(
                 onClick = {
                     val sId = if (role == UserRole.COOK) stationIdText.toIntOrNull() else null
-                    // Тут важливо: Register у AuthViewModel має ставити стан Success при успіху
                     authViewModel.register(
                         role,
                         username,

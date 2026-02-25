@@ -53,7 +53,6 @@ fun OrderDetailsScreen(
                 }
                 Spacer(Modifier.height(16.dp))
 
-                // Список страв
                 Text("Страви:", style = MaterialTheme.typography.titleSmall, modifier = Modifier.align(Alignment.Start))
                 order.items.forEach { item ->
                     Row(
@@ -81,9 +80,6 @@ fun OrderDetailsScreen(
 
                 Spacer(Modifier.weight(1f))
 
-                // =========================
-                // ЛОГІКА КНОПОК ДІЙ
-                // =========================
 
                 val isMine = (order.waiterId == myWaiterId)
                 val isFree = (order.waiterId == null)
@@ -102,7 +98,6 @@ fun OrderDetailsScreen(
                     }
                 } else if (isMine) {
 
-                    // 1. Кнопка Оплати
                     if (order.isPaid) {
                         Text("✅ ОПЛАЧЕНО", color = Color(0xFF2E7D32), fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleLarge)
                     } else {
@@ -115,10 +110,8 @@ fun OrderDetailsScreen(
 
                     Spacer(Modifier.height(8.dp))
 
-                    // 2. Кнопка Завершення
                     if (order.status != "completed") {
-                        // --- НОВА ЛОГІКА ПЕРЕВІРКИ ---
-                        // Завершити можна, ТІЛЬКИ якщо (Оплачено) І (Всі страви готові - status=="ready")
+
                         val isKitchenReady = (order.status == "ready")
                         val canComplete = order.isPaid && isKitchenReady
 
@@ -127,7 +120,7 @@ fun OrderDetailsScreen(
                                 vm.completeOrder(order.id, myWaiterId, onSuccess = onBack)
                             },
                             modifier = Modifier.fillMaxWidth(),
-                            enabled = canComplete, // Блокування
+                            enabled = canComplete,
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = if(canComplete) MaterialTheme.colorScheme.secondary else Color.Gray
                             )

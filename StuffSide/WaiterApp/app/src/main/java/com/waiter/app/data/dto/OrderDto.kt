@@ -7,7 +7,7 @@ data class OrderItemDto(
     val qty: Int,
     val price: Double,
     val stationId: Int,
-    val status: String // "Pending", "Cooking", "Ready"
+    val status: String
 )
 
 data class OrderDto(
@@ -23,8 +23,7 @@ data class OrderDto(
     val isPaid: Boolean,
     val paidAt: String?,
 
-    // --- НОВЕ ПОЛЕ ---
-    val waiterId: Int?, // Може бути null, якщо замовлення ще ніхто не взяв
+    val waiterId: Int?,
 
     val items: List<OrderItemDto>
 )

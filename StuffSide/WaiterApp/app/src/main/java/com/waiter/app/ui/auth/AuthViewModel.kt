@@ -64,16 +64,13 @@ class AuthViewModel(
         }
     }
 
-    // --- НОВИЙ МЕТОД: ЗБЕРЕЖЕННЯ ТОКЕНА ---
     fun saveToken(username: String, role: UserRole, token: String) {
         viewModelScope.launch {
-            // Конвертуємо enum у рядок, який очікує бекенд (з великої літери)
             val roleString = when(role) {
                 UserRole.WAITER -> "Waiter"
                 UserRole.COURIER -> "Courier"
                 UserRole.COOK -> "Cook"
             }
-            // Викликаємо репозиторій (воно піде на сервер асинхронно)
             authRepository.saveToken(username, roleString, token)
         }
     }

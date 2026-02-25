@@ -25,9 +25,8 @@ fun KitchenScreen(
 ) {
     val pendingItems by vm.pendingItems.collectAsState()
     val cookingItems by vm.cookingItems.collectAsState()
-    val readyItems by vm.readyItems.collectAsState() // НОВЕ
+    val readyItems by vm.readyItems.collectAsState()
 
-    // Стан вкладок: 0=Черга, 1=В роботі, 2=Видано
     var selectedTab by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(stationId) {
@@ -48,7 +47,6 @@ fun KitchenScreen(
                         }
                     }
                 )
-                // --- 3 ВКЛАДКИ ---
                 TabRow(selectedTabIndex = selectedTab) {
                     Tab(
                         selected = selectedTab == 0,
@@ -73,7 +71,6 @@ fun KitchenScreen(
             modifier = Modifier.padding(pad).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // Вибираємо список
             val listToShow = when(selectedTab) {
                 0 -> pendingItems
                 1 -> cookingItems
@@ -102,11 +99,10 @@ fun KitchenScreen(
 
 @Composable
 fun KitchenItemCard(item: KitchenUiItem, onAdvance: () -> Unit) {
-    // Кольори карток
     val cardColor = when(item.status) {
-        "Cooking" -> Color(0xFFFFF3E0) // Помаранчевий
-        "Ready" -> Color(0xFFE8F5E9)   // Зелений
-        else -> MaterialTheme.colorScheme.surface // Білий/Сірий
+        "Cooking" -> Color(0xFFFFF3E0)
+        "Ready" -> Color(0xFFE8F5E9)
+        else -> MaterialTheme.colorScheme.surface
     }
 
     Card(
@@ -134,9 +130,7 @@ fun KitchenItemCard(item: KitchenUiItem, onAdvance: () -> Unit) {
             Text("Замовлення #${item.orderId}", style = MaterialTheme.typography.bodyMedium)
             Spacer(Modifier.height(8.dp))
 
-            // Кнопка або Статус
             if (item.status == "Ready") {
-                // Якщо готово - просто текст
                 Text(
                     text = "✅ ВИДАНО НА РОЗДАЧУ",
                     color = Color(0xFF2E7D32),
@@ -145,7 +139,6 @@ fun KitchenItemCard(item: KitchenUiItem, onAdvance: () -> Unit) {
                     modifier = Modifier.align(Alignment.End)
                 )
             } else {
-                // Якщо в процесі - кнопка
                 Button(
                     onClick = onAdvance,
                     modifier = Modifier.fillMaxWidth(),

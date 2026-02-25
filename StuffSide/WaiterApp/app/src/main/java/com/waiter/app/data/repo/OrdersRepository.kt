@@ -8,7 +8,6 @@ import com.waiter.app.domain.model.UiOrder
 class OrdersRepository(
     private val api: OrdersApi = RetrofitModule.createApi()
 ) {
-    // Оновлений метод з параметрами
     suspend fun getOrders(
         type: String? = null,
         waiterId: Int? = null,
@@ -23,12 +22,9 @@ class OrdersRepository(
         }
     }
 
-    // --- НОВІ МЕТОДИ ---
-
     suspend fun assignOrder(id: String, waiterId: Int) {
         val response = api.assignOrder(id, waiterId)
         if (!response.isSuccessful) {
-            // Можна розпарсити error body, якщо треба, але поки так:
             throw Exception("Failed to assign order: ${response.message()}")
         }
     }
@@ -40,7 +36,6 @@ class OrdersRepository(
         }
     }
 
-    // -------------------
 
     suspend fun getOrder(id: String): UiOrder =
         api.getOrder(id).toUi()
